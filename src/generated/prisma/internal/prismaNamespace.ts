@@ -400,11 +400,9 @@ export const ModelName = {
   User: 'User',
   Vehicle: 'Vehicle',
   ServiceRecord: 'ServiceRecord',
-  TechnicianAssignment: 'TechnicianAssignment',
-  OdometerReading: 'OdometerReading',
-  ServiceRecordEdit: 'ServiceRecordEdit',
-  TimelineEvent: 'TimelineEvent',
-  OverdueAlert: 'OverdueAlert'
+  ServiceAssignment: 'ServiceAssignment',
+  ServiceHistoryEvent: 'ServiceHistoryEvent',
+  Alert: 'Alert'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -420,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "vehicle" | "serviceRecord" | "technicianAssignment" | "odometerReading" | "serviceRecordEdit" | "timelineEvent" | "overdueAlert"
+    modelProps: "user" | "vehicle" | "serviceRecord" | "serviceAssignment" | "serviceHistoryEvent" | "alert"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -646,373 +644,225 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    TechnicianAssignment: {
-      payload: Prisma.$TechnicianAssignmentPayload<ExtArgs>
-      fields: Prisma.TechnicianAssignmentFieldRefs
+    ServiceAssignment: {
+      payload: Prisma.$ServiceAssignmentPayload<ExtArgs>
+      fields: Prisma.ServiceAssignmentFieldRefs
       operations: {
         findUnique: {
-          args: Prisma.TechnicianAssignmentFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicianAssignmentPayload> | null
+          args: Prisma.ServiceAssignmentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceAssignmentPayload> | null
         }
         findUniqueOrThrow: {
-          args: Prisma.TechnicianAssignmentFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicianAssignmentPayload>
+          args: Prisma.ServiceAssignmentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceAssignmentPayload>
         }
         findFirst: {
-          args: Prisma.TechnicianAssignmentFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicianAssignmentPayload> | null
+          args: Prisma.ServiceAssignmentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceAssignmentPayload> | null
         }
         findFirstOrThrow: {
-          args: Prisma.TechnicianAssignmentFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicianAssignmentPayload>
+          args: Prisma.ServiceAssignmentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceAssignmentPayload>
         }
         findMany: {
-          args: Prisma.TechnicianAssignmentFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicianAssignmentPayload>[]
+          args: Prisma.ServiceAssignmentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceAssignmentPayload>[]
         }
         create: {
-          args: Prisma.TechnicianAssignmentCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicianAssignmentPayload>
+          args: Prisma.ServiceAssignmentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceAssignmentPayload>
         }
         createMany: {
-          args: Prisma.TechnicianAssignmentCreateManyArgs<ExtArgs>
+          args: Prisma.ServiceAssignmentCreateManyArgs<ExtArgs>
           result: BatchPayload
         }
         createManyAndReturn: {
-          args: Prisma.TechnicianAssignmentCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicianAssignmentPayload>[]
+          args: Prisma.ServiceAssignmentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceAssignmentPayload>[]
         }
         delete: {
-          args: Prisma.TechnicianAssignmentDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicianAssignmentPayload>
+          args: Prisma.ServiceAssignmentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceAssignmentPayload>
         }
         update: {
-          args: Prisma.TechnicianAssignmentUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicianAssignmentPayload>
+          args: Prisma.ServiceAssignmentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceAssignmentPayload>
         }
         deleteMany: {
-          args: Prisma.TechnicianAssignmentDeleteManyArgs<ExtArgs>
+          args: Prisma.ServiceAssignmentDeleteManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateMany: {
-          args: Prisma.TechnicianAssignmentUpdateManyArgs<ExtArgs>
+          args: Prisma.ServiceAssignmentUpdateManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateManyAndReturn: {
-          args: Prisma.TechnicianAssignmentUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicianAssignmentPayload>[]
+          args: Prisma.ServiceAssignmentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceAssignmentPayload>[]
         }
         upsert: {
-          args: Prisma.TechnicianAssignmentUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicianAssignmentPayload>
+          args: Prisma.ServiceAssignmentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceAssignmentPayload>
         }
         aggregate: {
-          args: Prisma.TechnicianAssignmentAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateTechnicianAssignment>
+          args: Prisma.ServiceAssignmentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateServiceAssignment>
         }
         groupBy: {
-          args: Prisma.TechnicianAssignmentGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.TechnicianAssignmentGroupByOutputType>[]
+          args: Prisma.ServiceAssignmentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ServiceAssignmentGroupByOutputType>[]
         }
         count: {
-          args: Prisma.TechnicianAssignmentCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.TechnicianAssignmentCountAggregateOutputType> | number
+          args: Prisma.ServiceAssignmentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ServiceAssignmentCountAggregateOutputType> | number
         }
       }
     }
-    OdometerReading: {
-      payload: Prisma.$OdometerReadingPayload<ExtArgs>
-      fields: Prisma.OdometerReadingFieldRefs
+    ServiceHistoryEvent: {
+      payload: Prisma.$ServiceHistoryEventPayload<ExtArgs>
+      fields: Prisma.ServiceHistoryEventFieldRefs
       operations: {
         findUnique: {
-          args: Prisma.OdometerReadingFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OdometerReadingPayload> | null
+          args: Prisma.ServiceHistoryEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceHistoryEventPayload> | null
         }
         findUniqueOrThrow: {
-          args: Prisma.OdometerReadingFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OdometerReadingPayload>
+          args: Prisma.ServiceHistoryEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceHistoryEventPayload>
         }
         findFirst: {
-          args: Prisma.OdometerReadingFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OdometerReadingPayload> | null
+          args: Prisma.ServiceHistoryEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceHistoryEventPayload> | null
         }
         findFirstOrThrow: {
-          args: Prisma.OdometerReadingFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OdometerReadingPayload>
+          args: Prisma.ServiceHistoryEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceHistoryEventPayload>
         }
         findMany: {
-          args: Prisma.OdometerReadingFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OdometerReadingPayload>[]
+          args: Prisma.ServiceHistoryEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceHistoryEventPayload>[]
         }
         create: {
-          args: Prisma.OdometerReadingCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OdometerReadingPayload>
+          args: Prisma.ServiceHistoryEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceHistoryEventPayload>
         }
         createMany: {
-          args: Prisma.OdometerReadingCreateManyArgs<ExtArgs>
+          args: Prisma.ServiceHistoryEventCreateManyArgs<ExtArgs>
           result: BatchPayload
         }
         createManyAndReturn: {
-          args: Prisma.OdometerReadingCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OdometerReadingPayload>[]
+          args: Prisma.ServiceHistoryEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceHistoryEventPayload>[]
         }
         delete: {
-          args: Prisma.OdometerReadingDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OdometerReadingPayload>
+          args: Prisma.ServiceHistoryEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceHistoryEventPayload>
         }
         update: {
-          args: Prisma.OdometerReadingUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OdometerReadingPayload>
+          args: Prisma.ServiceHistoryEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceHistoryEventPayload>
         }
         deleteMany: {
-          args: Prisma.OdometerReadingDeleteManyArgs<ExtArgs>
+          args: Prisma.ServiceHistoryEventDeleteManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateMany: {
-          args: Prisma.OdometerReadingUpdateManyArgs<ExtArgs>
+          args: Prisma.ServiceHistoryEventUpdateManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateManyAndReturn: {
-          args: Prisma.OdometerReadingUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OdometerReadingPayload>[]
+          args: Prisma.ServiceHistoryEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceHistoryEventPayload>[]
         }
         upsert: {
-          args: Prisma.OdometerReadingUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OdometerReadingPayload>
+          args: Prisma.ServiceHistoryEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceHistoryEventPayload>
         }
         aggregate: {
-          args: Prisma.OdometerReadingAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateOdometerReading>
+          args: Prisma.ServiceHistoryEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateServiceHistoryEvent>
         }
         groupBy: {
-          args: Prisma.OdometerReadingGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.OdometerReadingGroupByOutputType>[]
+          args: Prisma.ServiceHistoryEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ServiceHistoryEventGroupByOutputType>[]
         }
         count: {
-          args: Prisma.OdometerReadingCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.OdometerReadingCountAggregateOutputType> | number
+          args: Prisma.ServiceHistoryEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ServiceHistoryEventCountAggregateOutputType> | number
         }
       }
     }
-    ServiceRecordEdit: {
-      payload: Prisma.$ServiceRecordEditPayload<ExtArgs>
-      fields: Prisma.ServiceRecordEditFieldRefs
+    Alert: {
+      payload: Prisma.$AlertPayload<ExtArgs>
+      fields: Prisma.AlertFieldRefs
       operations: {
         findUnique: {
-          args: Prisma.ServiceRecordEditFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceRecordEditPayload> | null
+          args: Prisma.AlertFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload> | null
         }
         findUniqueOrThrow: {
-          args: Prisma.ServiceRecordEditFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceRecordEditPayload>
+          args: Prisma.AlertFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload>
         }
         findFirst: {
-          args: Prisma.ServiceRecordEditFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceRecordEditPayload> | null
+          args: Prisma.AlertFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload> | null
         }
         findFirstOrThrow: {
-          args: Prisma.ServiceRecordEditFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceRecordEditPayload>
+          args: Prisma.AlertFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload>
         }
         findMany: {
-          args: Prisma.ServiceRecordEditFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceRecordEditPayload>[]
+          args: Prisma.AlertFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload>[]
         }
         create: {
-          args: Prisma.ServiceRecordEditCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceRecordEditPayload>
+          args: Prisma.AlertCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload>
         }
         createMany: {
-          args: Prisma.ServiceRecordEditCreateManyArgs<ExtArgs>
+          args: Prisma.AlertCreateManyArgs<ExtArgs>
           result: BatchPayload
         }
         createManyAndReturn: {
-          args: Prisma.ServiceRecordEditCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceRecordEditPayload>[]
+          args: Prisma.AlertCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload>[]
         }
         delete: {
-          args: Prisma.ServiceRecordEditDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceRecordEditPayload>
+          args: Prisma.AlertDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload>
         }
         update: {
-          args: Prisma.ServiceRecordEditUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceRecordEditPayload>
+          args: Prisma.AlertUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload>
         }
         deleteMany: {
-          args: Prisma.ServiceRecordEditDeleteManyArgs<ExtArgs>
+          args: Prisma.AlertDeleteManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateMany: {
-          args: Prisma.ServiceRecordEditUpdateManyArgs<ExtArgs>
+          args: Prisma.AlertUpdateManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateManyAndReturn: {
-          args: Prisma.ServiceRecordEditUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceRecordEditPayload>[]
+          args: Prisma.AlertUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload>[]
         }
         upsert: {
-          args: Prisma.ServiceRecordEditUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceRecordEditPayload>
+          args: Prisma.AlertUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlertPayload>
         }
         aggregate: {
-          args: Prisma.ServiceRecordEditAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateServiceRecordEdit>
+          args: Prisma.AlertAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAlert>
         }
         groupBy: {
-          args: Prisma.ServiceRecordEditGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.ServiceRecordEditGroupByOutputType>[]
+          args: Prisma.AlertGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AlertGroupByOutputType>[]
         }
         count: {
-          args: Prisma.ServiceRecordEditCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.ServiceRecordEditCountAggregateOutputType> | number
-        }
-      }
-    }
-    TimelineEvent: {
-      payload: Prisma.$TimelineEventPayload<ExtArgs>
-      fields: Prisma.TimelineEventFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.TimelineEventFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimelineEventPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.TimelineEventFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimelineEventPayload>
-        }
-        findFirst: {
-          args: Prisma.TimelineEventFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimelineEventPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.TimelineEventFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimelineEventPayload>
-        }
-        findMany: {
-          args: Prisma.TimelineEventFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimelineEventPayload>[]
-        }
-        create: {
-          args: Prisma.TimelineEventCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimelineEventPayload>
-        }
-        createMany: {
-          args: Prisma.TimelineEventCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.TimelineEventCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimelineEventPayload>[]
-        }
-        delete: {
-          args: Prisma.TimelineEventDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimelineEventPayload>
-        }
-        update: {
-          args: Prisma.TimelineEventUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimelineEventPayload>
-        }
-        deleteMany: {
-          args: Prisma.TimelineEventDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.TimelineEventUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.TimelineEventUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimelineEventPayload>[]
-        }
-        upsert: {
-          args: Prisma.TimelineEventUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimelineEventPayload>
-        }
-        aggregate: {
-          args: Prisma.TimelineEventAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateTimelineEvent>
-        }
-        groupBy: {
-          args: Prisma.TimelineEventGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.TimelineEventGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.TimelineEventCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.TimelineEventCountAggregateOutputType> | number
-        }
-      }
-    }
-    OverdueAlert: {
-      payload: Prisma.$OverdueAlertPayload<ExtArgs>
-      fields: Prisma.OverdueAlertFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.OverdueAlertFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OverdueAlertPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.OverdueAlertFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OverdueAlertPayload>
-        }
-        findFirst: {
-          args: Prisma.OverdueAlertFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OverdueAlertPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.OverdueAlertFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OverdueAlertPayload>
-        }
-        findMany: {
-          args: Prisma.OverdueAlertFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OverdueAlertPayload>[]
-        }
-        create: {
-          args: Prisma.OverdueAlertCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OverdueAlertPayload>
-        }
-        createMany: {
-          args: Prisma.OverdueAlertCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.OverdueAlertCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OverdueAlertPayload>[]
-        }
-        delete: {
-          args: Prisma.OverdueAlertDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OverdueAlertPayload>
-        }
-        update: {
-          args: Prisma.OverdueAlertUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OverdueAlertPayload>
-        }
-        deleteMany: {
-          args: Prisma.OverdueAlertDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.OverdueAlertUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.OverdueAlertUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OverdueAlertPayload>[]
-        }
-        upsert: {
-          args: Prisma.OverdueAlertUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OverdueAlertPayload>
-        }
-        aggregate: {
-          args: Prisma.OverdueAlertAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateOverdueAlert>
-        }
-        groupBy: {
-          args: Prisma.OverdueAlertGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.OverdueAlertGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.OverdueAlertCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.OverdueAlertCountAggregateOutputType> | number
+          args: Prisma.AlertCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AlertCountAggregateOutputType> | number
         }
       }
     }
@@ -1069,14 +919,18 @@ export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof User
 
 export const VehicleScalarFieldEnum = {
   id: 'id',
-  registration: 'registration',
+  registrationNumber: 'registrationNumber',
   make: 'make',
   model: 'model',
-  odometerReading: 'odometerReading',
+  currentOdometer: 'currentOdometer',
   dateIntervalDays: 'dateIntervalDays',
-  mileageIntervalKm: 'mileageIntervalKm',
-  archived: 'archived',
-  createdAt: 'createdAt'
+  mileageInterval: 'mileageInterval',
+  lastServiceDate: 'lastServiceDate',
+  lastServiceOdometer: 'lastServiceOdometer',
+  serviceCycle: 'serviceCycle',
+  archivedAt: 'archivedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type VehicleScalarFieldEnum = (typeof VehicleScalarFieldEnum)[keyof typeof VehicleScalarFieldEnum]
@@ -1087,10 +941,11 @@ export const ServiceRecordScalarFieldEnum = {
   vehicleId: 'vehicleId',
   description: 'description',
   status: 'status',
-  scheduledAt: 'scheduledAt',
-  gracePeriodDays: 'gracePeriodDays',
-  dueDate: 'dueDate',
-  dueMileage: 'dueMileage',
+  scheduledDate: 'scheduledDate',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  completedOdometer: 'completedOdometer',
+  dueSince: 'dueSince',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1098,62 +953,41 @@ export const ServiceRecordScalarFieldEnum = {
 export type ServiceRecordScalarFieldEnum = (typeof ServiceRecordScalarFieldEnum)[keyof typeof ServiceRecordScalarFieldEnum]
 
 
-export const TechnicianAssignmentScalarFieldEnum = {
+export const ServiceAssignmentScalarFieldEnum = {
   id: 'id',
   serviceRecordId: 'serviceRecordId',
   technicianId: 'technicianId',
   assignedAt: 'assignedAt',
-  removedAt: 'removedAt'
+  unassignedAt: 'unassignedAt'
 } as const
 
-export type TechnicianAssignmentScalarFieldEnum = (typeof TechnicianAssignmentScalarFieldEnum)[keyof typeof TechnicianAssignmentScalarFieldEnum]
+export type ServiceAssignmentScalarFieldEnum = (typeof ServiceAssignmentScalarFieldEnum)[keyof typeof ServiceAssignmentScalarFieldEnum]
 
 
-export const OdometerReadingScalarFieldEnum = {
+export const ServiceHistoryEventScalarFieldEnum = {
+  id: 'id',
+  serviceRecordId: 'serviceRecordId',
+  type: 'type',
+  fromStatus: 'fromStatus',
+  toStatus: 'toStatus',
+  note: 'note',
+  actorId: 'actorId',
+  createdAt: 'createdAt'
+} as const
+
+export type ServiceHistoryEventScalarFieldEnum = (typeof ServiceHistoryEventScalarFieldEnum)[keyof typeof ServiceHistoryEventScalarFieldEnum]
+
+
+export const AlertScalarFieldEnum = {
   id: 'id',
   vehicleId: 'vehicleId',
-  reading: 'reading',
-  source: 'source',
-  recordedAt: 'recordedAt'
+  serviceCycle: 'serviceCycle',
+  triggeredAt: 'triggeredAt',
+  dismissedAt: 'dismissedAt',
+  dismissedById: 'dismissedById'
 } as const
 
-export type OdometerReadingScalarFieldEnum = (typeof OdometerReadingScalarFieldEnum)[keyof typeof OdometerReadingScalarFieldEnum]
-
-
-export const ServiceRecordEditScalarFieldEnum = {
-  id: 'id',
-  serviceRecordId: 'serviceRecordId',
-  editedById: 'editedById',
-  oldStatus: 'oldStatus',
-  newStatus: 'newStatus',
-  note: 'note',
-  createdAt: 'createdAt'
-} as const
-
-export type ServiceRecordEditScalarFieldEnum = (typeof ServiceRecordEditScalarFieldEnum)[keyof typeof ServiceRecordEditScalarFieldEnum]
-
-
-export const TimelineEventScalarFieldEnum = {
-  id: 'id',
-  serviceRecordId: 'serviceRecordId',
-  actorId: 'actorId',
-  type: 'type',
-  oldValue: 'oldValue',
-  newValue: 'newValue',
-  createdAt: 'createdAt'
-} as const
-
-export type TimelineEventScalarFieldEnum = (typeof TimelineEventScalarFieldEnum)[keyof typeof TimelineEventScalarFieldEnum]
-
-
-export const OverdueAlertScalarFieldEnum = {
-  id: 'id',
-  serviceRecordId: 'serviceRecordId',
-  dismissed: 'dismissed',
-  createdAt: 'createdAt'
-} as const
-
-export type OverdueAlertScalarFieldEnum = (typeof OverdueAlertScalarFieldEnum)[keyof typeof OverdueAlertScalarFieldEnum]
+export type AlertScalarFieldEnum = (typeof AlertScalarFieldEnum)[keyof typeof AlertScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1243,13 +1077,6 @@ export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
-    
-
-
-/**
  * Reference to a field of type 'ServiceStatus'
  */
 export type EnumServiceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceStatus'>
@@ -1260,6 +1087,20 @@ export type EnumServiceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
  * Reference to a field of type 'ServiceStatus[]'
  */
 export type ListEnumServiceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'HistoryEventType'
+ */
+export type EnumHistoryEventTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'HistoryEventType'>
+    
+
+
+/**
+ * Reference to a field of type 'HistoryEventType[]'
+ */
+export type ListEnumHistoryEventTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'HistoryEventType[]'>
     
 
 
@@ -1430,11 +1271,9 @@ export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   vehicle?: Prisma.VehicleOmit
   serviceRecord?: Prisma.ServiceRecordOmit
-  technicianAssignment?: Prisma.TechnicianAssignmentOmit
-  odometerReading?: Prisma.OdometerReadingOmit
-  serviceRecordEdit?: Prisma.ServiceRecordEditOmit
-  timelineEvent?: Prisma.TimelineEventOmit
-  overdueAlert?: Prisma.OverdueAlertOmit
+  serviceAssignment?: Prisma.ServiceAssignmentOmit
+  serviceHistoryEvent?: Prisma.ServiceHistoryEventOmit
+  alert?: Prisma.AlertOmit
 }
 
 /* Types for Logging */

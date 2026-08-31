@@ -54,11 +54,9 @@ export const ModelName = {
   User: 'User',
   Vehicle: 'Vehicle',
   ServiceRecord: 'ServiceRecord',
-  TechnicianAssignment: 'TechnicianAssignment',
-  OdometerReading: 'OdometerReading',
-  ServiceRecordEdit: 'ServiceRecordEdit',
-  TimelineEvent: 'TimelineEvent',
-  OverdueAlert: 'OverdueAlert'
+  ServiceAssignment: 'ServiceAssignment',
+  ServiceHistoryEvent: 'ServiceHistoryEvent',
+  Alert: 'Alert'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -91,14 +89,18 @@ export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof User
 
 export const VehicleScalarFieldEnum = {
   id: 'id',
-  registration: 'registration',
+  registrationNumber: 'registrationNumber',
   make: 'make',
   model: 'model',
-  odometerReading: 'odometerReading',
+  currentOdometer: 'currentOdometer',
   dateIntervalDays: 'dateIntervalDays',
-  mileageIntervalKm: 'mileageIntervalKm',
-  archived: 'archived',
-  createdAt: 'createdAt'
+  mileageInterval: 'mileageInterval',
+  lastServiceDate: 'lastServiceDate',
+  lastServiceOdometer: 'lastServiceOdometer',
+  serviceCycle: 'serviceCycle',
+  archivedAt: 'archivedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type VehicleScalarFieldEnum = (typeof VehicleScalarFieldEnum)[keyof typeof VehicleScalarFieldEnum]
@@ -109,10 +111,11 @@ export const ServiceRecordScalarFieldEnum = {
   vehicleId: 'vehicleId',
   description: 'description',
   status: 'status',
-  scheduledAt: 'scheduledAt',
-  gracePeriodDays: 'gracePeriodDays',
-  dueDate: 'dueDate',
-  dueMileage: 'dueMileage',
+  scheduledDate: 'scheduledDate',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  completedOdometer: 'completedOdometer',
+  dueSince: 'dueSince',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -120,62 +123,41 @@ export const ServiceRecordScalarFieldEnum = {
 export type ServiceRecordScalarFieldEnum = (typeof ServiceRecordScalarFieldEnum)[keyof typeof ServiceRecordScalarFieldEnum]
 
 
-export const TechnicianAssignmentScalarFieldEnum = {
+export const ServiceAssignmentScalarFieldEnum = {
   id: 'id',
   serviceRecordId: 'serviceRecordId',
   technicianId: 'technicianId',
   assignedAt: 'assignedAt',
-  removedAt: 'removedAt'
+  unassignedAt: 'unassignedAt'
 } as const
 
-export type TechnicianAssignmentScalarFieldEnum = (typeof TechnicianAssignmentScalarFieldEnum)[keyof typeof TechnicianAssignmentScalarFieldEnum]
+export type ServiceAssignmentScalarFieldEnum = (typeof ServiceAssignmentScalarFieldEnum)[keyof typeof ServiceAssignmentScalarFieldEnum]
 
 
-export const OdometerReadingScalarFieldEnum = {
+export const ServiceHistoryEventScalarFieldEnum = {
+  id: 'id',
+  serviceRecordId: 'serviceRecordId',
+  type: 'type',
+  fromStatus: 'fromStatus',
+  toStatus: 'toStatus',
+  note: 'note',
+  actorId: 'actorId',
+  createdAt: 'createdAt'
+} as const
+
+export type ServiceHistoryEventScalarFieldEnum = (typeof ServiceHistoryEventScalarFieldEnum)[keyof typeof ServiceHistoryEventScalarFieldEnum]
+
+
+export const AlertScalarFieldEnum = {
   id: 'id',
   vehicleId: 'vehicleId',
-  reading: 'reading',
-  source: 'source',
-  recordedAt: 'recordedAt'
+  serviceCycle: 'serviceCycle',
+  triggeredAt: 'triggeredAt',
+  dismissedAt: 'dismissedAt',
+  dismissedById: 'dismissedById'
 } as const
 
-export type OdometerReadingScalarFieldEnum = (typeof OdometerReadingScalarFieldEnum)[keyof typeof OdometerReadingScalarFieldEnum]
-
-
-export const ServiceRecordEditScalarFieldEnum = {
-  id: 'id',
-  serviceRecordId: 'serviceRecordId',
-  editedById: 'editedById',
-  oldStatus: 'oldStatus',
-  newStatus: 'newStatus',
-  note: 'note',
-  createdAt: 'createdAt'
-} as const
-
-export type ServiceRecordEditScalarFieldEnum = (typeof ServiceRecordEditScalarFieldEnum)[keyof typeof ServiceRecordEditScalarFieldEnum]
-
-
-export const TimelineEventScalarFieldEnum = {
-  id: 'id',
-  serviceRecordId: 'serviceRecordId',
-  actorId: 'actorId',
-  type: 'type',
-  oldValue: 'oldValue',
-  newValue: 'newValue',
-  createdAt: 'createdAt'
-} as const
-
-export type TimelineEventScalarFieldEnum = (typeof TimelineEventScalarFieldEnum)[keyof typeof TimelineEventScalarFieldEnum]
-
-
-export const OverdueAlertScalarFieldEnum = {
-  id: 'id',
-  serviceRecordId: 'serviceRecordId',
-  dismissed: 'dismissed',
-  createdAt: 'createdAt'
-} as const
-
-export type OverdueAlertScalarFieldEnum = (typeof OverdueAlertScalarFieldEnum)[keyof typeof OverdueAlertScalarFieldEnum]
+export type AlertScalarFieldEnum = (typeof AlertScalarFieldEnum)[keyof typeof AlertScalarFieldEnum]
 
 
 export const SortOrder = {

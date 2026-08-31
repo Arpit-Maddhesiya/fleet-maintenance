@@ -6,6 +6,8 @@ target/
 __pycache__/
 venv/
 .env
+.commandcode
+backend-prompts.md
 .env.local
 .env.*.local
 *.log

@@ -27,101 +27,133 @@ export type AggregateVehicle = {
 }
 
 export type VehicleAvgAggregateOutputType = {
-  odometerReading: number | null
+  currentOdometer: number | null
   dateIntervalDays: number | null
-  mileageIntervalKm: number | null
+  mileageInterval: number | null
+  lastServiceOdometer: number | null
+  serviceCycle: number | null
 }
 
 export type VehicleSumAggregateOutputType = {
-  odometerReading: number | null
+  currentOdometer: number | null
   dateIntervalDays: number | null
-  mileageIntervalKm: number | null
+  mileageInterval: number | null
+  lastServiceOdometer: number | null
+  serviceCycle: number | null
 }
 
 export type VehicleMinAggregateOutputType = {
   id: string | null
-  registration: string | null
+  registrationNumber: string | null
   make: string | null
   model: string | null
-  odometerReading: number | null
+  currentOdometer: number | null
   dateIntervalDays: number | null
-  mileageIntervalKm: number | null
-  archived: boolean | null
+  mileageInterval: number | null
+  lastServiceDate: Date | null
+  lastServiceOdometer: number | null
+  serviceCycle: number | null
+  archivedAt: Date | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type VehicleMaxAggregateOutputType = {
   id: string | null
-  registration: string | null
+  registrationNumber: string | null
   make: string | null
   model: string | null
-  odometerReading: number | null
+  currentOdometer: number | null
   dateIntervalDays: number | null
-  mileageIntervalKm: number | null
-  archived: boolean | null
+  mileageInterval: number | null
+  lastServiceDate: Date | null
+  lastServiceOdometer: number | null
+  serviceCycle: number | null
+  archivedAt: Date | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type VehicleCountAggregateOutputType = {
   id: number
-  registration: number
+  registrationNumber: number
   make: number
   model: number
-  odometerReading: number
+  currentOdometer: number
   dateIntervalDays: number
-  mileageIntervalKm: number
-  archived: number
+  mileageInterval: number
+  lastServiceDate: number
+  lastServiceOdometer: number
+  serviceCycle: number
+  archivedAt: number
   createdAt: number
+  updatedAt: number
   _all: number
 }
 
 
 export type VehicleAvgAggregateInputType = {
-  odometerReading?: true
+  currentOdometer?: true
   dateIntervalDays?: true
-  mileageIntervalKm?: true
+  mileageInterval?: true
+  lastServiceOdometer?: true
+  serviceCycle?: true
 }
 
 export type VehicleSumAggregateInputType = {
-  odometerReading?: true
+  currentOdometer?: true
   dateIntervalDays?: true
-  mileageIntervalKm?: true
+  mileageInterval?: true
+  lastServiceOdometer?: true
+  serviceCycle?: true
 }
 
 export type VehicleMinAggregateInputType = {
   id?: true
-  registration?: true
+  registrationNumber?: true
   make?: true
   model?: true
-  odometerReading?: true
+  currentOdometer?: true
   dateIntervalDays?: true
-  mileageIntervalKm?: true
-  archived?: true
+  mileageInterval?: true
+  lastServiceDate?: true
+  lastServiceOdometer?: true
+  serviceCycle?: true
+  archivedAt?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type VehicleMaxAggregateInputType = {
   id?: true
-  registration?: true
+  registrationNumber?: true
   make?: true
   model?: true
-  odometerReading?: true
+  currentOdometer?: true
   dateIntervalDays?: true
-  mileageIntervalKm?: true
-  archived?: true
+  mileageInterval?: true
+  lastServiceDate?: true
+  lastServiceOdometer?: true
+  serviceCycle?: true
+  archivedAt?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type VehicleCountAggregateInputType = {
   id?: true
-  registration?: true
+  registrationNumber?: true
   make?: true
   model?: true
-  odometerReading?: true
+  currentOdometer?: true
   dateIntervalDays?: true
-  mileageIntervalKm?: true
-  archived?: true
+  mileageInterval?: true
+  lastServiceDate?: true
+  lastServiceOdometer?: true
+  serviceCycle?: true
+  archivedAt?: true
   createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -213,14 +245,18 @@ export type VehicleGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
 
 export type VehicleGroupByOutputType = {
   id: string
-  registration: string
+  registrationNumber: string
   make: string
   model: string
-  odometerReading: number
+  currentOdometer: number
   dateIntervalDays: number
-  mileageIntervalKm: number
-  archived: boolean
+  mileageInterval: number
+  lastServiceDate: Date | null
+  lastServiceOdometer: number | null
+  serviceCycle: number
+  archivedAt: Date | null
   createdAt: Date
+  updatedAt: Date
   _count: VehicleCountAggregateOutputType | null
   _avg: VehicleAvgAggregateOutputType | null
   _sum: VehicleSumAggregateOutputType | null
@@ -248,59 +284,75 @@ export type VehicleWhereInput = {
   OR?: Prisma.VehicleWhereInput[]
   NOT?: Prisma.VehicleWhereInput | Prisma.VehicleWhereInput[]
   id?: Prisma.StringFilter<"Vehicle"> | string
-  registration?: Prisma.StringFilter<"Vehicle"> | string
+  registrationNumber?: Prisma.StringFilter<"Vehicle"> | string
   make?: Prisma.StringFilter<"Vehicle"> | string
   model?: Prisma.StringFilter<"Vehicle"> | string
-  odometerReading?: Prisma.IntFilter<"Vehicle"> | number
+  currentOdometer?: Prisma.IntFilter<"Vehicle"> | number
   dateIntervalDays?: Prisma.IntFilter<"Vehicle"> | number
-  mileageIntervalKm?: Prisma.IntFilter<"Vehicle"> | number
-  archived?: Prisma.BoolFilter<"Vehicle"> | boolean
+  mileageInterval?: Prisma.IntFilter<"Vehicle"> | number
+  lastServiceDate?: Prisma.DateTimeNullableFilter<"Vehicle"> | Date | string | null
+  lastServiceOdometer?: Prisma.IntNullableFilter<"Vehicle"> | number | null
+  serviceCycle?: Prisma.IntFilter<"Vehicle"> | number
+  archivedAt?: Prisma.DateTimeNullableFilter<"Vehicle"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Vehicle"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Vehicle"> | Date | string
   serviceRecords?: Prisma.ServiceRecordListRelationFilter
-  odometerReadings?: Prisma.OdometerReadingListRelationFilter
+  alerts?: Prisma.AlertListRelationFilter
 }
 
 export type VehicleOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  registration?: Prisma.SortOrder
+  registrationNumber?: Prisma.SortOrder
   make?: Prisma.SortOrder
   model?: Prisma.SortOrder
-  odometerReading?: Prisma.SortOrder
+  currentOdometer?: Prisma.SortOrder
   dateIntervalDays?: Prisma.SortOrder
-  mileageIntervalKm?: Prisma.SortOrder
-  archived?: Prisma.SortOrder
+  mileageInterval?: Prisma.SortOrder
+  lastServiceDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastServiceOdometer?: Prisma.SortOrderInput | Prisma.SortOrder
+  serviceCycle?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   serviceRecords?: Prisma.ServiceRecordOrderByRelationAggregateInput
-  odometerReadings?: Prisma.OdometerReadingOrderByRelationAggregateInput
+  alerts?: Prisma.AlertOrderByRelationAggregateInput
 }
 
 export type VehicleWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  registration?: string
+  registrationNumber?: string
   AND?: Prisma.VehicleWhereInput | Prisma.VehicleWhereInput[]
   OR?: Prisma.VehicleWhereInput[]
   NOT?: Prisma.VehicleWhereInput | Prisma.VehicleWhereInput[]
   make?: Prisma.StringFilter<"Vehicle"> | string
   model?: Prisma.StringFilter<"Vehicle"> | string
-  odometerReading?: Prisma.IntFilter<"Vehicle"> | number
+  currentOdometer?: Prisma.IntFilter<"Vehicle"> | number
   dateIntervalDays?: Prisma.IntFilter<"Vehicle"> | number
-  mileageIntervalKm?: Prisma.IntFilter<"Vehicle"> | number
-  archived?: Prisma.BoolFilter<"Vehicle"> | boolean
+  mileageInterval?: Prisma.IntFilter<"Vehicle"> | number
+  lastServiceDate?: Prisma.DateTimeNullableFilter<"Vehicle"> | Date | string | null
+  lastServiceOdometer?: Prisma.IntNullableFilter<"Vehicle"> | number | null
+  serviceCycle?: Prisma.IntFilter<"Vehicle"> | number
+  archivedAt?: Prisma.DateTimeNullableFilter<"Vehicle"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Vehicle"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Vehicle"> | Date | string
   serviceRecords?: Prisma.ServiceRecordListRelationFilter
-  odometerReadings?: Prisma.OdometerReadingListRelationFilter
-}, "id" | "registration">
+  alerts?: Prisma.AlertListRelationFilter
+}, "id" | "registrationNumber">
 
 export type VehicleOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  registration?: Prisma.SortOrder
+  registrationNumber?: Prisma.SortOrder
   make?: Prisma.SortOrder
   model?: Prisma.SortOrder
-  odometerReading?: Prisma.SortOrder
+  currentOdometer?: Prisma.SortOrder
   dateIntervalDays?: Prisma.SortOrder
-  mileageIntervalKm?: Prisma.SortOrder
-  archived?: Prisma.SortOrder
+  mileageInterval?: Prisma.SortOrder
+  lastServiceDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastServiceOdometer?: Prisma.SortOrderInput | Prisma.SortOrder
+  serviceCycle?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.VehicleCountOrderByAggregateInput
   _avg?: Prisma.VehicleAvgOrderByAggregateInput
   _max?: Prisma.VehicleMaxOrderByAggregateInput
@@ -313,154 +365,202 @@ export type VehicleScalarWhereWithAggregatesInput = {
   OR?: Prisma.VehicleScalarWhereWithAggregatesInput[]
   NOT?: Prisma.VehicleScalarWhereWithAggregatesInput | Prisma.VehicleScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Vehicle"> | string
-  registration?: Prisma.StringWithAggregatesFilter<"Vehicle"> | string
+  registrationNumber?: Prisma.StringWithAggregatesFilter<"Vehicle"> | string
   make?: Prisma.StringWithAggregatesFilter<"Vehicle"> | string
   model?: Prisma.StringWithAggregatesFilter<"Vehicle"> | string
-  odometerReading?: Prisma.IntWithAggregatesFilter<"Vehicle"> | number
+  currentOdometer?: Prisma.IntWithAggregatesFilter<"Vehicle"> | number
   dateIntervalDays?: Prisma.IntWithAggregatesFilter<"Vehicle"> | number
-  mileageIntervalKm?: Prisma.IntWithAggregatesFilter<"Vehicle"> | number
-  archived?: Prisma.BoolWithAggregatesFilter<"Vehicle"> | boolean
+  mileageInterval?: Prisma.IntWithAggregatesFilter<"Vehicle"> | number
+  lastServiceDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Vehicle"> | Date | string | null
+  lastServiceOdometer?: Prisma.IntNullableWithAggregatesFilter<"Vehicle"> | number | null
+  serviceCycle?: Prisma.IntWithAggregatesFilter<"Vehicle"> | number
+  archivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Vehicle"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Vehicle"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Vehicle"> | Date | string
 }
 
 export type VehicleCreateInput = {
   id?: string
-  registration: string
+  registrationNumber: string
   make: string
   model: string
-  odometerReading: number
+  currentOdometer: number
   dateIntervalDays: number
-  mileageIntervalKm: number
-  archived?: boolean
+  mileageInterval: number
+  lastServiceDate?: Date | string | null
+  lastServiceOdometer?: number | null
+  serviceCycle?: number
+  archivedAt?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   serviceRecords?: Prisma.ServiceRecordCreateNestedManyWithoutVehicleInput
-  odometerReadings?: Prisma.OdometerReadingCreateNestedManyWithoutVehicleInput
+  alerts?: Prisma.AlertCreateNestedManyWithoutVehicleInput
 }
 
 export type VehicleUncheckedCreateInput = {
   id?: string
-  registration: string
+  registrationNumber: string
   make: string
   model: string
-  odometerReading: number
+  currentOdometer: number
   dateIntervalDays: number
-  mileageIntervalKm: number
-  archived?: boolean
+  mileageInterval: number
+  lastServiceDate?: Date | string | null
+  lastServiceOdometer?: number | null
+  serviceCycle?: number
+  archivedAt?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   serviceRecords?: Prisma.ServiceRecordUncheckedCreateNestedManyWithoutVehicleInput
-  odometerReadings?: Prisma.OdometerReadingUncheckedCreateNestedManyWithoutVehicleInput
+  alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutVehicleInput
 }
 
 export type VehicleUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  registration?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.StringFieldUpdateOperationsInput | string
   make?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
-  odometerReading?: Prisma.IntFieldUpdateOperationsInput | number
+  currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   dateIntervalDays?: Prisma.IntFieldUpdateOperationsInput | number
-  mileageIntervalKm?: Prisma.IntFieldUpdateOperationsInput | number
-  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mileageInterval?: Prisma.IntFieldUpdateOperationsInput | number
+  lastServiceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastServiceOdometer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  serviceCycle?: Prisma.IntFieldUpdateOperationsInput | number
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   serviceRecords?: Prisma.ServiceRecordUpdateManyWithoutVehicleNestedInput
-  odometerReadings?: Prisma.OdometerReadingUpdateManyWithoutVehicleNestedInput
+  alerts?: Prisma.AlertUpdateManyWithoutVehicleNestedInput
 }
 
 export type VehicleUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  registration?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.StringFieldUpdateOperationsInput | string
   make?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
-  odometerReading?: Prisma.IntFieldUpdateOperationsInput | number
+  currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   dateIntervalDays?: Prisma.IntFieldUpdateOperationsInput | number
-  mileageIntervalKm?: Prisma.IntFieldUpdateOperationsInput | number
-  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mileageInterval?: Prisma.IntFieldUpdateOperationsInput | number
+  lastServiceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastServiceOdometer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  serviceCycle?: Prisma.IntFieldUpdateOperationsInput | number
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   serviceRecords?: Prisma.ServiceRecordUncheckedUpdateManyWithoutVehicleNestedInput
-  odometerReadings?: Prisma.OdometerReadingUncheckedUpdateManyWithoutVehicleNestedInput
+  alerts?: Prisma.AlertUncheckedUpdateManyWithoutVehicleNestedInput
 }
 
 export type VehicleCreateManyInput = {
   id?: string
-  registration: string
+  registrationNumber: string
   make: string
   model: string
-  odometerReading: number
+  currentOdometer: number
   dateIntervalDays: number
-  mileageIntervalKm: number
-  archived?: boolean
+  mileageInterval: number
+  lastServiceDate?: Date | string | null
+  lastServiceOdometer?: number | null
+  serviceCycle?: number
+  archivedAt?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type VehicleUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  registration?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.StringFieldUpdateOperationsInput | string
   make?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
-  odometerReading?: Prisma.IntFieldUpdateOperationsInput | number
+  currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   dateIntervalDays?: Prisma.IntFieldUpdateOperationsInput | number
-  mileageIntervalKm?: Prisma.IntFieldUpdateOperationsInput | number
-  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mileageInterval?: Prisma.IntFieldUpdateOperationsInput | number
+  lastServiceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastServiceOdometer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  serviceCycle?: Prisma.IntFieldUpdateOperationsInput | number
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type VehicleUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  registration?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.StringFieldUpdateOperationsInput | string
   make?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
-  odometerReading?: Prisma.IntFieldUpdateOperationsInput | number
+  currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   dateIntervalDays?: Prisma.IntFieldUpdateOperationsInput | number
-  mileageIntervalKm?: Prisma.IntFieldUpdateOperationsInput | number
-  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mileageInterval?: Prisma.IntFieldUpdateOperationsInput | number
+  lastServiceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastServiceOdometer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  serviceCycle?: Prisma.IntFieldUpdateOperationsInput | number
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type VehicleCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  registration?: Prisma.SortOrder
+  registrationNumber?: Prisma.SortOrder
   make?: Prisma.SortOrder
   model?: Prisma.SortOrder
-  odometerReading?: Prisma.SortOrder
+  currentOdometer?: Prisma.SortOrder
   dateIntervalDays?: Prisma.SortOrder
-  mileageIntervalKm?: Prisma.SortOrder
-  archived?: Prisma.SortOrder
+  mileageInterval?: Prisma.SortOrder
+  lastServiceDate?: Prisma.SortOrder
+  lastServiceOdometer?: Prisma.SortOrder
+  serviceCycle?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type VehicleAvgOrderByAggregateInput = {
-  odometerReading?: Prisma.SortOrder
+  currentOdometer?: Prisma.SortOrder
   dateIntervalDays?: Prisma.SortOrder
-  mileageIntervalKm?: Prisma.SortOrder
+  mileageInterval?: Prisma.SortOrder
+  lastServiceOdometer?: Prisma.SortOrder
+  serviceCycle?: Prisma.SortOrder
 }
 
 export type VehicleMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  registration?: Prisma.SortOrder
+  registrationNumber?: Prisma.SortOrder
   make?: Prisma.SortOrder
   model?: Prisma.SortOrder
-  odometerReading?: Prisma.SortOrder
+  currentOdometer?: Prisma.SortOrder
   dateIntervalDays?: Prisma.SortOrder
-  mileageIntervalKm?: Prisma.SortOrder
-  archived?: Prisma.SortOrder
+  mileageInterval?: Prisma.SortOrder
+  lastServiceDate?: Prisma.SortOrder
+  lastServiceOdometer?: Prisma.SortOrder
+  serviceCycle?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type VehicleMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  registration?: Prisma.SortOrder
+  registrationNumber?: Prisma.SortOrder
   make?: Prisma.SortOrder
   model?: Prisma.SortOrder
-  odometerReading?: Prisma.SortOrder
+  currentOdometer?: Prisma.SortOrder
   dateIntervalDays?: Prisma.SortOrder
-  mileageIntervalKm?: Prisma.SortOrder
-  archived?: Prisma.SortOrder
+  mileageInterval?: Prisma.SortOrder
+  lastServiceDate?: Prisma.SortOrder
+  lastServiceOdometer?: Prisma.SortOrder
+  serviceCycle?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type VehicleSumOrderByAggregateInput = {
-  odometerReading?: Prisma.SortOrder
+  currentOdometer?: Prisma.SortOrder
   dateIntervalDays?: Prisma.SortOrder
-  mileageIntervalKm?: Prisma.SortOrder
+  mileageInterval?: Prisma.SortOrder
+  lastServiceOdometer?: Prisma.SortOrder
+  serviceCycle?: Prisma.SortOrder
 }
 
 export type VehicleScalarRelationFilter = {
@@ -476,8 +576,16 @@ export type IntFieldUpdateOperationsInput = {
   divide?: number
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type VehicleCreateNestedOneWithoutServiceRecordsInput = {
@@ -494,44 +602,52 @@ export type VehicleUpdateOneRequiredWithoutServiceRecordsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.VehicleUpdateToOneWithWhereWithoutServiceRecordsInput, Prisma.VehicleUpdateWithoutServiceRecordsInput>, Prisma.VehicleUncheckedUpdateWithoutServiceRecordsInput>
 }
 
-export type VehicleCreateNestedOneWithoutOdometerReadingsInput = {
-  create?: Prisma.XOR<Prisma.VehicleCreateWithoutOdometerReadingsInput, Prisma.VehicleUncheckedCreateWithoutOdometerReadingsInput>
-  connectOrCreate?: Prisma.VehicleCreateOrConnectWithoutOdometerReadingsInput
+export type VehicleCreateNestedOneWithoutAlertsInput = {
+  create?: Prisma.XOR<Prisma.VehicleCreateWithoutAlertsInput, Prisma.VehicleUncheckedCreateWithoutAlertsInput>
+  connectOrCreate?: Prisma.VehicleCreateOrConnectWithoutAlertsInput
   connect?: Prisma.VehicleWhereUniqueInput
 }
 
-export type VehicleUpdateOneRequiredWithoutOdometerReadingsNestedInput = {
-  create?: Prisma.XOR<Prisma.VehicleCreateWithoutOdometerReadingsInput, Prisma.VehicleUncheckedCreateWithoutOdometerReadingsInput>
-  connectOrCreate?: Prisma.VehicleCreateOrConnectWithoutOdometerReadingsInput
-  upsert?: Prisma.VehicleUpsertWithoutOdometerReadingsInput
+export type VehicleUpdateOneRequiredWithoutAlertsNestedInput = {
+  create?: Prisma.XOR<Prisma.VehicleCreateWithoutAlertsInput, Prisma.VehicleUncheckedCreateWithoutAlertsInput>
+  connectOrCreate?: Prisma.VehicleCreateOrConnectWithoutAlertsInput
+  upsert?: Prisma.VehicleUpsertWithoutAlertsInput
   connect?: Prisma.VehicleWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.VehicleUpdateToOneWithWhereWithoutOdometerReadingsInput, Prisma.VehicleUpdateWithoutOdometerReadingsInput>, Prisma.VehicleUncheckedUpdateWithoutOdometerReadingsInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.VehicleUpdateToOneWithWhereWithoutAlertsInput, Prisma.VehicleUpdateWithoutAlertsInput>, Prisma.VehicleUncheckedUpdateWithoutAlertsInput>
 }
 
 export type VehicleCreateWithoutServiceRecordsInput = {
   id?: string
-  registration: string
+  registrationNumber: string
   make: string
   model: string
-  odometerReading: number
+  currentOdometer: number
   dateIntervalDays: number
-  mileageIntervalKm: number
-  archived?: boolean
+  mileageInterval: number
+  lastServiceDate?: Date | string | null
+  lastServiceOdometer?: number | null
+  serviceCycle?: number
+  archivedAt?: Date | string | null
   createdAt?: Date | string
-  odometerReadings?: Prisma.OdometerReadingCreateNestedManyWithoutVehicleInput
+  updatedAt?: Date | string
+  alerts?: Prisma.AlertCreateNestedManyWithoutVehicleInput
 }
 
 export type VehicleUncheckedCreateWithoutServiceRecordsInput = {
   id?: string
-  registration: string
+  registrationNumber: string
   make: string
   model: string
-  odometerReading: number
+  currentOdometer: number
   dateIntervalDays: number
-  mileageIntervalKm: number
-  archived?: boolean
+  mileageInterval: number
+  lastServiceDate?: Date | string | null
+  lastServiceOdometer?: number | null
+  serviceCycle?: number
+  archivedAt?: Date | string | null
   createdAt?: Date | string
-  odometerReadings?: Prisma.OdometerReadingUncheckedCreateNestedManyWithoutVehicleInput
+  updatedAt?: Date | string
+  alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutVehicleInput
 }
 
 export type VehicleCreateOrConnectWithoutServiceRecordsInput = {
@@ -552,95 +668,119 @@ export type VehicleUpdateToOneWithWhereWithoutServiceRecordsInput = {
 
 export type VehicleUpdateWithoutServiceRecordsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  registration?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.StringFieldUpdateOperationsInput | string
   make?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
-  odometerReading?: Prisma.IntFieldUpdateOperationsInput | number
+  currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   dateIntervalDays?: Prisma.IntFieldUpdateOperationsInput | number
-  mileageIntervalKm?: Prisma.IntFieldUpdateOperationsInput | number
-  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mileageInterval?: Prisma.IntFieldUpdateOperationsInput | number
+  lastServiceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastServiceOdometer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  serviceCycle?: Prisma.IntFieldUpdateOperationsInput | number
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  odometerReadings?: Prisma.OdometerReadingUpdateManyWithoutVehicleNestedInput
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  alerts?: Prisma.AlertUpdateManyWithoutVehicleNestedInput
 }
 
 export type VehicleUncheckedUpdateWithoutServiceRecordsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  registration?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.StringFieldUpdateOperationsInput | string
   make?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
-  odometerReading?: Prisma.IntFieldUpdateOperationsInput | number
+  currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   dateIntervalDays?: Prisma.IntFieldUpdateOperationsInput | number
-  mileageIntervalKm?: Prisma.IntFieldUpdateOperationsInput | number
-  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mileageInterval?: Prisma.IntFieldUpdateOperationsInput | number
+  lastServiceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastServiceOdometer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  serviceCycle?: Prisma.IntFieldUpdateOperationsInput | number
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  odometerReadings?: Prisma.OdometerReadingUncheckedUpdateManyWithoutVehicleNestedInput
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  alerts?: Prisma.AlertUncheckedUpdateManyWithoutVehicleNestedInput
 }
 
-export type VehicleCreateWithoutOdometerReadingsInput = {
+export type VehicleCreateWithoutAlertsInput = {
   id?: string
-  registration: string
+  registrationNumber: string
   make: string
   model: string
-  odometerReading: number
+  currentOdometer: number
   dateIntervalDays: number
-  mileageIntervalKm: number
-  archived?: boolean
+  mileageInterval: number
+  lastServiceDate?: Date | string | null
+  lastServiceOdometer?: number | null
+  serviceCycle?: number
+  archivedAt?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   serviceRecords?: Prisma.ServiceRecordCreateNestedManyWithoutVehicleInput
 }
 
-export type VehicleUncheckedCreateWithoutOdometerReadingsInput = {
+export type VehicleUncheckedCreateWithoutAlertsInput = {
   id?: string
-  registration: string
+  registrationNumber: string
   make: string
   model: string
-  odometerReading: number
+  currentOdometer: number
   dateIntervalDays: number
-  mileageIntervalKm: number
-  archived?: boolean
+  mileageInterval: number
+  lastServiceDate?: Date | string | null
+  lastServiceOdometer?: number | null
+  serviceCycle?: number
+  archivedAt?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   serviceRecords?: Prisma.ServiceRecordUncheckedCreateNestedManyWithoutVehicleInput
 }
 
-export type VehicleCreateOrConnectWithoutOdometerReadingsInput = {
+export type VehicleCreateOrConnectWithoutAlertsInput = {
   where: Prisma.VehicleWhereUniqueInput
-  create: Prisma.XOR<Prisma.VehicleCreateWithoutOdometerReadingsInput, Prisma.VehicleUncheckedCreateWithoutOdometerReadingsInput>
+  create: Prisma.XOR<Prisma.VehicleCreateWithoutAlertsInput, Prisma.VehicleUncheckedCreateWithoutAlertsInput>
 }
 
-export type VehicleUpsertWithoutOdometerReadingsInput = {
-  update: Prisma.XOR<Prisma.VehicleUpdateWithoutOdometerReadingsInput, Prisma.VehicleUncheckedUpdateWithoutOdometerReadingsInput>
-  create: Prisma.XOR<Prisma.VehicleCreateWithoutOdometerReadingsInput, Prisma.VehicleUncheckedCreateWithoutOdometerReadingsInput>
+export type VehicleUpsertWithoutAlertsInput = {
+  update: Prisma.XOR<Prisma.VehicleUpdateWithoutAlertsInput, Prisma.VehicleUncheckedUpdateWithoutAlertsInput>
+  create: Prisma.XOR<Prisma.VehicleCreateWithoutAlertsInput, Prisma.VehicleUncheckedCreateWithoutAlertsInput>
   where?: Prisma.VehicleWhereInput
 }
 
-export type VehicleUpdateToOneWithWhereWithoutOdometerReadingsInput = {
+export type VehicleUpdateToOneWithWhereWithoutAlertsInput = {
   where?: Prisma.VehicleWhereInput
-  data: Prisma.XOR<Prisma.VehicleUpdateWithoutOdometerReadingsInput, Prisma.VehicleUncheckedUpdateWithoutOdometerReadingsInput>
+  data: Prisma.XOR<Prisma.VehicleUpdateWithoutAlertsInput, Prisma.VehicleUncheckedUpdateWithoutAlertsInput>
 }
 
-export type VehicleUpdateWithoutOdometerReadingsInput = {
+export type VehicleUpdateWithoutAlertsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  registration?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.StringFieldUpdateOperationsInput | string
   make?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
-  odometerReading?: Prisma.IntFieldUpdateOperationsInput | number
+  currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   dateIntervalDays?: Prisma.IntFieldUpdateOperationsInput | number
-  mileageIntervalKm?: Prisma.IntFieldUpdateOperationsInput | number
-  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mileageInterval?: Prisma.IntFieldUpdateOperationsInput | number
+  lastServiceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastServiceOdometer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  serviceCycle?: Prisma.IntFieldUpdateOperationsInput | number
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   serviceRecords?: Prisma.ServiceRecordUpdateManyWithoutVehicleNestedInput
 }
 
-export type VehicleUncheckedUpdateWithoutOdometerReadingsInput = {
+export type VehicleUncheckedUpdateWithoutAlertsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  registration?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNumber?: Prisma.StringFieldUpdateOperationsInput | string
   make?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
-  odometerReading?: Prisma.IntFieldUpdateOperationsInput | number
+  currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   dateIntervalDays?: Prisma.IntFieldUpdateOperationsInput | number
-  mileageIntervalKm?: Prisma.IntFieldUpdateOperationsInput | number
-  archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mileageInterval?: Prisma.IntFieldUpdateOperationsInput | number
+  lastServiceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastServiceOdometer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  serviceCycle?: Prisma.IntFieldUpdateOperationsInput | number
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   serviceRecords?: Prisma.ServiceRecordUncheckedUpdateManyWithoutVehicleNestedInput
 }
 
@@ -651,12 +791,12 @@ export type VehicleUncheckedUpdateWithoutOdometerReadingsInput = {
 
 export type VehicleCountOutputType = {
   serviceRecords: number
-  odometerReadings: number
+  alerts: number
 }
 
 export type VehicleCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   serviceRecords?: boolean | VehicleCountOutputTypeCountServiceRecordsArgs
-  odometerReadings?: boolean | VehicleCountOutputTypeCountOdometerReadingsArgs
+  alerts?: boolean | VehicleCountOutputTypeCountAlertsArgs
 }
 
 /**
@@ -679,66 +819,82 @@ export type VehicleCountOutputTypeCountServiceRecordsArgs<ExtArgs extends runtim
 /**
  * VehicleCountOutputType without action
  */
-export type VehicleCountOutputTypeCountOdometerReadingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.OdometerReadingWhereInput
+export type VehicleCountOutputTypeCountAlertsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AlertWhereInput
 }
 
 
 export type VehicleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  registration?: boolean
+  registrationNumber?: boolean
   make?: boolean
   model?: boolean
-  odometerReading?: boolean
+  currentOdometer?: boolean
   dateIntervalDays?: boolean
-  mileageIntervalKm?: boolean
-  archived?: boolean
+  mileageInterval?: boolean
+  lastServiceDate?: boolean
+  lastServiceOdometer?: boolean
+  serviceCycle?: boolean
+  archivedAt?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   serviceRecords?: boolean | Prisma.Vehicle$serviceRecordsArgs<ExtArgs>
-  odometerReadings?: boolean | Prisma.Vehicle$odometerReadingsArgs<ExtArgs>
+  alerts?: boolean | Prisma.Vehicle$alertsArgs<ExtArgs>
   _count?: boolean | Prisma.VehicleCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["vehicle"]>
 
 export type VehicleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  registration?: boolean
+  registrationNumber?: boolean
   make?: boolean
   model?: boolean
-  odometerReading?: boolean
+  currentOdometer?: boolean
   dateIntervalDays?: boolean
-  mileageIntervalKm?: boolean
-  archived?: boolean
+  mileageInterval?: boolean
+  lastServiceDate?: boolean
+  lastServiceOdometer?: boolean
+  serviceCycle?: boolean
+  archivedAt?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
 }, ExtArgs["result"]["vehicle"]>
 
 export type VehicleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  registration?: boolean
+  registrationNumber?: boolean
   make?: boolean
   model?: boolean
-  odometerReading?: boolean
+  currentOdometer?: boolean
   dateIntervalDays?: boolean
-  mileageIntervalKm?: boolean
-  archived?: boolean
+  mileageInterval?: boolean
+  lastServiceDate?: boolean
+  lastServiceOdometer?: boolean
+  serviceCycle?: boolean
+  archivedAt?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
 }, ExtArgs["result"]["vehicle"]>
 
 export type VehicleSelectScalar = {
   id?: boolean
-  registration?: boolean
+  registrationNumber?: boolean
   make?: boolean
   model?: boolean
-  odometerReading?: boolean
+  currentOdometer?: boolean
   dateIntervalDays?: boolean
-  mileageIntervalKm?: boolean
-  archived?: boolean
+  mileageInterval?: boolean
+  lastServiceDate?: boolean
+  lastServiceOdometer?: boolean
+  serviceCycle?: boolean
+  archivedAt?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type VehicleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "registration" | "make" | "model" | "odometerReading" | "dateIntervalDays" | "mileageIntervalKm" | "archived" | "createdAt", ExtArgs["result"]["vehicle"]>
+export type VehicleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "registrationNumber" | "make" | "model" | "currentOdometer" | "dateIntervalDays" | "mileageInterval" | "lastServiceDate" | "lastServiceOdometer" | "serviceCycle" | "archivedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["vehicle"]>
 export type VehicleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   serviceRecords?: boolean | Prisma.Vehicle$serviceRecordsArgs<ExtArgs>
-  odometerReadings?: boolean | Prisma.Vehicle$odometerReadingsArgs<ExtArgs>
+  alerts?: boolean | Prisma.Vehicle$alertsArgs<ExtArgs>
   _count?: boolean | Prisma.VehicleCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type VehicleIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -748,18 +904,22 @@ export type $VehiclePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   name: "Vehicle"
   objects: {
     serviceRecords: Prisma.$ServiceRecordPayload<ExtArgs>[]
-    odometerReadings: Prisma.$OdometerReadingPayload<ExtArgs>[]
+    alerts: Prisma.$AlertPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    registration: string
+    registrationNumber: string
     make: string
     model: string
-    odometerReading: number
+    currentOdometer: number
     dateIntervalDays: number
-    mileageIntervalKm: number
-    archived: boolean
+    mileageInterval: number
+    lastServiceDate: Date | null
+    lastServiceOdometer: number | null
+    serviceCycle: number
+    archivedAt: Date | null
     createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["vehicle"]>
   composites: {}
 }
@@ -1155,7 +1315,7 @@ readonly fields: VehicleFieldRefs;
 export interface Prisma__VehicleClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   serviceRecords<T extends Prisma.Vehicle$serviceRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vehicle$serviceRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServiceRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  odometerReadings<T extends Prisma.Vehicle$odometerReadingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vehicle$odometerReadingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OdometerReadingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  alerts<T extends Prisma.Vehicle$alertsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vehicle$alertsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AlertPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1186,14 +1346,18 @@ export interface Prisma__VehicleClient<T, Null = never, ExtArgs extends runtime.
  */
 export interface VehicleFieldRefs {
   readonly id: Prisma.FieldRef<"Vehicle", 'String'>
-  readonly registration: Prisma.FieldRef<"Vehicle", 'String'>
+  readonly registrationNumber: Prisma.FieldRef<"Vehicle", 'String'>
   readonly make: Prisma.FieldRef<"Vehicle", 'String'>
   readonly model: Prisma.FieldRef<"Vehicle", 'String'>
-  readonly odometerReading: Prisma.FieldRef<"Vehicle", 'Int'>
+  readonly currentOdometer: Prisma.FieldRef<"Vehicle", 'Int'>
   readonly dateIntervalDays: Prisma.FieldRef<"Vehicle", 'Int'>
-  readonly mileageIntervalKm: Prisma.FieldRef<"Vehicle", 'Int'>
-  readonly archived: Prisma.FieldRef<"Vehicle", 'Boolean'>
+  readonly mileageInterval: Prisma.FieldRef<"Vehicle", 'Int'>
+  readonly lastServiceDate: Prisma.FieldRef<"Vehicle", 'DateTime'>
+  readonly lastServiceOdometer: Prisma.FieldRef<"Vehicle", 'Int'>
+  readonly serviceCycle: Prisma.FieldRef<"Vehicle", 'Int'>
+  readonly archivedAt: Prisma.FieldRef<"Vehicle", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Vehicle", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"Vehicle", 'DateTime'>
 }
     
 
@@ -1611,27 +1775,27 @@ export type Vehicle$serviceRecordsArgs<ExtArgs extends runtime.Types.Extensions.
 }
 
 /**
- * Vehicle.odometerReadings
+ * Vehicle.alerts
  */
-export type Vehicle$odometerReadingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type Vehicle$alertsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the OdometerReading
+   * Select specific fields to fetch from the Alert
    */
-  select?: Prisma.OdometerReadingSelect<ExtArgs> | null
+  select?: Prisma.AlertSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the OdometerReading
+   * Omit specific fields from the Alert
    */
-  omit?: Prisma.OdometerReadingOmit<ExtArgs> | null
+  omit?: Prisma.AlertOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.OdometerReadingInclude<ExtArgs> | null
-  where?: Prisma.OdometerReadingWhereInput
-  orderBy?: Prisma.OdometerReadingOrderByWithRelationInput | Prisma.OdometerReadingOrderByWithRelationInput[]
-  cursor?: Prisma.OdometerReadingWhereUniqueInput
+  include?: Prisma.AlertInclude<ExtArgs> | null
+  where?: Prisma.AlertWhereInput
+  orderBy?: Prisma.AlertOrderByWithRelationInput | Prisma.AlertOrderByWithRelationInput[]
+  cursor?: Prisma.AlertWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.OdometerReadingScalarFieldEnum | Prisma.OdometerReadingScalarFieldEnum[]
+  distinct?: Prisma.AlertScalarFieldEnum | Prisma.AlertScalarFieldEnum[]
 }
 
 /**

@@ -22,99 +22,108 @@ enum ServiceStatus {
   COMPLETED
 }
 
+enum HistoryEventType {
+  CREATED
+  STATUS_CHANGE
+  ASSIGNED
+  UNASSIGNED
+  NOTE
+}
+
 model User {
-  id            String         @id @default(cuid())
-  email         String         @unique
-  passwordHash  String
-  name          String
-  role          Role
-  createdAt     DateTime       @default(now())
-  assignments   TechnicianAssignment[]
-  serviceEdits  ServiceRecordEdit[]
-  timelineEvents TimelineEvent[]
+  id             String   @id @default(cuid())
+  email          String   @unique
+  passwordHash   String
+  name           String
+  role           Role
+  createdAt      DateTime @default(now())
+  assignments    ServiceAssignment[]
+  historyEvents  ServiceHistoryEvent[]
+  dismissedAlerts Alert[]  @relation("AlertDismissedBy")
+
+  @@index([role])
 }
 
 model Vehicle {
-  id                String          @id @default(cuid())
-  registration      String          @unique
-  make              String
-  model             String
-  odometerReading   Int
-  dateIntervalDays  Int
-  mileageIntervalKm Int
-  archived          Boolean         @default(false)
-  createdAt         DateTime        @default(now())
-  serviceRecords    ServiceRecord[]
-  odometerReadings  OdometerReading[]
+  id                  String             @id @default(cuid())
+  registrationNumber  String             @unique
+  make                String
+  model               String
+  currentOdometer     Int
+  dateIntervalDays    Int
+  mileageInterval     Int
+  lastServiceDate     DateTime?
+  lastServiceOdometer Int?
+  serviceCycle        Int                @default(1)
+  archivedAt          DateTime?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  serviceRecords      ServiceRecord[]
+  alerts              Alert[]
+
+  @@index([archivedAt])
 }
 
 model ServiceRecord {
-  id           String               @id @default(cuid())
-  vehicleId    String
-  vehicle      Vehicle              @relation(fields: [vehicleId], references: [id])
-  description  String
-  status       ServiceStatus        @default(DUE)
-  scheduledAt  DateTime?
-  gracePeriodDays Int               @default(7)
-  dueDate      DateTime?
-  dueMileage   Int?
-  createdAt    DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
-  assignments  TechnicianAssignment[]
-  timeline     TimelineEvent[]
-  edits        ServiceRecordEdit[]
-  overdueAlert OverdueAlert?
+  id                String              @id @default(cuid())
+  vehicleId         String
+  vehicle           Vehicle             @relation(fields: [vehicleId], references: [id])
+  description       String
+  status            ServiceStatus       @default(DUE)
+  scheduledDate     DateTime?
+  startedAt         DateTime?
+  completedAt       DateTime?
+  completedOdometer Int?
+  dueSince          DateTime            @default(now())
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  assignments       ServiceAssignment[]
+  historyEvents     ServiceHistoryEvent[]
+
+  @@index([vehicleId])
+  @@index([status])
+  @@index([scheduledDate])
+  @@index([updatedAt])
 }
 
-model TechnicianAssignment {
-  id             String        @id @default(cuid())
+model ServiceAssignment {
+  id              String        @id @default(cuid())
   serviceRecordId String
-  serviceRecord  ServiceRecord @relation(fields: [serviceRecordId], references: [id])
-  technicianId   String
-  technician     User          @relation(fields: [technicianId], references: [id])
-  assignedAt     DateTime      @default(now())
-  removedAt      DateTime?
+  serviceRecord   ServiceRecord @relation(fields: [serviceRecordId], references: [id])
+  technicianId    String
+  technician      User          @relation(fields: [technicianId], references: [id])
+  assignedAt      DateTime      @default(now())
+  unassignedAt    DateTime?
 
-  @@unique([serviceRecordId, technicianId])
+  @@index([technicianId])
+  @@index([serviceRecordId])
 }
 
-model OdometerReading {
-  id        String   @id @default(cuid())
-  vehicleId String
-  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
-  reading   Int
-  source    String
-  recordedAt DateTime @default(now())
-}
-
-model ServiceRecordEdit {
-  id             String       @id @default(cuid())
+model ServiceHistoryEvent {
+  id              String            @id @default(cuid())
   serviceRecordId String
-  serviceRecord  ServiceRecord @relation(fields: [serviceRecordId], references: [id])
-  editedById     String
-  editedBy       User         @relation(fields: [editedById], references: [id])
-  oldStatus      ServiceStatus?
-  newStatus      ServiceStatus?
-  note           String?
-  createdAt      DateTime     @default(now())
+  serviceRecord   ServiceRecord     @relation(fields: [serviceRecordId], references: [id])
+  type            HistoryEventType
+  fromStatus      ServiceStatus?
+  toStatus        ServiceStatus?
+  note            String?
+  actorId         String
+  actor           User              @relation(fields: [actorId], references: [id])
+  createdAt       DateTime          @default(now())
+
+  @@index([serviceRecordId, createdAt])
 }
 
-model TimelineEvent {
-  id             String        @id @default(cuid())
-  serviceRecordId String
-  serviceRecord  ServiceRecord @relation(fields: [serviceRecordId], references: [id])
-  actorId        String
-  actor          User          @relation(fields: [actorId], references: [id])
-  type           String
-  oldValue       String?
-  newValue       String?
-  createdAt      DateTime      @default(now())
-}
-
-model OverdueAlert {
+model Alert {
   id             String   @id @default(cuid())
-  serviceRecordId String   @unique
-  serviceRecord  ServiceRecord @relation(fields: [serviceRecordId], references: [id])
-  dismissed      Boolean  @default(false)
-  createdAt      DateTime @default(now())
+  vehicleId      String
+  vehicle        Vehicle  @relation(fields: [vehicleId], references: [id])
+  serviceCycle   Int
+  triggeredAt    DateTime @default(now())
+  dismissedAt    DateTime?
+  dismissedById  String?
+  dismissedBy    User?    @relation("AlertDismissedBy", fields: [dismissedById], references: [id])
+
+  @@unique([vehicleId, serviceCycle])
+  @@index([vehicleId])
 }

@@ -190,9 +190,9 @@ export type UserWhereInput = {
   name?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  assignments?: Prisma.TechnicianAssignmentListRelationFilter
-  serviceEdits?: Prisma.ServiceRecordEditListRelationFilter
-  timelineEvents?: Prisma.TimelineEventListRelationFilter
+  assignments?: Prisma.ServiceAssignmentListRelationFilter
+  historyEvents?: Prisma.ServiceHistoryEventListRelationFilter
+  dismissedAlerts?: Prisma.AlertListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -202,9 +202,9 @@ export type UserOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   role?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  assignments?: Prisma.TechnicianAssignmentOrderByRelationAggregateInput
-  serviceEdits?: Prisma.ServiceRecordEditOrderByRelationAggregateInput
-  timelineEvents?: Prisma.TimelineEventOrderByRelationAggregateInput
+  assignments?: Prisma.ServiceAssignmentOrderByRelationAggregateInput
+  historyEvents?: Prisma.ServiceHistoryEventOrderByRelationAggregateInput
+  dismissedAlerts?: Prisma.AlertOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -217,9 +217,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  assignments?: Prisma.TechnicianAssignmentListRelationFilter
-  serviceEdits?: Prisma.ServiceRecordEditListRelationFilter
-  timelineEvents?: Prisma.TimelineEventListRelationFilter
+  assignments?: Prisma.ServiceAssignmentListRelationFilter
+  historyEvents?: Prisma.ServiceHistoryEventListRelationFilter
+  dismissedAlerts?: Prisma.AlertListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -253,9 +253,9 @@ export type UserCreateInput = {
   name: string
   role: $Enums.Role
   createdAt?: Date | string
-  assignments?: Prisma.TechnicianAssignmentCreateNestedManyWithoutTechnicianInput
-  serviceEdits?: Prisma.ServiceRecordEditCreateNestedManyWithoutEditedByInput
-  timelineEvents?: Prisma.TimelineEventCreateNestedManyWithoutActorInput
+  assignments?: Prisma.ServiceAssignmentCreateNestedManyWithoutTechnicianInput
+  historyEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutActorInput
+  dismissedAlerts?: Prisma.AlertCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -265,9 +265,9 @@ export type UserUncheckedCreateInput = {
   name: string
   role: $Enums.Role
   createdAt?: Date | string
-  assignments?: Prisma.TechnicianAssignmentUncheckedCreateNestedManyWithoutTechnicianInput
-  serviceEdits?: Prisma.ServiceRecordEditUncheckedCreateNestedManyWithoutEditedByInput
-  timelineEvents?: Prisma.TimelineEventUncheckedCreateNestedManyWithoutActorInput
+  assignments?: Prisma.ServiceAssignmentUncheckedCreateNestedManyWithoutTechnicianInput
+  historyEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutActorInput
+  dismissedAlerts?: Prisma.AlertUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUpdateInput = {
@@ -277,9 +277,9 @@ export type UserUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  assignments?: Prisma.TechnicianAssignmentUpdateManyWithoutTechnicianNestedInput
-  serviceEdits?: Prisma.ServiceRecordEditUpdateManyWithoutEditedByNestedInput
-  timelineEvents?: Prisma.TimelineEventUpdateManyWithoutActorNestedInput
+  assignments?: Prisma.ServiceAssignmentUpdateManyWithoutTechnicianNestedInput
+  historyEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutActorNestedInput
+  dismissedAlerts?: Prisma.AlertUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -289,9 +289,9 @@ export type UserUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  assignments?: Prisma.TechnicianAssignmentUncheckedUpdateManyWithoutTechnicianNestedInput
-  serviceEdits?: Prisma.ServiceRecordEditUncheckedUpdateManyWithoutEditedByNestedInput
-  timelineEvents?: Prisma.TimelineEventUncheckedUpdateManyWithoutActorNestedInput
+  assignments?: Prisma.ServiceAssignmentUncheckedUpdateManyWithoutTechnicianNestedInput
+  historyEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutActorNestedInput
+  dismissedAlerts?: Prisma.AlertUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -353,6 +353,11 @@ export type UserScalarRelationFilter = {
   isNot?: Prisma.UserWhereInput
 }
 
+export type UserNullableScalarRelationFilter = {
+  is?: Prisma.UserWhereInput | null
+  isNot?: Prisma.UserWhereInput | null
+}
+
 export type StringFieldUpdateOperationsInput = {
   set?: string
 }
@@ -379,32 +384,34 @@ export type UserUpdateOneRequiredWithoutAssignmentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAssignmentsInput, Prisma.UserUpdateWithoutAssignmentsInput>, Prisma.UserUncheckedUpdateWithoutAssignmentsInput>
 }
 
-export type UserCreateNestedOneWithoutServiceEditsInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutServiceEditsInput, Prisma.UserUncheckedCreateWithoutServiceEditsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutServiceEditsInput
+export type UserCreateNestedOneWithoutHistoryEventsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutHistoryEventsInput, Prisma.UserUncheckedCreateWithoutHistoryEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutHistoryEventsInput
   connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserUpdateOneRequiredWithoutServiceEditsNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutServiceEditsInput, Prisma.UserUncheckedCreateWithoutServiceEditsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutServiceEditsInput
-  upsert?: Prisma.UserUpsertWithoutServiceEditsInput
+export type UserUpdateOneRequiredWithoutHistoryEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutHistoryEventsInput, Prisma.UserUncheckedCreateWithoutHistoryEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutHistoryEventsInput
+  upsert?: Prisma.UserUpsertWithoutHistoryEventsInput
   connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutServiceEditsInput, Prisma.UserUpdateWithoutServiceEditsInput>, Prisma.UserUncheckedUpdateWithoutServiceEditsInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutHistoryEventsInput, Prisma.UserUpdateWithoutHistoryEventsInput>, Prisma.UserUncheckedUpdateWithoutHistoryEventsInput>
 }
 
-export type UserCreateNestedOneWithoutTimelineEventsInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutTimelineEventsInput, Prisma.UserUncheckedCreateWithoutTimelineEventsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTimelineEventsInput
+export type UserCreateNestedOneWithoutDismissedAlertsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDismissedAlertsInput, Prisma.UserUncheckedCreateWithoutDismissedAlertsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDismissedAlertsInput
   connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserUpdateOneRequiredWithoutTimelineEventsNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutTimelineEventsInput, Prisma.UserUncheckedCreateWithoutTimelineEventsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTimelineEventsInput
-  upsert?: Prisma.UserUpsertWithoutTimelineEventsInput
+export type UserUpdateOneWithoutDismissedAlertsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDismissedAlertsInput, Prisma.UserUncheckedCreateWithoutDismissedAlertsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDismissedAlertsInput
+  upsert?: Prisma.UserUpsertWithoutDismissedAlertsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
   connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTimelineEventsInput, Prisma.UserUpdateWithoutTimelineEventsInput>, Prisma.UserUncheckedUpdateWithoutTimelineEventsInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDismissedAlertsInput, Prisma.UserUpdateWithoutDismissedAlertsInput>, Prisma.UserUncheckedUpdateWithoutDismissedAlertsInput>
 }
 
 export type UserCreateWithoutAssignmentsInput = {
@@ -414,8 +421,8 @@ export type UserCreateWithoutAssignmentsInput = {
   name: string
   role: $Enums.Role
   createdAt?: Date | string
-  serviceEdits?: Prisma.ServiceRecordEditCreateNestedManyWithoutEditedByInput
-  timelineEvents?: Prisma.TimelineEventCreateNestedManyWithoutActorInput
+  historyEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutActorInput
+  dismissedAlerts?: Prisma.AlertCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutAssignmentsInput = {
@@ -425,8 +432,8 @@ export type UserUncheckedCreateWithoutAssignmentsInput = {
   name: string
   role: $Enums.Role
   createdAt?: Date | string
-  serviceEdits?: Prisma.ServiceRecordEditUncheckedCreateNestedManyWithoutEditedByInput
-  timelineEvents?: Prisma.TimelineEventUncheckedCreateNestedManyWithoutActorInput
+  historyEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutActorInput
+  dismissedAlerts?: Prisma.AlertUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutAssignmentsInput = {
@@ -452,8 +459,8 @@ export type UserUpdateWithoutAssignmentsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  serviceEdits?: Prisma.ServiceRecordEditUpdateManyWithoutEditedByNestedInput
-  timelineEvents?: Prisma.TimelineEventUpdateManyWithoutActorNestedInput
+  historyEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutActorNestedInput
+  dismissedAlerts?: Prisma.AlertUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAssignmentsInput = {
@@ -463,128 +470,128 @@ export type UserUncheckedUpdateWithoutAssignmentsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  serviceEdits?: Prisma.ServiceRecordEditUncheckedUpdateManyWithoutEditedByNestedInput
-  timelineEvents?: Prisma.TimelineEventUncheckedUpdateManyWithoutActorNestedInput
+  historyEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutActorNestedInput
+  dismissedAlerts?: Prisma.AlertUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
-export type UserCreateWithoutServiceEditsInput = {
+export type UserCreateWithoutHistoryEventsInput = {
   id?: string
   email: string
   passwordHash: string
   name: string
   role: $Enums.Role
   createdAt?: Date | string
-  assignments?: Prisma.TechnicianAssignmentCreateNestedManyWithoutTechnicianInput
-  timelineEvents?: Prisma.TimelineEventCreateNestedManyWithoutActorInput
+  assignments?: Prisma.ServiceAssignmentCreateNestedManyWithoutTechnicianInput
+  dismissedAlerts?: Prisma.AlertCreateNestedManyWithoutDismissedByInput
 }
 
-export type UserUncheckedCreateWithoutServiceEditsInput = {
+export type UserUncheckedCreateWithoutHistoryEventsInput = {
   id?: string
   email: string
   passwordHash: string
   name: string
   role: $Enums.Role
   createdAt?: Date | string
-  assignments?: Prisma.TechnicianAssignmentUncheckedCreateNestedManyWithoutTechnicianInput
-  timelineEvents?: Prisma.TimelineEventUncheckedCreateNestedManyWithoutActorInput
+  assignments?: Prisma.ServiceAssignmentUncheckedCreateNestedManyWithoutTechnicianInput
+  dismissedAlerts?: Prisma.AlertUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
-export type UserCreateOrConnectWithoutServiceEditsInput = {
+export type UserCreateOrConnectWithoutHistoryEventsInput = {
   where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutServiceEditsInput, Prisma.UserUncheckedCreateWithoutServiceEditsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutHistoryEventsInput, Prisma.UserUncheckedCreateWithoutHistoryEventsInput>
 }
 
-export type UserUpsertWithoutServiceEditsInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutServiceEditsInput, Prisma.UserUncheckedUpdateWithoutServiceEditsInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutServiceEditsInput, Prisma.UserUncheckedCreateWithoutServiceEditsInput>
+export type UserUpsertWithoutHistoryEventsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutHistoryEventsInput, Prisma.UserUncheckedUpdateWithoutHistoryEventsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutHistoryEventsInput, Prisma.UserUncheckedCreateWithoutHistoryEventsInput>
   where?: Prisma.UserWhereInput
 }
 
-export type UserUpdateToOneWithWhereWithoutServiceEditsInput = {
+export type UserUpdateToOneWithWhereWithoutHistoryEventsInput = {
   where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutServiceEditsInput, Prisma.UserUncheckedUpdateWithoutServiceEditsInput>
+  data: Prisma.XOR<Prisma.UserUpdateWithoutHistoryEventsInput, Prisma.UserUncheckedUpdateWithoutHistoryEventsInput>
 }
 
-export type UserUpdateWithoutServiceEditsInput = {
+export type UserUpdateWithoutHistoryEventsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  assignments?: Prisma.TechnicianAssignmentUpdateManyWithoutTechnicianNestedInput
-  timelineEvents?: Prisma.TimelineEventUpdateManyWithoutActorNestedInput
+  assignments?: Prisma.ServiceAssignmentUpdateManyWithoutTechnicianNestedInput
+  dismissedAlerts?: Prisma.AlertUpdateManyWithoutDismissedByNestedInput
 }
 
-export type UserUncheckedUpdateWithoutServiceEditsInput = {
+export type UserUncheckedUpdateWithoutHistoryEventsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  assignments?: Prisma.TechnicianAssignmentUncheckedUpdateManyWithoutTechnicianNestedInput
-  timelineEvents?: Prisma.TimelineEventUncheckedUpdateManyWithoutActorNestedInput
+  assignments?: Prisma.ServiceAssignmentUncheckedUpdateManyWithoutTechnicianNestedInput
+  dismissedAlerts?: Prisma.AlertUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
-export type UserCreateWithoutTimelineEventsInput = {
+export type UserCreateWithoutDismissedAlertsInput = {
   id?: string
   email: string
   passwordHash: string
   name: string
   role: $Enums.Role
   createdAt?: Date | string
-  assignments?: Prisma.TechnicianAssignmentCreateNestedManyWithoutTechnicianInput
-  serviceEdits?: Prisma.ServiceRecordEditCreateNestedManyWithoutEditedByInput
+  assignments?: Prisma.ServiceAssignmentCreateNestedManyWithoutTechnicianInput
+  historyEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutActorInput
 }
 
-export type UserUncheckedCreateWithoutTimelineEventsInput = {
+export type UserUncheckedCreateWithoutDismissedAlertsInput = {
   id?: string
   email: string
   passwordHash: string
   name: string
   role: $Enums.Role
   createdAt?: Date | string
-  assignments?: Prisma.TechnicianAssignmentUncheckedCreateNestedManyWithoutTechnicianInput
-  serviceEdits?: Prisma.ServiceRecordEditUncheckedCreateNestedManyWithoutEditedByInput
+  assignments?: Prisma.ServiceAssignmentUncheckedCreateNestedManyWithoutTechnicianInput
+  historyEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutActorInput
 }
 
-export type UserCreateOrConnectWithoutTimelineEventsInput = {
+export type UserCreateOrConnectWithoutDismissedAlertsInput = {
   where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutTimelineEventsInput, Prisma.UserUncheckedCreateWithoutTimelineEventsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDismissedAlertsInput, Prisma.UserUncheckedCreateWithoutDismissedAlertsInput>
 }
 
-export type UserUpsertWithoutTimelineEventsInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutTimelineEventsInput, Prisma.UserUncheckedUpdateWithoutTimelineEventsInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutTimelineEventsInput, Prisma.UserUncheckedCreateWithoutTimelineEventsInput>
+export type UserUpsertWithoutDismissedAlertsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDismissedAlertsInput, Prisma.UserUncheckedUpdateWithoutDismissedAlertsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDismissedAlertsInput, Prisma.UserUncheckedCreateWithoutDismissedAlertsInput>
   where?: Prisma.UserWhereInput
 }
 
-export type UserUpdateToOneWithWhereWithoutTimelineEventsInput = {
+export type UserUpdateToOneWithWhereWithoutDismissedAlertsInput = {
   where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutTimelineEventsInput, Prisma.UserUncheckedUpdateWithoutTimelineEventsInput>
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDismissedAlertsInput, Prisma.UserUncheckedUpdateWithoutDismissedAlertsInput>
 }
 
-export type UserUpdateWithoutTimelineEventsInput = {
+export type UserUpdateWithoutDismissedAlertsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  assignments?: Prisma.TechnicianAssignmentUpdateManyWithoutTechnicianNestedInput
-  serviceEdits?: Prisma.ServiceRecordEditUpdateManyWithoutEditedByNestedInput
+  assignments?: Prisma.ServiceAssignmentUpdateManyWithoutTechnicianNestedInput
+  historyEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutActorNestedInput
 }
 
-export type UserUncheckedUpdateWithoutTimelineEventsInput = {
+export type UserUncheckedUpdateWithoutDismissedAlertsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  assignments?: Prisma.TechnicianAssignmentUncheckedUpdateManyWithoutTechnicianNestedInput
-  serviceEdits?: Prisma.ServiceRecordEditUncheckedUpdateManyWithoutEditedByNestedInput
+  assignments?: Prisma.ServiceAssignmentUncheckedUpdateManyWithoutTechnicianNestedInput
+  historyEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 
@@ -594,14 +601,14 @@ export type UserUncheckedUpdateWithoutTimelineEventsInput = {
 
 export type UserCountOutputType = {
   assignments: number
-  serviceEdits: number
-  timelineEvents: number
+  historyEvents: number
+  dismissedAlerts: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assignments?: boolean | UserCountOutputTypeCountAssignmentsArgs
-  serviceEdits?: boolean | UserCountOutputTypeCountServiceEditsArgs
-  timelineEvents?: boolean | UserCountOutputTypeCountTimelineEventsArgs
+  historyEvents?: boolean | UserCountOutputTypeCountHistoryEventsArgs
+  dismissedAlerts?: boolean | UserCountOutputTypeCountDismissedAlertsArgs
 }
 
 /**
@@ -618,21 +625,21 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
  * UserCountOutputType without action
  */
 export type UserCountOutputTypeCountAssignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.TechnicianAssignmentWhereInput
+  where?: Prisma.ServiceAssignmentWhereInput
 }
 
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountServiceEditsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.ServiceRecordEditWhereInput
+export type UserCountOutputTypeCountHistoryEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ServiceHistoryEventWhereInput
 }
 
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountTimelineEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.TimelineEventWhereInput
+export type UserCountOutputTypeCountDismissedAlertsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AlertWhereInput
 }
 
 
@@ -644,8 +651,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   role?: boolean
   createdAt?: boolean
   assignments?: boolean | Prisma.User$assignmentsArgs<ExtArgs>
-  serviceEdits?: boolean | Prisma.User$serviceEditsArgs<ExtArgs>
-  timelineEvents?: boolean | Prisma.User$timelineEventsArgs<ExtArgs>
+  historyEvents?: boolean | Prisma.User$historyEventsArgs<ExtArgs>
+  dismissedAlerts?: boolean | Prisma.User$dismissedAlertsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -679,8 +686,8 @@ export type UserSelectScalar = {
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "passwordHash" | "name" | "role" | "createdAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assignments?: boolean | Prisma.User$assignmentsArgs<ExtArgs>
-  serviceEdits?: boolean | Prisma.User$serviceEditsArgs<ExtArgs>
-  timelineEvents?: boolean | Prisma.User$timelineEventsArgs<ExtArgs>
+  historyEvents?: boolean | Prisma.User$historyEventsArgs<ExtArgs>
+  dismissedAlerts?: boolean | Prisma.User$dismissedAlertsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -689,9 +696,9 @@ export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
-    assignments: Prisma.$TechnicianAssignmentPayload<ExtArgs>[]
-    serviceEdits: Prisma.$ServiceRecordEditPayload<ExtArgs>[]
-    timelineEvents: Prisma.$TimelineEventPayload<ExtArgs>[]
+    assignments: Prisma.$ServiceAssignmentPayload<ExtArgs>[]
+    historyEvents: Prisma.$ServiceHistoryEventPayload<ExtArgs>[]
+    dismissedAlerts: Prisma.$AlertPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1094,9 +1101,9 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  assignments<T extends Prisma.User$assignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TechnicianAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  serviceEdits<T extends Prisma.User$serviceEditsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$serviceEditsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServiceRecordEditPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  timelineEvents<T extends Prisma.User$timelineEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$timelineEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TimelineEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  assignments<T extends Prisma.User$assignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServiceAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  historyEvents<T extends Prisma.User$historyEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$historyEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServiceHistoryEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  dismissedAlerts<T extends Prisma.User$dismissedAlertsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$dismissedAlertsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AlertPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1529,71 +1536,71 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
  */
 export type User$assignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the TechnicianAssignment
+   * Select specific fields to fetch from the ServiceAssignment
    */
-  select?: Prisma.TechnicianAssignmentSelect<ExtArgs> | null
+  select?: Prisma.ServiceAssignmentSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the TechnicianAssignment
+   * Omit specific fields from the ServiceAssignment
    */
-  omit?: Prisma.TechnicianAssignmentOmit<ExtArgs> | null
+  omit?: Prisma.ServiceAssignmentOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.TechnicianAssignmentInclude<ExtArgs> | null
-  where?: Prisma.TechnicianAssignmentWhereInput
-  orderBy?: Prisma.TechnicianAssignmentOrderByWithRelationInput | Prisma.TechnicianAssignmentOrderByWithRelationInput[]
-  cursor?: Prisma.TechnicianAssignmentWhereUniqueInput
+  include?: Prisma.ServiceAssignmentInclude<ExtArgs> | null
+  where?: Prisma.ServiceAssignmentWhereInput
+  orderBy?: Prisma.ServiceAssignmentOrderByWithRelationInput | Prisma.ServiceAssignmentOrderByWithRelationInput[]
+  cursor?: Prisma.ServiceAssignmentWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.TechnicianAssignmentScalarFieldEnum | Prisma.TechnicianAssignmentScalarFieldEnum[]
+  distinct?: Prisma.ServiceAssignmentScalarFieldEnum | Prisma.ServiceAssignmentScalarFieldEnum[]
 }
 
 /**
- * User.serviceEdits
+ * User.historyEvents
  */
-export type User$serviceEditsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$historyEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the ServiceRecordEdit
+   * Select specific fields to fetch from the ServiceHistoryEvent
    */
-  select?: Prisma.ServiceRecordEditSelect<ExtArgs> | null
+  select?: Prisma.ServiceHistoryEventSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the ServiceRecordEdit
+   * Omit specific fields from the ServiceHistoryEvent
    */
-  omit?: Prisma.ServiceRecordEditOmit<ExtArgs> | null
+  omit?: Prisma.ServiceHistoryEventOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.ServiceRecordEditInclude<ExtArgs> | null
-  where?: Prisma.ServiceRecordEditWhereInput
-  orderBy?: Prisma.ServiceRecordEditOrderByWithRelationInput | Prisma.ServiceRecordEditOrderByWithRelationInput[]
-  cursor?: Prisma.ServiceRecordEditWhereUniqueInput
+  include?: Prisma.ServiceHistoryEventInclude<ExtArgs> | null
+  where?: Prisma.ServiceHistoryEventWhereInput
+  orderBy?: Prisma.ServiceHistoryEventOrderByWithRelationInput | Prisma.ServiceHistoryEventOrderByWithRelationInput[]
+  cursor?: Prisma.ServiceHistoryEventWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.ServiceRecordEditScalarFieldEnum | Prisma.ServiceRecordEditScalarFieldEnum[]
+  distinct?: Prisma.ServiceHistoryEventScalarFieldEnum | Prisma.ServiceHistoryEventScalarFieldEnum[]
 }
 
 /**
- * User.timelineEvents
+ * User.dismissedAlerts
  */
-export type User$timelineEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$dismissedAlertsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the TimelineEvent
+   * Select specific fields to fetch from the Alert
    */
-  select?: Prisma.TimelineEventSelect<ExtArgs> | null
+  select?: Prisma.AlertSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the TimelineEvent
+   * Omit specific fields from the Alert
    */
-  omit?: Prisma.TimelineEventOmit<ExtArgs> | null
+  omit?: Prisma.AlertOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.TimelineEventInclude<ExtArgs> | null
-  where?: Prisma.TimelineEventWhereInput
-  orderBy?: Prisma.TimelineEventOrderByWithRelationInput | Prisma.TimelineEventOrderByWithRelationInput[]
-  cursor?: Prisma.TimelineEventWhereUniqueInput
+  include?: Prisma.AlertInclude<ExtArgs> | null
+  where?: Prisma.AlertWhereInput
+  orderBy?: Prisma.AlertOrderByWithRelationInput | Prisma.AlertOrderByWithRelationInput[]
+  cursor?: Prisma.AlertWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.TimelineEventScalarFieldEnum | Prisma.TimelineEventScalarFieldEnum[]
+  distinct?: Prisma.AlertScalarFieldEnum | Prisma.AlertScalarFieldEnum[]
 }
 
 /**

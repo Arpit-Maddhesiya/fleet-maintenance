@@ -33,27 +33,17 @@ export type Vehicle = Prisma.VehicleModel
  */
 export type ServiceRecord = Prisma.ServiceRecordModel
 /**
- * Model TechnicianAssignment
+ * Model ServiceAssignment
  * 
  */
-export type TechnicianAssignment = Prisma.TechnicianAssignmentModel
+export type ServiceAssignment = Prisma.ServiceAssignmentModel
 /**
- * Model OdometerReading
+ * Model ServiceHistoryEvent
  * 
  */
-export type OdometerReading = Prisma.OdometerReadingModel
+export type ServiceHistoryEvent = Prisma.ServiceHistoryEventModel
 /**
- * Model ServiceRecordEdit
+ * Model Alert
  * 
  */
-export type ServiceRecordEdit = Prisma.ServiceRecordEditModel
-/**
- * Model TimelineEvent
- * 
- */
-export type TimelineEvent = Prisma.TimelineEventModel
-/**
- * Model OverdueAlert
- * 
- */
-export type OverdueAlert = Prisma.OverdueAlertModel
+export type Alert = Prisma.AlertModel

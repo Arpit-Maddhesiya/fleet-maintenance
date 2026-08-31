@@ -27,13 +27,11 @@ export type AggregateServiceRecord = {
 }
 
 export type ServiceRecordAvgAggregateOutputType = {
-  gracePeriodDays: number | null
-  dueMileage: number | null
+  completedOdometer: number | null
 }
 
 export type ServiceRecordSumAggregateOutputType = {
-  gracePeriodDays: number | null
-  dueMileage: number | null
+  completedOdometer: number | null
 }
 
 export type ServiceRecordMinAggregateOutputType = {
@@ -41,10 +39,11 @@ export type ServiceRecordMinAggregateOutputType = {
   vehicleId: string | null
   description: string | null
   status: $Enums.ServiceStatus | null
-  scheduledAt: Date | null
-  gracePeriodDays: number | null
-  dueDate: Date | null
-  dueMileage: number | null
+  scheduledDate: Date | null
+  startedAt: Date | null
+  completedAt: Date | null
+  completedOdometer: number | null
+  dueSince: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -54,10 +53,11 @@ export type ServiceRecordMaxAggregateOutputType = {
   vehicleId: string | null
   description: string | null
   status: $Enums.ServiceStatus | null
-  scheduledAt: Date | null
-  gracePeriodDays: number | null
-  dueDate: Date | null
-  dueMileage: number | null
+  scheduledDate: Date | null
+  startedAt: Date | null
+  completedAt: Date | null
+  completedOdometer: number | null
+  dueSince: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -67,10 +67,11 @@ export type ServiceRecordCountAggregateOutputType = {
   vehicleId: number
   description: number
   status: number
-  scheduledAt: number
-  gracePeriodDays: number
-  dueDate: number
-  dueMileage: number
+  scheduledDate: number
+  startedAt: number
+  completedAt: number
+  completedOdometer: number
+  dueSince: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -78,13 +79,11 @@ export type ServiceRecordCountAggregateOutputType = {
 
 
 export type ServiceRecordAvgAggregateInputType = {
-  gracePeriodDays?: true
-  dueMileage?: true
+  completedOdometer?: true
 }
 
 export type ServiceRecordSumAggregateInputType = {
-  gracePeriodDays?: true
-  dueMileage?: true
+  completedOdometer?: true
 }
 
 export type ServiceRecordMinAggregateInputType = {
@@ -92,10 +91,11 @@ export type ServiceRecordMinAggregateInputType = {
   vehicleId?: true
   description?: true
   status?: true
-  scheduledAt?: true
-  gracePeriodDays?: true
-  dueDate?: true
-  dueMileage?: true
+  scheduledDate?: true
+  startedAt?: true
+  completedAt?: true
+  completedOdometer?: true
+  dueSince?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -105,10 +105,11 @@ export type ServiceRecordMaxAggregateInputType = {
   vehicleId?: true
   description?: true
   status?: true
-  scheduledAt?: true
-  gracePeriodDays?: true
-  dueDate?: true
-  dueMileage?: true
+  scheduledDate?: true
+  startedAt?: true
+  completedAt?: true
+  completedOdometer?: true
+  dueSince?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -118,10 +119,11 @@ export type ServiceRecordCountAggregateInputType = {
   vehicleId?: true
   description?: true
   status?: true
-  scheduledAt?: true
-  gracePeriodDays?: true
-  dueDate?: true
-  dueMileage?: true
+  scheduledDate?: true
+  startedAt?: true
+  completedAt?: true
+  completedOdometer?: true
+  dueSince?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -218,10 +220,11 @@ export type ServiceRecordGroupByOutputType = {
   vehicleId: string
   description: string
   status: $Enums.ServiceStatus
-  scheduledAt: Date | null
-  gracePeriodDays: number
-  dueDate: Date | null
-  dueMileage: number | null
+  scheduledDate: Date | null
+  startedAt: Date | null
+  completedAt: Date | null
+  completedOdometer: number | null
+  dueSince: Date
   createdAt: Date
   updatedAt: Date
   _count: ServiceRecordCountAggregateOutputType | null
@@ -254,17 +257,16 @@ export type ServiceRecordWhereInput = {
   vehicleId?: Prisma.StringFilter<"ServiceRecord"> | string
   description?: Prisma.StringFilter<"ServiceRecord"> | string
   status?: Prisma.EnumServiceStatusFilter<"ServiceRecord"> | $Enums.ServiceStatus
-  scheduledAt?: Prisma.DateTimeNullableFilter<"ServiceRecord"> | Date | string | null
-  gracePeriodDays?: Prisma.IntFilter<"ServiceRecord"> | number
-  dueDate?: Prisma.DateTimeNullableFilter<"ServiceRecord"> | Date | string | null
-  dueMileage?: Prisma.IntNullableFilter<"ServiceRecord"> | number | null
+  scheduledDate?: Prisma.DateTimeNullableFilter<"ServiceRecord"> | Date | string | null
+  startedAt?: Prisma.DateTimeNullableFilter<"ServiceRecord"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableFilter<"ServiceRecord"> | Date | string | null
+  completedOdometer?: Prisma.IntNullableFilter<"ServiceRecord"> | number | null
+  dueSince?: Prisma.DateTimeFilter<"ServiceRecord"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"ServiceRecord"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ServiceRecord"> | Date | string
   vehicle?: Prisma.XOR<Prisma.VehicleScalarRelationFilter, Prisma.VehicleWhereInput>
-  assignments?: Prisma.TechnicianAssignmentListRelationFilter
-  timeline?: Prisma.TimelineEventListRelationFilter
-  edits?: Prisma.ServiceRecordEditListRelationFilter
-  overdueAlert?: Prisma.XOR<Prisma.OverdueAlertNullableScalarRelationFilter, Prisma.OverdueAlertWhereInput> | null
+  assignments?: Prisma.ServiceAssignmentListRelationFilter
+  historyEvents?: Prisma.ServiceHistoryEventListRelationFilter
 }
 
 export type ServiceRecordOrderByWithRelationInput = {
@@ -272,17 +274,16 @@ export type ServiceRecordOrderByWithRelationInput = {
   vehicleId?: Prisma.SortOrder
   description?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  scheduledAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  gracePeriodDays?: Prisma.SortOrder
-  dueDate?: Prisma.SortOrderInput | Prisma.SortOrder
-  dueMileage?: Prisma.SortOrderInput | Prisma.SortOrder
+  scheduledDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  completedOdometer?: Prisma.SortOrderInput | Prisma.SortOrder
+  dueSince?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   vehicle?: Prisma.VehicleOrderByWithRelationInput
-  assignments?: Prisma.TechnicianAssignmentOrderByRelationAggregateInput
-  timeline?: Prisma.TimelineEventOrderByRelationAggregateInput
-  edits?: Prisma.ServiceRecordEditOrderByRelationAggregateInput
-  overdueAlert?: Prisma.OverdueAlertOrderByWithRelationInput
+  assignments?: Prisma.ServiceAssignmentOrderByRelationAggregateInput
+  historyEvents?: Prisma.ServiceHistoryEventOrderByRelationAggregateInput
 }
 
 export type ServiceRecordWhereUniqueInput = Prisma.AtLeast<{
@@ -293,17 +294,16 @@ export type ServiceRecordWhereUniqueInput = Prisma.AtLeast<{
   vehicleId?: Prisma.StringFilter<"ServiceRecord"> | string
   description?: Prisma.StringFilter<"ServiceRecord"> | string
   status?: Prisma.EnumServiceStatusFilter<"ServiceRecord"> | $Enums.ServiceStatus
-  scheduledAt?: Prisma.DateTimeNullableFilter<"ServiceRecord"> | Date | string | null
-  gracePeriodDays?: Prisma.IntFilter<"ServiceRecord"> | number
-  dueDate?: Prisma.DateTimeNullableFilter<"ServiceRecord"> | Date | string | null
-  dueMileage?: Prisma.IntNullableFilter<"ServiceRecord"> | number | null
+  scheduledDate?: Prisma.DateTimeNullableFilter<"ServiceRecord"> | Date | string | null
+  startedAt?: Prisma.DateTimeNullableFilter<"ServiceRecord"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableFilter<"ServiceRecord"> | Date | string | null
+  completedOdometer?: Prisma.IntNullableFilter<"ServiceRecord"> | number | null
+  dueSince?: Prisma.DateTimeFilter<"ServiceRecord"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"ServiceRecord"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ServiceRecord"> | Date | string
   vehicle?: Prisma.XOR<Prisma.VehicleScalarRelationFilter, Prisma.VehicleWhereInput>
-  assignments?: Prisma.TechnicianAssignmentListRelationFilter
-  timeline?: Prisma.TimelineEventListRelationFilter
-  edits?: Prisma.ServiceRecordEditListRelationFilter
-  overdueAlert?: Prisma.XOR<Prisma.OverdueAlertNullableScalarRelationFilter, Prisma.OverdueAlertWhereInput> | null
+  assignments?: Prisma.ServiceAssignmentListRelationFilter
+  historyEvents?: Prisma.ServiceHistoryEventListRelationFilter
 }, "id">
 
 export type ServiceRecordOrderByWithAggregationInput = {
@@ -311,10 +311,11 @@ export type ServiceRecordOrderByWithAggregationInput = {
   vehicleId?: Prisma.SortOrder
   description?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  scheduledAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  gracePeriodDays?: Prisma.SortOrder
-  dueDate?: Prisma.SortOrderInput | Prisma.SortOrder
-  dueMileage?: Prisma.SortOrderInput | Prisma.SortOrder
+  scheduledDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  completedOdometer?: Prisma.SortOrderInput | Prisma.SortOrder
+  dueSince?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ServiceRecordCountOrderByAggregateInput
@@ -332,10 +333,11 @@ export type ServiceRecordScalarWhereWithAggregatesInput = {
   vehicleId?: Prisma.StringWithAggregatesFilter<"ServiceRecord"> | string
   description?: Prisma.StringWithAggregatesFilter<"ServiceRecord"> | string
   status?: Prisma.EnumServiceStatusWithAggregatesFilter<"ServiceRecord"> | $Enums.ServiceStatus
-  scheduledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ServiceRecord"> | Date | string | null
-  gracePeriodDays?: Prisma.IntWithAggregatesFilter<"ServiceRecord"> | number
-  dueDate?: Prisma.DateTimeNullableWithAggregatesFilter<"ServiceRecord"> | Date | string | null
-  dueMileage?: Prisma.IntNullableWithAggregatesFilter<"ServiceRecord"> | number | null
+  scheduledDate?: Prisma.DateTimeNullableWithAggregatesFilter<"ServiceRecord"> | Date | string | null
+  startedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ServiceRecord"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ServiceRecord"> | Date | string | null
+  completedOdometer?: Prisma.IntNullableWithAggregatesFilter<"ServiceRecord"> | number | null
+  dueSince?: Prisma.DateTimeWithAggregatesFilter<"ServiceRecord"> | Date | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ServiceRecord"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ServiceRecord"> | Date | string
 }
@@ -344,17 +346,16 @@ export type ServiceRecordCreateInput = {
   id?: string
   description: string
   status?: $Enums.ServiceStatus
-  scheduledAt?: Date | string | null
-  gracePeriodDays?: number
-  dueDate?: Date | string | null
-  dueMileage?: number | null
+  scheduledDate?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  completedOdometer?: number | null
+  dueSince?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
   vehicle: Prisma.VehicleCreateNestedOneWithoutServiceRecordsInput
-  assignments?: Prisma.TechnicianAssignmentCreateNestedManyWithoutServiceRecordInput
-  timeline?: Prisma.TimelineEventCreateNestedManyWithoutServiceRecordInput
-  edits?: Prisma.ServiceRecordEditCreateNestedManyWithoutServiceRecordInput
-  overdueAlert?: Prisma.OverdueAlertCreateNestedOneWithoutServiceRecordInput
+  assignments?: Prisma.ServiceAssignmentCreateNestedManyWithoutServiceRecordInput
+  historyEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutServiceRecordInput
 }
 
 export type ServiceRecordUncheckedCreateInput = {
@@ -362,33 +363,31 @@ export type ServiceRecordUncheckedCreateInput = {
   vehicleId: string
   description: string
   status?: $Enums.ServiceStatus
-  scheduledAt?: Date | string | null
-  gracePeriodDays?: number
-  dueDate?: Date | string | null
-  dueMileage?: number | null
+  scheduledDate?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  completedOdometer?: number | null
+  dueSince?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
-  assignments?: Prisma.TechnicianAssignmentUncheckedCreateNestedManyWithoutServiceRecordInput
-  timeline?: Prisma.TimelineEventUncheckedCreateNestedManyWithoutServiceRecordInput
-  edits?: Prisma.ServiceRecordEditUncheckedCreateNestedManyWithoutServiceRecordInput
-  overdueAlert?: Prisma.OverdueAlertUncheckedCreateNestedOneWithoutServiceRecordInput
+  assignments?: Prisma.ServiceAssignmentUncheckedCreateNestedManyWithoutServiceRecordInput
+  historyEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutServiceRecordInput
 }
 
 export type ServiceRecordUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  gracePeriodDays?: Prisma.IntFieldUpdateOperationsInput | number
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueMileage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedOdometer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  dueSince?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vehicle?: Prisma.VehicleUpdateOneRequiredWithoutServiceRecordsNestedInput
-  assignments?: Prisma.TechnicianAssignmentUpdateManyWithoutServiceRecordNestedInput
-  timeline?: Prisma.TimelineEventUpdateManyWithoutServiceRecordNestedInput
-  edits?: Prisma.ServiceRecordEditUpdateManyWithoutServiceRecordNestedInput
-  overdueAlert?: Prisma.OverdueAlertUpdateOneWithoutServiceRecordNestedInput
+  assignments?: Prisma.ServiceAssignmentUpdateManyWithoutServiceRecordNestedInput
+  historyEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutServiceRecordNestedInput
 }
 
 export type ServiceRecordUncheckedUpdateInput = {
@@ -396,16 +395,15 @@ export type ServiceRecordUncheckedUpdateInput = {
   vehicleId?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  gracePeriodDays?: Prisma.IntFieldUpdateOperationsInput | number
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueMileage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedOdometer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  dueSince?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  assignments?: Prisma.TechnicianAssignmentUncheckedUpdateManyWithoutServiceRecordNestedInput
-  timeline?: Prisma.TimelineEventUncheckedUpdateManyWithoutServiceRecordNestedInput
-  edits?: Prisma.ServiceRecordEditUncheckedUpdateManyWithoutServiceRecordNestedInput
-  overdueAlert?: Prisma.OverdueAlertUncheckedUpdateOneWithoutServiceRecordNestedInput
+  assignments?: Prisma.ServiceAssignmentUncheckedUpdateManyWithoutServiceRecordNestedInput
+  historyEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutServiceRecordNestedInput
 }
 
 export type ServiceRecordCreateManyInput = {
@@ -413,10 +411,11 @@ export type ServiceRecordCreateManyInput = {
   vehicleId: string
   description: string
   status?: $Enums.ServiceStatus
-  scheduledAt?: Date | string | null
-  gracePeriodDays?: number
-  dueDate?: Date | string | null
-  dueMileage?: number | null
+  scheduledDate?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  completedOdometer?: number | null
+  dueSince?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -425,10 +424,11 @@ export type ServiceRecordUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  gracePeriodDays?: Prisma.IntFieldUpdateOperationsInput | number
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueMileage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedOdometer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  dueSince?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -438,10 +438,11 @@ export type ServiceRecordUncheckedUpdateManyInput = {
   vehicleId?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  gracePeriodDays?: Prisma.IntFieldUpdateOperationsInput | number
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueMileage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedOdometer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  dueSince?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -461,17 +462,17 @@ export type ServiceRecordCountOrderByAggregateInput = {
   vehicleId?: Prisma.SortOrder
   description?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  scheduledAt?: Prisma.SortOrder
-  gracePeriodDays?: Prisma.SortOrder
-  dueDate?: Prisma.SortOrder
-  dueMileage?: Prisma.SortOrder
+  scheduledDate?: Prisma.SortOrder
+  startedAt?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrder
+  completedOdometer?: Prisma.SortOrder
+  dueSince?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type ServiceRecordAvgOrderByAggregateInput = {
-  gracePeriodDays?: Prisma.SortOrder
-  dueMileage?: Prisma.SortOrder
+  completedOdometer?: Prisma.SortOrder
 }
 
 export type ServiceRecordMaxOrderByAggregateInput = {
@@ -479,10 +480,11 @@ export type ServiceRecordMaxOrderByAggregateInput = {
   vehicleId?: Prisma.SortOrder
   description?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  scheduledAt?: Prisma.SortOrder
-  gracePeriodDays?: Prisma.SortOrder
-  dueDate?: Prisma.SortOrder
-  dueMileage?: Prisma.SortOrder
+  scheduledDate?: Prisma.SortOrder
+  startedAt?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrder
+  completedOdometer?: Prisma.SortOrder
+  dueSince?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -492,17 +494,17 @@ export type ServiceRecordMinOrderByAggregateInput = {
   vehicleId?: Prisma.SortOrder
   description?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  scheduledAt?: Prisma.SortOrder
-  gracePeriodDays?: Prisma.SortOrder
-  dueDate?: Prisma.SortOrder
-  dueMileage?: Prisma.SortOrder
+  scheduledDate?: Prisma.SortOrder
+  startedAt?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrder
+  completedOdometer?: Prisma.SortOrder
+  dueSince?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type ServiceRecordSumOrderByAggregateInput = {
-  gracePeriodDays?: Prisma.SortOrder
-  dueMileage?: Prisma.SortOrder
+  completedOdometer?: Prisma.SortOrder
 }
 
 export type ServiceRecordScalarRelationFilter = {
@@ -556,18 +558,6 @@ export type EnumServiceStatusFieldUpdateOperationsInput = {
   set?: $Enums.ServiceStatus
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type ServiceRecordCreateNestedOneWithoutAssignmentsInput = {
   create?: Prisma.XOR<Prisma.ServiceRecordCreateWithoutAssignmentsInput, Prisma.ServiceRecordUncheckedCreateWithoutAssignmentsInput>
   connectOrCreate?: Prisma.ServiceRecordCreateOrConnectWithoutAssignmentsInput
@@ -582,78 +572,48 @@ export type ServiceRecordUpdateOneRequiredWithoutAssignmentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ServiceRecordUpdateToOneWithWhereWithoutAssignmentsInput, Prisma.ServiceRecordUpdateWithoutAssignmentsInput>, Prisma.ServiceRecordUncheckedUpdateWithoutAssignmentsInput>
 }
 
-export type ServiceRecordCreateNestedOneWithoutEditsInput = {
-  create?: Prisma.XOR<Prisma.ServiceRecordCreateWithoutEditsInput, Prisma.ServiceRecordUncheckedCreateWithoutEditsInput>
-  connectOrCreate?: Prisma.ServiceRecordCreateOrConnectWithoutEditsInput
+export type ServiceRecordCreateNestedOneWithoutHistoryEventsInput = {
+  create?: Prisma.XOR<Prisma.ServiceRecordCreateWithoutHistoryEventsInput, Prisma.ServiceRecordUncheckedCreateWithoutHistoryEventsInput>
+  connectOrCreate?: Prisma.ServiceRecordCreateOrConnectWithoutHistoryEventsInput
   connect?: Prisma.ServiceRecordWhereUniqueInput
 }
 
-export type ServiceRecordUpdateOneRequiredWithoutEditsNestedInput = {
-  create?: Prisma.XOR<Prisma.ServiceRecordCreateWithoutEditsInput, Prisma.ServiceRecordUncheckedCreateWithoutEditsInput>
-  connectOrCreate?: Prisma.ServiceRecordCreateOrConnectWithoutEditsInput
-  upsert?: Prisma.ServiceRecordUpsertWithoutEditsInput
+export type ServiceRecordUpdateOneRequiredWithoutHistoryEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.ServiceRecordCreateWithoutHistoryEventsInput, Prisma.ServiceRecordUncheckedCreateWithoutHistoryEventsInput>
+  connectOrCreate?: Prisma.ServiceRecordCreateOrConnectWithoutHistoryEventsInput
+  upsert?: Prisma.ServiceRecordUpsertWithoutHistoryEventsInput
   connect?: Prisma.ServiceRecordWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.ServiceRecordUpdateToOneWithWhereWithoutEditsInput, Prisma.ServiceRecordUpdateWithoutEditsInput>, Prisma.ServiceRecordUncheckedUpdateWithoutEditsInput>
-}
-
-export type ServiceRecordCreateNestedOneWithoutTimelineInput = {
-  create?: Prisma.XOR<Prisma.ServiceRecordCreateWithoutTimelineInput, Prisma.ServiceRecordUncheckedCreateWithoutTimelineInput>
-  connectOrCreate?: Prisma.ServiceRecordCreateOrConnectWithoutTimelineInput
-  connect?: Prisma.ServiceRecordWhereUniqueInput
-}
-
-export type ServiceRecordUpdateOneRequiredWithoutTimelineNestedInput = {
-  create?: Prisma.XOR<Prisma.ServiceRecordCreateWithoutTimelineInput, Prisma.ServiceRecordUncheckedCreateWithoutTimelineInput>
-  connectOrCreate?: Prisma.ServiceRecordCreateOrConnectWithoutTimelineInput
-  upsert?: Prisma.ServiceRecordUpsertWithoutTimelineInput
-  connect?: Prisma.ServiceRecordWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.ServiceRecordUpdateToOneWithWhereWithoutTimelineInput, Prisma.ServiceRecordUpdateWithoutTimelineInput>, Prisma.ServiceRecordUncheckedUpdateWithoutTimelineInput>
-}
-
-export type ServiceRecordCreateNestedOneWithoutOverdueAlertInput = {
-  create?: Prisma.XOR<Prisma.ServiceRecordCreateWithoutOverdueAlertInput, Prisma.ServiceRecordUncheckedCreateWithoutOverdueAlertInput>
-  connectOrCreate?: Prisma.ServiceRecordCreateOrConnectWithoutOverdueAlertInput
-  connect?: Prisma.ServiceRecordWhereUniqueInput
-}
-
-export type ServiceRecordUpdateOneRequiredWithoutOverdueAlertNestedInput = {
-  create?: Prisma.XOR<Prisma.ServiceRecordCreateWithoutOverdueAlertInput, Prisma.ServiceRecordUncheckedCreateWithoutOverdueAlertInput>
-  connectOrCreate?: Prisma.ServiceRecordCreateOrConnectWithoutOverdueAlertInput
-  upsert?: Prisma.ServiceRecordUpsertWithoutOverdueAlertInput
-  connect?: Prisma.ServiceRecordWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.ServiceRecordUpdateToOneWithWhereWithoutOverdueAlertInput, Prisma.ServiceRecordUpdateWithoutOverdueAlertInput>, Prisma.ServiceRecordUncheckedUpdateWithoutOverdueAlertInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ServiceRecordUpdateToOneWithWhereWithoutHistoryEventsInput, Prisma.ServiceRecordUpdateWithoutHistoryEventsInput>, Prisma.ServiceRecordUncheckedUpdateWithoutHistoryEventsInput>
 }
 
 export type ServiceRecordCreateWithoutVehicleInput = {
   id?: string
   description: string
   status?: $Enums.ServiceStatus
-  scheduledAt?: Date | string | null
-  gracePeriodDays?: number
-  dueDate?: Date | string | null
-  dueMileage?: number | null
+  scheduledDate?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  completedOdometer?: number | null
+  dueSince?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
-  assignments?: Prisma.TechnicianAssignmentCreateNestedManyWithoutServiceRecordInput
-  timeline?: Prisma.TimelineEventCreateNestedManyWithoutServiceRecordInput
-  edits?: Prisma.ServiceRecordEditCreateNestedManyWithoutServiceRecordInput
-  overdueAlert?: Prisma.OverdueAlertCreateNestedOneWithoutServiceRecordInput
+  assignments?: Prisma.ServiceAssignmentCreateNestedManyWithoutServiceRecordInput
+  historyEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutServiceRecordInput
 }
 
 export type ServiceRecordUncheckedCreateWithoutVehicleInput = {
   id?: string
   description: string
   status?: $Enums.ServiceStatus
-  scheduledAt?: Date | string | null
-  gracePeriodDays?: number
-  dueDate?: Date | string | null
-  dueMileage?: number | null
+  scheduledDate?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  completedOdometer?: number | null
+  dueSince?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
-  assignments?: Prisma.TechnicianAssignmentUncheckedCreateNestedManyWithoutServiceRecordInput
-  timeline?: Prisma.TimelineEventUncheckedCreateNestedManyWithoutServiceRecordInput
-  edits?: Prisma.ServiceRecordEditUncheckedCreateNestedManyWithoutServiceRecordInput
-  overdueAlert?: Prisma.OverdueAlertUncheckedCreateNestedOneWithoutServiceRecordInput
+  assignments?: Prisma.ServiceAssignmentUncheckedCreateNestedManyWithoutServiceRecordInput
+  historyEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutServiceRecordInput
 }
 
 export type ServiceRecordCreateOrConnectWithoutVehicleInput = {
@@ -690,10 +650,11 @@ export type ServiceRecordScalarWhereInput = {
   vehicleId?: Prisma.StringFilter<"ServiceRecord"> | string
   description?: Prisma.StringFilter<"ServiceRecord"> | string
   status?: Prisma.EnumServiceStatusFilter<"ServiceRecord"> | $Enums.ServiceStatus
-  scheduledAt?: Prisma.DateTimeNullableFilter<"ServiceRecord"> | Date | string | null
-  gracePeriodDays?: Prisma.IntFilter<"ServiceRecord"> | number
-  dueDate?: Prisma.DateTimeNullableFilter<"ServiceRecord"> | Date | string | null
-  dueMileage?: Prisma.IntNullableFilter<"ServiceRecord"> | number | null
+  scheduledDate?: Prisma.DateTimeNullableFilter<"ServiceRecord"> | Date | string | null
+  startedAt?: Prisma.DateTimeNullableFilter<"ServiceRecord"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableFilter<"ServiceRecord"> | Date | string | null
+  completedOdometer?: Prisma.IntNullableFilter<"ServiceRecord"> | number | null
+  dueSince?: Prisma.DateTimeFilter<"ServiceRecord"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"ServiceRecord"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ServiceRecord"> | Date | string
 }
@@ -702,16 +663,15 @@ export type ServiceRecordCreateWithoutAssignmentsInput = {
   id?: string
   description: string
   status?: $Enums.ServiceStatus
-  scheduledAt?: Date | string | null
-  gracePeriodDays?: number
-  dueDate?: Date | string | null
-  dueMileage?: number | null
+  scheduledDate?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  completedOdometer?: number | null
+  dueSince?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
   vehicle: Prisma.VehicleCreateNestedOneWithoutServiceRecordsInput
-  timeline?: Prisma.TimelineEventCreateNestedManyWithoutServiceRecordInput
-  edits?: Prisma.ServiceRecordEditCreateNestedManyWithoutServiceRecordInput
-  overdueAlert?: Prisma.OverdueAlertCreateNestedOneWithoutServiceRecordInput
+  historyEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutServiceRecordInput
 }
 
 export type ServiceRecordUncheckedCreateWithoutAssignmentsInput = {
@@ -719,15 +679,14 @@ export type ServiceRecordUncheckedCreateWithoutAssignmentsInput = {
   vehicleId: string
   description: string
   status?: $Enums.ServiceStatus
-  scheduledAt?: Date | string | null
-  gracePeriodDays?: number
-  dueDate?: Date | string | null
-  dueMileage?: number | null
+  scheduledDate?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  completedOdometer?: number | null
+  dueSince?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
-  timeline?: Prisma.TimelineEventUncheckedCreateNestedManyWithoutServiceRecordInput
-  edits?: Prisma.ServiceRecordEditUncheckedCreateNestedManyWithoutServiceRecordInput
-  overdueAlert?: Prisma.OverdueAlertUncheckedCreateNestedOneWithoutServiceRecordInput
+  historyEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutServiceRecordInput
 }
 
 export type ServiceRecordCreateOrConnectWithoutAssignmentsInput = {
@@ -750,16 +709,15 @@ export type ServiceRecordUpdateWithoutAssignmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  gracePeriodDays?: Prisma.IntFieldUpdateOperationsInput | number
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueMileage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedOdometer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  dueSince?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vehicle?: Prisma.VehicleUpdateOneRequiredWithoutServiceRecordsNestedInput
-  timeline?: Prisma.TimelineEventUpdateManyWithoutServiceRecordNestedInput
-  edits?: Prisma.ServiceRecordEditUpdateManyWithoutServiceRecordNestedInput
-  overdueAlert?: Prisma.OverdueAlertUpdateOneWithoutServiceRecordNestedInput
+  historyEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutServiceRecordNestedInput
 }
 
 export type ServiceRecordUncheckedUpdateWithoutAssignmentsInput = {
@@ -767,265 +725,101 @@ export type ServiceRecordUncheckedUpdateWithoutAssignmentsInput = {
   vehicleId?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  gracePeriodDays?: Prisma.IntFieldUpdateOperationsInput | number
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueMileage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedOdometer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  dueSince?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  timeline?: Prisma.TimelineEventUncheckedUpdateManyWithoutServiceRecordNestedInput
-  edits?: Prisma.ServiceRecordEditUncheckedUpdateManyWithoutServiceRecordNestedInput
-  overdueAlert?: Prisma.OverdueAlertUncheckedUpdateOneWithoutServiceRecordNestedInput
+  historyEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutServiceRecordNestedInput
 }
 
-export type ServiceRecordCreateWithoutEditsInput = {
+export type ServiceRecordCreateWithoutHistoryEventsInput = {
   id?: string
   description: string
   status?: $Enums.ServiceStatus
-  scheduledAt?: Date | string | null
-  gracePeriodDays?: number
-  dueDate?: Date | string | null
-  dueMileage?: number | null
+  scheduledDate?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  completedOdometer?: number | null
+  dueSince?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
   vehicle: Prisma.VehicleCreateNestedOneWithoutServiceRecordsInput
-  assignments?: Prisma.TechnicianAssignmentCreateNestedManyWithoutServiceRecordInput
-  timeline?: Prisma.TimelineEventCreateNestedManyWithoutServiceRecordInput
-  overdueAlert?: Prisma.OverdueAlertCreateNestedOneWithoutServiceRecordInput
+  assignments?: Prisma.ServiceAssignmentCreateNestedManyWithoutServiceRecordInput
 }
 
-export type ServiceRecordUncheckedCreateWithoutEditsInput = {
+export type ServiceRecordUncheckedCreateWithoutHistoryEventsInput = {
   id?: string
   vehicleId: string
   description: string
   status?: $Enums.ServiceStatus
-  scheduledAt?: Date | string | null
-  gracePeriodDays?: number
-  dueDate?: Date | string | null
-  dueMileage?: number | null
+  scheduledDate?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  completedOdometer?: number | null
+  dueSince?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
-  assignments?: Prisma.TechnicianAssignmentUncheckedCreateNestedManyWithoutServiceRecordInput
-  timeline?: Prisma.TimelineEventUncheckedCreateNestedManyWithoutServiceRecordInput
-  overdueAlert?: Prisma.OverdueAlertUncheckedCreateNestedOneWithoutServiceRecordInput
+  assignments?: Prisma.ServiceAssignmentUncheckedCreateNestedManyWithoutServiceRecordInput
 }
 
-export type ServiceRecordCreateOrConnectWithoutEditsInput = {
+export type ServiceRecordCreateOrConnectWithoutHistoryEventsInput = {
   where: Prisma.ServiceRecordWhereUniqueInput
-  create: Prisma.XOR<Prisma.ServiceRecordCreateWithoutEditsInput, Prisma.ServiceRecordUncheckedCreateWithoutEditsInput>
+  create: Prisma.XOR<Prisma.ServiceRecordCreateWithoutHistoryEventsInput, Prisma.ServiceRecordUncheckedCreateWithoutHistoryEventsInput>
 }
 
-export type ServiceRecordUpsertWithoutEditsInput = {
-  update: Prisma.XOR<Prisma.ServiceRecordUpdateWithoutEditsInput, Prisma.ServiceRecordUncheckedUpdateWithoutEditsInput>
-  create: Prisma.XOR<Prisma.ServiceRecordCreateWithoutEditsInput, Prisma.ServiceRecordUncheckedCreateWithoutEditsInput>
+export type ServiceRecordUpsertWithoutHistoryEventsInput = {
+  update: Prisma.XOR<Prisma.ServiceRecordUpdateWithoutHistoryEventsInput, Prisma.ServiceRecordUncheckedUpdateWithoutHistoryEventsInput>
+  create: Prisma.XOR<Prisma.ServiceRecordCreateWithoutHistoryEventsInput, Prisma.ServiceRecordUncheckedCreateWithoutHistoryEventsInput>
   where?: Prisma.ServiceRecordWhereInput
 }
 
-export type ServiceRecordUpdateToOneWithWhereWithoutEditsInput = {
+export type ServiceRecordUpdateToOneWithWhereWithoutHistoryEventsInput = {
   where?: Prisma.ServiceRecordWhereInput
-  data: Prisma.XOR<Prisma.ServiceRecordUpdateWithoutEditsInput, Prisma.ServiceRecordUncheckedUpdateWithoutEditsInput>
+  data: Prisma.XOR<Prisma.ServiceRecordUpdateWithoutHistoryEventsInput, Prisma.ServiceRecordUncheckedUpdateWithoutHistoryEventsInput>
 }
 
-export type ServiceRecordUpdateWithoutEditsInput = {
+export type ServiceRecordUpdateWithoutHistoryEventsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  gracePeriodDays?: Prisma.IntFieldUpdateOperationsInput | number
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueMileage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedOdometer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  dueSince?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vehicle?: Prisma.VehicleUpdateOneRequiredWithoutServiceRecordsNestedInput
-  assignments?: Prisma.TechnicianAssignmentUpdateManyWithoutServiceRecordNestedInput
-  timeline?: Prisma.TimelineEventUpdateManyWithoutServiceRecordNestedInput
-  overdueAlert?: Prisma.OverdueAlertUpdateOneWithoutServiceRecordNestedInput
+  assignments?: Prisma.ServiceAssignmentUpdateManyWithoutServiceRecordNestedInput
 }
 
-export type ServiceRecordUncheckedUpdateWithoutEditsInput = {
+export type ServiceRecordUncheckedUpdateWithoutHistoryEventsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   vehicleId?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  gracePeriodDays?: Prisma.IntFieldUpdateOperationsInput | number
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueMileage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedOdometer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  dueSince?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  assignments?: Prisma.TechnicianAssignmentUncheckedUpdateManyWithoutServiceRecordNestedInput
-  timeline?: Prisma.TimelineEventUncheckedUpdateManyWithoutServiceRecordNestedInput
-  overdueAlert?: Prisma.OverdueAlertUncheckedUpdateOneWithoutServiceRecordNestedInput
-}
-
-export type ServiceRecordCreateWithoutTimelineInput = {
-  id?: string
-  description: string
-  status?: $Enums.ServiceStatus
-  scheduledAt?: Date | string | null
-  gracePeriodDays?: number
-  dueDate?: Date | string | null
-  dueMileage?: number | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  vehicle: Prisma.VehicleCreateNestedOneWithoutServiceRecordsInput
-  assignments?: Prisma.TechnicianAssignmentCreateNestedManyWithoutServiceRecordInput
-  edits?: Prisma.ServiceRecordEditCreateNestedManyWithoutServiceRecordInput
-  overdueAlert?: Prisma.OverdueAlertCreateNestedOneWithoutServiceRecordInput
-}
-
-export type ServiceRecordUncheckedCreateWithoutTimelineInput = {
-  id?: string
-  vehicleId: string
-  description: string
-  status?: $Enums.ServiceStatus
-  scheduledAt?: Date | string | null
-  gracePeriodDays?: number
-  dueDate?: Date | string | null
-  dueMileage?: number | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  assignments?: Prisma.TechnicianAssignmentUncheckedCreateNestedManyWithoutServiceRecordInput
-  edits?: Prisma.ServiceRecordEditUncheckedCreateNestedManyWithoutServiceRecordInput
-  overdueAlert?: Prisma.OverdueAlertUncheckedCreateNestedOneWithoutServiceRecordInput
-}
-
-export type ServiceRecordCreateOrConnectWithoutTimelineInput = {
-  where: Prisma.ServiceRecordWhereUniqueInput
-  create: Prisma.XOR<Prisma.ServiceRecordCreateWithoutTimelineInput, Prisma.ServiceRecordUncheckedCreateWithoutTimelineInput>
-}
-
-export type ServiceRecordUpsertWithoutTimelineInput = {
-  update: Prisma.XOR<Prisma.ServiceRecordUpdateWithoutTimelineInput, Prisma.ServiceRecordUncheckedUpdateWithoutTimelineInput>
-  create: Prisma.XOR<Prisma.ServiceRecordCreateWithoutTimelineInput, Prisma.ServiceRecordUncheckedCreateWithoutTimelineInput>
-  where?: Prisma.ServiceRecordWhereInput
-}
-
-export type ServiceRecordUpdateToOneWithWhereWithoutTimelineInput = {
-  where?: Prisma.ServiceRecordWhereInput
-  data: Prisma.XOR<Prisma.ServiceRecordUpdateWithoutTimelineInput, Prisma.ServiceRecordUncheckedUpdateWithoutTimelineInput>
-}
-
-export type ServiceRecordUpdateWithoutTimelineInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  gracePeriodDays?: Prisma.IntFieldUpdateOperationsInput | number
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueMileage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  vehicle?: Prisma.VehicleUpdateOneRequiredWithoutServiceRecordsNestedInput
-  assignments?: Prisma.TechnicianAssignmentUpdateManyWithoutServiceRecordNestedInput
-  edits?: Prisma.ServiceRecordEditUpdateManyWithoutServiceRecordNestedInput
-  overdueAlert?: Prisma.OverdueAlertUpdateOneWithoutServiceRecordNestedInput
-}
-
-export type ServiceRecordUncheckedUpdateWithoutTimelineInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  vehicleId?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  gracePeriodDays?: Prisma.IntFieldUpdateOperationsInput | number
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueMileage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  assignments?: Prisma.TechnicianAssignmentUncheckedUpdateManyWithoutServiceRecordNestedInput
-  edits?: Prisma.ServiceRecordEditUncheckedUpdateManyWithoutServiceRecordNestedInput
-  overdueAlert?: Prisma.OverdueAlertUncheckedUpdateOneWithoutServiceRecordNestedInput
-}
-
-export type ServiceRecordCreateWithoutOverdueAlertInput = {
-  id?: string
-  description: string
-  status?: $Enums.ServiceStatus
-  scheduledAt?: Date | string | null
-  gracePeriodDays?: number
-  dueDate?: Date | string | null
-  dueMileage?: number | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  vehicle: Prisma.VehicleCreateNestedOneWithoutServiceRecordsInput
-  assignments?: Prisma.TechnicianAssignmentCreateNestedManyWithoutServiceRecordInput
-  timeline?: Prisma.TimelineEventCreateNestedManyWithoutServiceRecordInput
-  edits?: Prisma.ServiceRecordEditCreateNestedManyWithoutServiceRecordInput
-}
-
-export type ServiceRecordUncheckedCreateWithoutOverdueAlertInput = {
-  id?: string
-  vehicleId: string
-  description: string
-  status?: $Enums.ServiceStatus
-  scheduledAt?: Date | string | null
-  gracePeriodDays?: number
-  dueDate?: Date | string | null
-  dueMileage?: number | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  assignments?: Prisma.TechnicianAssignmentUncheckedCreateNestedManyWithoutServiceRecordInput
-  timeline?: Prisma.TimelineEventUncheckedCreateNestedManyWithoutServiceRecordInput
-  edits?: Prisma.ServiceRecordEditUncheckedCreateNestedManyWithoutServiceRecordInput
-}
-
-export type ServiceRecordCreateOrConnectWithoutOverdueAlertInput = {
-  where: Prisma.ServiceRecordWhereUniqueInput
-  create: Prisma.XOR<Prisma.ServiceRecordCreateWithoutOverdueAlertInput, Prisma.ServiceRecordUncheckedCreateWithoutOverdueAlertInput>
-}
-
-export type ServiceRecordUpsertWithoutOverdueAlertInput = {
-  update: Prisma.XOR<Prisma.ServiceRecordUpdateWithoutOverdueAlertInput, Prisma.ServiceRecordUncheckedUpdateWithoutOverdueAlertInput>
-  create: Prisma.XOR<Prisma.ServiceRecordCreateWithoutOverdueAlertInput, Prisma.ServiceRecordUncheckedCreateWithoutOverdueAlertInput>
-  where?: Prisma.ServiceRecordWhereInput
-}
-
-export type ServiceRecordUpdateToOneWithWhereWithoutOverdueAlertInput = {
-  where?: Prisma.ServiceRecordWhereInput
-  data: Prisma.XOR<Prisma.ServiceRecordUpdateWithoutOverdueAlertInput, Prisma.ServiceRecordUncheckedUpdateWithoutOverdueAlertInput>
-}
-
-export type ServiceRecordUpdateWithoutOverdueAlertInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  gracePeriodDays?: Prisma.IntFieldUpdateOperationsInput | number
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueMileage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  vehicle?: Prisma.VehicleUpdateOneRequiredWithoutServiceRecordsNestedInput
-  assignments?: Prisma.TechnicianAssignmentUpdateManyWithoutServiceRecordNestedInput
-  timeline?: Prisma.TimelineEventUpdateManyWithoutServiceRecordNestedInput
-  edits?: Prisma.ServiceRecordEditUpdateManyWithoutServiceRecordNestedInput
-}
-
-export type ServiceRecordUncheckedUpdateWithoutOverdueAlertInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  vehicleId?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  gracePeriodDays?: Prisma.IntFieldUpdateOperationsInput | number
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueMileage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  assignments?: Prisma.TechnicianAssignmentUncheckedUpdateManyWithoutServiceRecordNestedInput
-  timeline?: Prisma.TimelineEventUncheckedUpdateManyWithoutServiceRecordNestedInput
-  edits?: Prisma.ServiceRecordEditUncheckedUpdateManyWithoutServiceRecordNestedInput
+  assignments?: Prisma.ServiceAssignmentUncheckedUpdateManyWithoutServiceRecordNestedInput
 }
 
 export type ServiceRecordCreateManyVehicleInput = {
   id?: string
   description: string
   status?: $Enums.ServiceStatus
-  scheduledAt?: Date | string | null
-  gracePeriodDays?: number
-  dueDate?: Date | string | null
-  dueMileage?: number | null
+  scheduledDate?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  completedOdometer?: number | null
+  dueSince?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1034,42 +828,41 @@ export type ServiceRecordUpdateWithoutVehicleInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  gracePeriodDays?: Prisma.IntFieldUpdateOperationsInput | number
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueMileage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedOdometer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  dueSince?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  assignments?: Prisma.TechnicianAssignmentUpdateManyWithoutServiceRecordNestedInput
-  timeline?: Prisma.TimelineEventUpdateManyWithoutServiceRecordNestedInput
-  edits?: Prisma.ServiceRecordEditUpdateManyWithoutServiceRecordNestedInput
-  overdueAlert?: Prisma.OverdueAlertUpdateOneWithoutServiceRecordNestedInput
+  assignments?: Prisma.ServiceAssignmentUpdateManyWithoutServiceRecordNestedInput
+  historyEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutServiceRecordNestedInput
 }
 
 export type ServiceRecordUncheckedUpdateWithoutVehicleInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  gracePeriodDays?: Prisma.IntFieldUpdateOperationsInput | number
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueMileage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedOdometer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  dueSince?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  assignments?: Prisma.TechnicianAssignmentUncheckedUpdateManyWithoutServiceRecordNestedInput
-  timeline?: Prisma.TimelineEventUncheckedUpdateManyWithoutServiceRecordNestedInput
-  edits?: Prisma.ServiceRecordEditUncheckedUpdateManyWithoutServiceRecordNestedInput
-  overdueAlert?: Prisma.OverdueAlertUncheckedUpdateOneWithoutServiceRecordNestedInput
+  assignments?: Prisma.ServiceAssignmentUncheckedUpdateManyWithoutServiceRecordNestedInput
+  historyEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutServiceRecordNestedInput
 }
 
 export type ServiceRecordUncheckedUpdateManyWithoutVehicleInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  gracePeriodDays?: Prisma.IntFieldUpdateOperationsInput | number
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueMileage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedOdometer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  dueSince?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1081,14 +874,12 @@ export type ServiceRecordUncheckedUpdateManyWithoutVehicleInput = {
 
 export type ServiceRecordCountOutputType = {
   assignments: number
-  timeline: number
-  edits: number
+  historyEvents: number
 }
 
 export type ServiceRecordCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assignments?: boolean | ServiceRecordCountOutputTypeCountAssignmentsArgs
-  timeline?: boolean | ServiceRecordCountOutputTypeCountTimelineArgs
-  edits?: boolean | ServiceRecordCountOutputTypeCountEditsArgs
+  historyEvents?: boolean | ServiceRecordCountOutputTypeCountHistoryEventsArgs
 }
 
 /**
@@ -1105,21 +896,14 @@ export type ServiceRecordCountOutputTypeDefaultArgs<ExtArgs extends runtime.Type
  * ServiceRecordCountOutputType without action
  */
 export type ServiceRecordCountOutputTypeCountAssignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.TechnicianAssignmentWhereInput
+  where?: Prisma.ServiceAssignmentWhereInput
 }
 
 /**
  * ServiceRecordCountOutputType without action
  */
-export type ServiceRecordCountOutputTypeCountTimelineArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.TimelineEventWhereInput
-}
-
-/**
- * ServiceRecordCountOutputType without action
- */
-export type ServiceRecordCountOutputTypeCountEditsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.ServiceRecordEditWhereInput
+export type ServiceRecordCountOutputTypeCountHistoryEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ServiceHistoryEventWhereInput
 }
 
 
@@ -1128,17 +912,16 @@ export type ServiceRecordSelect<ExtArgs extends runtime.Types.Extensions.Interna
   vehicleId?: boolean
   description?: boolean
   status?: boolean
-  scheduledAt?: boolean
-  gracePeriodDays?: boolean
-  dueDate?: boolean
-  dueMileage?: boolean
+  scheduledDate?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
+  completedOdometer?: boolean
+  dueSince?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   vehicle?: boolean | Prisma.VehicleDefaultArgs<ExtArgs>
   assignments?: boolean | Prisma.ServiceRecord$assignmentsArgs<ExtArgs>
-  timeline?: boolean | Prisma.ServiceRecord$timelineArgs<ExtArgs>
-  edits?: boolean | Prisma.ServiceRecord$editsArgs<ExtArgs>
-  overdueAlert?: boolean | Prisma.ServiceRecord$overdueAlertArgs<ExtArgs>
+  historyEvents?: boolean | Prisma.ServiceRecord$historyEventsArgs<ExtArgs>
   _count?: boolean | Prisma.ServiceRecordCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["serviceRecord"]>
 
@@ -1147,10 +930,11 @@ export type ServiceRecordSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   vehicleId?: boolean
   description?: boolean
   status?: boolean
-  scheduledAt?: boolean
-  gracePeriodDays?: boolean
-  dueDate?: boolean
-  dueMileage?: boolean
+  scheduledDate?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
+  completedOdometer?: boolean
+  dueSince?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   vehicle?: boolean | Prisma.VehicleDefaultArgs<ExtArgs>
@@ -1161,10 +945,11 @@ export type ServiceRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   vehicleId?: boolean
   description?: boolean
   status?: boolean
-  scheduledAt?: boolean
-  gracePeriodDays?: boolean
-  dueDate?: boolean
-  dueMileage?: boolean
+  scheduledDate?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
+  completedOdometer?: boolean
+  dueSince?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   vehicle?: boolean | Prisma.VehicleDefaultArgs<ExtArgs>
@@ -1175,21 +960,20 @@ export type ServiceRecordSelectScalar = {
   vehicleId?: boolean
   description?: boolean
   status?: boolean
-  scheduledAt?: boolean
-  gracePeriodDays?: boolean
-  dueDate?: boolean
-  dueMileage?: boolean
+  scheduledDate?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
+  completedOdometer?: boolean
+  dueSince?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ServiceRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "vehicleId" | "description" | "status" | "scheduledAt" | "gracePeriodDays" | "dueDate" | "dueMileage" | "createdAt" | "updatedAt", ExtArgs["result"]["serviceRecord"]>
+export type ServiceRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "vehicleId" | "description" | "status" | "scheduledDate" | "startedAt" | "completedAt" | "completedOdometer" | "dueSince" | "createdAt" | "updatedAt", ExtArgs["result"]["serviceRecord"]>
 export type ServiceRecordInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   vehicle?: boolean | Prisma.VehicleDefaultArgs<ExtArgs>
   assignments?: boolean | Prisma.ServiceRecord$assignmentsArgs<ExtArgs>
-  timeline?: boolean | Prisma.ServiceRecord$timelineArgs<ExtArgs>
-  edits?: boolean | Prisma.ServiceRecord$editsArgs<ExtArgs>
-  overdueAlert?: boolean | Prisma.ServiceRecord$overdueAlertArgs<ExtArgs>
+  historyEvents?: boolean | Prisma.ServiceRecord$historyEventsArgs<ExtArgs>
   _count?: boolean | Prisma.ServiceRecordCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ServiceRecordIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1203,20 +987,19 @@ export type $ServiceRecordPayload<ExtArgs extends runtime.Types.Extensions.Inter
   name: "ServiceRecord"
   objects: {
     vehicle: Prisma.$VehiclePayload<ExtArgs>
-    assignments: Prisma.$TechnicianAssignmentPayload<ExtArgs>[]
-    timeline: Prisma.$TimelineEventPayload<ExtArgs>[]
-    edits: Prisma.$ServiceRecordEditPayload<ExtArgs>[]
-    overdueAlert: Prisma.$OverdueAlertPayload<ExtArgs> | null
+    assignments: Prisma.$ServiceAssignmentPayload<ExtArgs>[]
+    historyEvents: Prisma.$ServiceHistoryEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     vehicleId: string
     description: string
     status: $Enums.ServiceStatus
-    scheduledAt: Date | null
-    gracePeriodDays: number
-    dueDate: Date | null
-    dueMileage: number | null
+    scheduledDate: Date | null
+    startedAt: Date | null
+    completedAt: Date | null
+    completedOdometer: number | null
+    dueSince: Date
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["serviceRecord"]>
@@ -1614,10 +1397,8 @@ readonly fields: ServiceRecordFieldRefs;
 export interface Prisma__ServiceRecordClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   vehicle<T extends Prisma.VehicleDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VehicleDefaultArgs<ExtArgs>>): Prisma.Prisma__VehicleClient<runtime.Types.Result.GetResult<Prisma.$VehiclePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  assignments<T extends Prisma.ServiceRecord$assignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ServiceRecord$assignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TechnicianAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  timeline<T extends Prisma.ServiceRecord$timelineArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ServiceRecord$timelineArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TimelineEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  edits<T extends Prisma.ServiceRecord$editsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ServiceRecord$editsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServiceRecordEditPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  overdueAlert<T extends Prisma.ServiceRecord$overdueAlertArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ServiceRecord$overdueAlertArgs<ExtArgs>>): Prisma.Prisma__OverdueAlertClient<runtime.Types.Result.GetResult<Prisma.$OverdueAlertPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  assignments<T extends Prisma.ServiceRecord$assignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ServiceRecord$assignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServiceAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  historyEvents<T extends Prisma.ServiceRecord$historyEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ServiceRecord$historyEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServiceHistoryEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1651,10 +1432,11 @@ export interface ServiceRecordFieldRefs {
   readonly vehicleId: Prisma.FieldRef<"ServiceRecord", 'String'>
   readonly description: Prisma.FieldRef<"ServiceRecord", 'String'>
   readonly status: Prisma.FieldRef<"ServiceRecord", 'ServiceStatus'>
-  readonly scheduledAt: Prisma.FieldRef<"ServiceRecord", 'DateTime'>
-  readonly gracePeriodDays: Prisma.FieldRef<"ServiceRecord", 'Int'>
-  readonly dueDate: Prisma.FieldRef<"ServiceRecord", 'DateTime'>
-  readonly dueMileage: Prisma.FieldRef<"ServiceRecord", 'Int'>
+  readonly scheduledDate: Prisma.FieldRef<"ServiceRecord", 'DateTime'>
+  readonly startedAt: Prisma.FieldRef<"ServiceRecord", 'DateTime'>
+  readonly completedAt: Prisma.FieldRef<"ServiceRecord", 'DateTime'>
+  readonly completedOdometer: Prisma.FieldRef<"ServiceRecord", 'Int'>
+  readonly dueSince: Prisma.FieldRef<"ServiceRecord", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"ServiceRecord", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ServiceRecord", 'DateTime'>
 }
@@ -2062,90 +1844,47 @@ export type ServiceRecordDeleteManyArgs<ExtArgs extends runtime.Types.Extensions
  */
 export type ServiceRecord$assignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the TechnicianAssignment
+   * Select specific fields to fetch from the ServiceAssignment
    */
-  select?: Prisma.TechnicianAssignmentSelect<ExtArgs> | null
+  select?: Prisma.ServiceAssignmentSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the TechnicianAssignment
+   * Omit specific fields from the ServiceAssignment
    */
-  omit?: Prisma.TechnicianAssignmentOmit<ExtArgs> | null
+  omit?: Prisma.ServiceAssignmentOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.TechnicianAssignmentInclude<ExtArgs> | null
-  where?: Prisma.TechnicianAssignmentWhereInput
-  orderBy?: Prisma.TechnicianAssignmentOrderByWithRelationInput | Prisma.TechnicianAssignmentOrderByWithRelationInput[]
-  cursor?: Prisma.TechnicianAssignmentWhereUniqueInput
+  include?: Prisma.ServiceAssignmentInclude<ExtArgs> | null
+  where?: Prisma.ServiceAssignmentWhereInput
+  orderBy?: Prisma.ServiceAssignmentOrderByWithRelationInput | Prisma.ServiceAssignmentOrderByWithRelationInput[]
+  cursor?: Prisma.ServiceAssignmentWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.TechnicianAssignmentScalarFieldEnum | Prisma.TechnicianAssignmentScalarFieldEnum[]
+  distinct?: Prisma.ServiceAssignmentScalarFieldEnum | Prisma.ServiceAssignmentScalarFieldEnum[]
 }
 
 /**
- * ServiceRecord.timeline
+ * ServiceRecord.historyEvents
  */
-export type ServiceRecord$timelineArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type ServiceRecord$historyEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the TimelineEvent
+   * Select specific fields to fetch from the ServiceHistoryEvent
    */
-  select?: Prisma.TimelineEventSelect<ExtArgs> | null
+  select?: Prisma.ServiceHistoryEventSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the TimelineEvent
+   * Omit specific fields from the ServiceHistoryEvent
    */
-  omit?: Prisma.TimelineEventOmit<ExtArgs> | null
+  omit?: Prisma.ServiceHistoryEventOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.TimelineEventInclude<ExtArgs> | null
-  where?: Prisma.TimelineEventWhereInput
-  orderBy?: Prisma.TimelineEventOrderByWithRelationInput | Prisma.TimelineEventOrderByWithRelationInput[]
-  cursor?: Prisma.TimelineEventWhereUniqueInput
+  include?: Prisma.ServiceHistoryEventInclude<ExtArgs> | null
+  where?: Prisma.ServiceHistoryEventWhereInput
+  orderBy?: Prisma.ServiceHistoryEventOrderByWithRelationInput | Prisma.ServiceHistoryEventOrderByWithRelationInput[]
+  cursor?: Prisma.ServiceHistoryEventWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.TimelineEventScalarFieldEnum | Prisma.TimelineEventScalarFieldEnum[]
-}
-
-/**
- * ServiceRecord.edits
- */
-export type ServiceRecord$editsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ServiceRecordEdit
-   */
-  select?: Prisma.ServiceRecordEditSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the ServiceRecordEdit
-   */
-  omit?: Prisma.ServiceRecordEditOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ServiceRecordEditInclude<ExtArgs> | null
-  where?: Prisma.ServiceRecordEditWhereInput
-  orderBy?: Prisma.ServiceRecordEditOrderByWithRelationInput | Prisma.ServiceRecordEditOrderByWithRelationInput[]
-  cursor?: Prisma.ServiceRecordEditWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.ServiceRecordEditScalarFieldEnum | Prisma.ServiceRecordEditScalarFieldEnum[]
-}
-
-/**
- * ServiceRecord.overdueAlert
- */
-export type ServiceRecord$overdueAlertArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the OverdueAlert
-   */
-  select?: Prisma.OverdueAlertSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the OverdueAlert
-   */
-  omit?: Prisma.OverdueAlertOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.OverdueAlertInclude<ExtArgs> | null
-  where?: Prisma.OverdueAlertWhereInput
+  distinct?: Prisma.ServiceHistoryEventScalarFieldEnum | Prisma.ServiceHistoryEventScalarFieldEnum[]
 }
 
 /**

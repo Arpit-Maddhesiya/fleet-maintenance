@@ -25,3 +25,14 @@ export const ServiceStatus = {
 } as const
 
 export type ServiceStatus = (typeof ServiceStatus)[keyof typeof ServiceStatus]
+
+
+export const HistoryEventType = {
+  CREATED: 'CREATED',
+  STATUS_CHANGE: 'STATUS_CHANGE',
+  ASSIGNED: 'ASSIGNED',
+  UNASSIGNED: 'UNASSIGNED',
+  NOTE: 'NOTE'
+} as const
+
+export type HistoryEventType = (typeof HistoryEventType)[keyof typeof HistoryEventType]
