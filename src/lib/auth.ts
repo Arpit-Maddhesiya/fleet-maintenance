@@ -40,6 +40,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
 });
 
+export class UnauthenticatedError extends Error {
+  constructor(message = "You must be signed in to perform this action.") {
+    super(message);
+    this.name = "UnauthenticatedError";
+  }
+}
+
 export class ForbiddenError extends Error {
   constructor(
     message = "You do not have permission to perform this action.",
@@ -51,13 +58,14 @@ export class ForbiddenError extends Error {
 }
 
 /**
- * Guards a server action or route handler. Throws ForbiddenError when the
- * caller is not authenticated or their role does not match.
+ * Guards a server action or route handler. Throws UnauthenticatedError when
+ * the caller is not signed in, or ForbiddenError when their role does not
+ * match.
  */
 export async function requireRole(role: Role) {
   const session = await auth();
   if (!session?.user) {
-    throw new ForbiddenError("You must be signed in to perform this action.");
+    throw new UnauthenticatedError();
   }
   if (session.user.role !== role) {
     throw new ForbiddenError(

@@ -208,6 +208,89 @@ end-to-end, transactionally, when a technician completes a service — every
 table that gets touched and in what order. I need to be able to reproduce
 this explanation on a call without looking at the code.
 ```
+New files
+
+  - src/lib/service-lifecycle.ts — the pure state machine: transition(record, action, payload, vehicle) returns { ok:
+   true, patch } or { ok: false, reason }. DUE→BOOKED needs scheduledDate+technicianId; BOOKED→IN_SERVICE via START;
+  IN_SERVICE→COMPLETED via COMPLETE requires completedOdometer >= vehicle.currentOdometer and sets
+  completedAt+completedOdometer. Every other move is rejected with a message like "Cannot book a record that is
+  already BOOKED." or "Cannot move from COMPLETED to COMPLETE."
+  - src/lib/validation/service-record.ts — shared Zod schemas (create + a discriminated union for the three
+  transition payloads).
+  - src/app/api/service-records/route.ts — POST, FLEET_MANAGER only, creates a DUE record with dueSince = now plus a
+  CREATED history event, 404 if the vehicle doesn't exist.
+  - src/app/api/service-records/[id]/transition/route.ts — POST; loads record+vehicle+assignments, authorizes (BOOK =
+   manager; START/COMPLETE = manager or an assigned technician), calls transition(), returns 409 with the reason on
+  ok:false, and does everything else inside one prisma.$transaction.
+  - src/lib/service-lifecycle.test.ts — 9 tests: all 3 legal transitions, 3 illegal ones with exact messages, plus
+  missing-odometer, below-current-odometer, and missing booking payload.
+
+  I also touched two existing files: lib/auth.ts now throws UnauthenticatedError (→ 401) vs ForbiddenError (→ 403) —
+  fixing the spec deviation I flagged in Module 2 — and lib/api.ts gained a NotFoundError → 404 mapping.
+
+  Walkthrough — what happens when a technician completes a service
+
+  A technician sends POST /api/service-records/{id}/transition with { "action": "COMPLETE", "completedOdometer": 
+  123456 }.
+
+  1. Auth + authorization — requireRole resolves the session; since the caller is a technician, the handler loads the
+   record and checks the technician is on an active assignment (unassignedAt is null). Not assigned → 403 before
+  anything else.
+  2. Load — the handler fetches the record with its vehicle and assignments. No record → 404.
+  3. Pure rule check — transition() verifies the record is IN_SERVICE and the reading isn't below the vehicle's
+  currentOdometer. If invalid, the handler returns 409 with the reason and nothing touches the DB.
+  4. The transaction opens — from here on, prisma.$transaction runs three writes, in order:
+
+  - ServiceRecord updated: status → COMPLETED, completedAt = now, completedOdometer = 123456.
+  - Vehicle updated (only on COMPLETE): currentOdometer = 123456, lastServiceDate = now, lastServiceOdometer = 
+  123456, serviceCycle += 1 — the "completing a service resets both counters" rule.
+  - ServiceHistoryEvent inserted: type = STATUS_CHANGE, fromStatus = IN_SERVICE, toStatus = COMPLETED, actorId = 
+  technician's id.
+
+  1. Commit or rollback — if any of the three writes fails, the whole transaction rolls back: no half-completed
+  state, no record marked done without the vehicle counters moving. On success all three land together and the
+  handler returns the updated record.
+
+  So three tables get touched, in this order: ServiceRecord → Vehicle → ServiceHistoryEvent, inside one atomic
+  transaction. The route handler never composes the rules itself — the state machine owns "can this happen," and the
+  transaction owns "it all happens together."
+
+ TASTE  Learned
+ └ Wants core domain/business logic extracted into pure, DB-free, independently testable modules (e.g. a
+   `transition()` state machine in `lib/`), with route handlers as thin callers — rules should live in exactly one
+   place. Explicitly asks the assistant to "go slow and be precise" on core domain logic [Confidence 90%]
+   user-taste-profile/taste.md
+
+ TASTE  Learned
+ └ Insists multi-table writes that must not partially fail be wrapped in a single atomic transaction (e.g. Prisma
+   `$transaction`), not sequential separate writes [Confidence 90%]
+   user-taste-profile/taste.md
+
+ TASTE  Learned
+ └ Wants tests to assert exact rejection/error message strings, not just failure booleans, and to cover every legal
+   transition plus multiple illegal ones [Confidence 85%]
+   user-taste-profile/taste.md
+
+ TASTE  Learned
+ └ Expects the full verification loop after each module: run tests, `tsc --noEmit` typecheck, and a production build
+   — all three must pass before declaring done [Confidence 90%]
+   user-taste-profile/taste.md
+
+ TASTE  Learned
+ └ Wants an end-to-end narrative walkthrough of critical flows in plain language — every table touched and in what
+   order — explicitly so it can be reproduced verbally on a call without the code [Confidence 90%]
+   user-taste-profile/taste.md
+
+ ✻ Worked for 8m 25s
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯ Ask your question...
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  » accept edits on [alt+m]
+  In backend-prompts.md · taste on
+
+
+
 
 ---
 
