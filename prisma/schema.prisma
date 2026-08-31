@@ -1,0 +1,120 @@
+// Prisma schema for Fleet Maintenance
+// Provider is postgresql — the database URL points at the Neon serverless Postgres.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  FLEET_MANAGER
+  TECHNICIAN
+}
+
+enum ServiceStatus {
+  DUE
+  BOOKED
+  IN_SERVICE
+  COMPLETED
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  passwordHash  String
+  name          String
+  role          Role
+  createdAt     DateTime       @default(now())
+  assignments   TechnicianAssignment[]
+  serviceEdits  ServiceRecordEdit[]
+  timelineEvents TimelineEvent[]
+}
+
+model Vehicle {
+  id                String          @id @default(cuid())
+  registration      String          @unique
+  make              String
+  model             String
+  odometerReading   Int
+  dateIntervalDays  Int
+  mileageIntervalKm Int
+  archived          Boolean         @default(false)
+  createdAt         DateTime        @default(now())
+  serviceRecords    ServiceRecord[]
+  odometerReadings  OdometerReading[]
+}
+
+model ServiceRecord {
+  id           String               @id @default(cuid())
+  vehicleId    String
+  vehicle      Vehicle              @relation(fields: [vehicleId], references: [id])
+  description  String
+  status       ServiceStatus        @default(DUE)
+  scheduledAt  DateTime?
+  gracePeriodDays Int               @default(7)
+  dueDate      DateTime?
+  dueMileage   Int?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  assignments  TechnicianAssignment[]
+  timeline     TimelineEvent[]
+  edits        ServiceRecordEdit[]
+  overdueAlert OverdueAlert?
+}
+
+model TechnicianAssignment {
+  id             String        @id @default(cuid())
+  serviceRecordId String
+  serviceRecord  ServiceRecord @relation(fields: [serviceRecordId], references: [id])
+  technicianId   String
+  technician     User          @relation(fields: [technicianId], references: [id])
+  assignedAt     DateTime      @default(now())
+  removedAt      DateTime?
+
+  @@unique([serviceRecordId, technicianId])
+}
+
+model OdometerReading {
+  id        String   @id @default(cuid())
+  vehicleId String
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+  reading   Int
+  source    String
+  recordedAt DateTime @default(now())
+}
+
+model ServiceRecordEdit {
+  id             String       @id @default(cuid())
+  serviceRecordId String
+  serviceRecord  ServiceRecord @relation(fields: [serviceRecordId], references: [id])
+  editedById     String
+  editedBy       User         @relation(fields: [editedById], references: [id])
+  oldStatus      ServiceStatus?
+  newStatus      ServiceStatus?
+  note           String?
+  createdAt      DateTime     @default(now())
+}
+
+model TimelineEvent {
+  id             String        @id @default(cuid())
+  serviceRecordId String
+  serviceRecord  ServiceRecord @relation(fields: [serviceRecordId], references: [id])
+  actorId        String
+  actor          User          @relation(fields: [actorId], references: [id])
+  type           String
+  oldValue       String?
+  newValue       String?
+  createdAt      DateTime      @default(now())
+}
+
+model OverdueAlert {
+  id             String   @id @default(cuid())
+  serviceRecordId String   @unique
+  serviceRecord  ServiceRecord @relation(fields: [serviceRecordId], references: [id])
+  dismissed      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+}

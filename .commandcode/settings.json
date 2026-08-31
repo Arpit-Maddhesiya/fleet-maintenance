@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(npx prisma validate)",
+      "Shell(node -e \"console.log(require('@prisma/adapter-neon/package.json').version); console.log(require('@prisma/client/package.json').version)\")",
+      "Shell(npx prisma init --help)",
+      "Shell(npx prisma init --datasource-provider postgresql)",
+      "Shell(npm:*)",
+      "Shell(set:*)",
+      "Shell(npx prisma generate)",
+      "Shell(findstr /s /m \"tailwindcss\" .next\\static\\css\\*.css 2>nul & echo --- & findstr /m \"\\.flex\\b\" .next\\static\\css\\*.css 2>nul)",
+      "Shell(dir /s /b .next\\static 2>nul | findstr /i css)",
+      "Shell(findstr:*)",
+      "Shell(timeout /t 5 /nobreak >nul & type \"C:\\Users\\yato\\AppData\\Local\\Temp\\commandcode\\shellout\\2026-08-31T13-37-42-340Z-s0ybgp6w.log\")",
+      "Shell(powershell -Command \"try { $r = Invoke-WebRequest -Uri http://localhost:3000 -UseBasicParsing -TimeoutSec 10; $r.StatusCode } catch { $_.Exception.Message }\")"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}
