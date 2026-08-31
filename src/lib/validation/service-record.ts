@@ -28,3 +28,24 @@ export const transitionSchema = z.discriminatedUnion("action", [
   startTransitionSchema,
   completeTransitionSchema,
 ]);
+
+export const createAssignmentSchema = z.object({
+  technicianId: z.string().min(1, "technicianId is required"),
+});
+
+export const updateServiceRecordDescriptionSchema = z.object({
+  description: z.string().trim().min(1, "Description is required"),
+});
+
+export const listServiceRecordsQuerySchema = z.object({
+  q: z.string().trim().min(1).optional(),
+  vehicleId: z.string().min(1).optional(),
+  status: z
+    .enum(["DUE", "BOOKED", "IN_SERVICE", "COMPLETED"])
+    .optional(),
+  technicianId: z.string().min(1).optional(),
+  sortBy: z.enum(["scheduledDate", "status", "updatedAt"]).optional(),
+  sortDir: z.enum(["asc", "desc"]).optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(20),
+});
