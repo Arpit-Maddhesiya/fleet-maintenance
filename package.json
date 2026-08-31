@@ -1,0 +1,21 @@
+{
+  "name": "fleet-maintenance",
+  "version": "1.0.0",
+  "description": "Picture a small logistics company running a fleet of several dozen delivery vans and trucks, each supposed to go in for service on a schedule — but \"schedule\" currently means whichever comes first among a wall calendar, a technician's memory, and a driver mentioning the engine sounds odd. Odometer readings get radioed in occasionally and written on a whiteboard that gets erased at the end of the week.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}
