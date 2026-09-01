@@ -22,6 +22,14 @@ vi.mock("@/lib/db", () => ({
   },
 }));
 
+const include = {
+  vehicle: { select: { registrationNumber: true } },
+  assignments: {
+    where: { unassignedAt: null },
+    include: { technician: { select: { name: true } } },
+  },
+};
+
 const managerSession = { user: { id: "u-manager", role: "FLEET_MANAGER" } };
 const technicianSession = { user: { id: "u-tech1", role: "TECHNICIAN" } };
 
@@ -67,6 +75,7 @@ describe("GET /api/service-records", () => {
       orderBy: { updatedAt: "desc" },
       skip: 0,
       take: 20,
+      include,
     });
     expect(prisma.serviceRecord.count).toHaveBeenCalledWith({ where: {} });
   });
@@ -89,6 +98,7 @@ describe("GET /api/service-records", () => {
       orderBy: { updatedAt: "desc" },
       skip: 10,
       take: 10,
+      include,
     });
 
     const body = await res.json();
@@ -120,6 +130,7 @@ describe("GET /api/service-records", () => {
       orderBy: { updatedAt: "desc" },
       skip: 0,
       take: 20,
+      include,
     });
   });
 
@@ -143,6 +154,7 @@ describe("GET /api/service-records", () => {
       orderBy: { updatedAt: "desc" },
       skip: 0,
       take: 20,
+      include,
     });
   });
 
@@ -167,6 +179,7 @@ describe("GET /api/service-records", () => {
       orderBy: { updatedAt: "desc" },
       skip: 0,
       take: 20,
+      include,
     });
   });
 
@@ -188,6 +201,7 @@ describe("GET /api/service-records", () => {
       orderBy: { updatedAt: "desc" },
       skip: 0,
       take: 20,
+      include,
     });
   });
 

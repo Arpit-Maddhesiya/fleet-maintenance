@@ -83,6 +83,15 @@ export async function GET(request: NextRequest) {
         orderBy,
         skip: (page - 1) * pageSize,
         take: pageSize,
+        // The list UI shows vehicle registration and the currently assigned
+        // technicians, so include the relations instead of returning bare rows.
+        include: {
+          vehicle: { select: { registrationNumber: true } },
+          assignments: {
+            where: { unassignedAt: null },
+            include: { technician: { select: { name: true } } },
+          },
+        },
       }),
       prisma.serviceRecord.count({ where }),
     ]);
