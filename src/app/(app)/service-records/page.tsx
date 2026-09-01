@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -11,10 +10,8 @@ import {
   ChevronRightIcon,
   PlusIcon,
   SearchIcon,
-  WrenchIcon,
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -23,14 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { apiFetch } from "@/lib/api-client";
 import type {
   ServiceRecordListItem,
@@ -40,25 +29,13 @@ import type {
 import { cn } from "@/lib/utils";
 import { Role, ServiceStatus } from "@/generated/prisma/enums";
 import { CreateRecordDialog } from "@/components/service-records/create-record-dialog";
+import { ExportButton } from "@/components/service-records/export-button";
+import {
+  ServiceRecordsTable,
+  STATUS_LABELS,
+} from "@/components/service-records/records-table";
 
 const PAGE_SIZE = 20;
-
-const STATUS_LABELS: Record<ServiceStatus, string> = {
-  DUE: "Due",
-  BOOKED: "Booked",
-  IN_SERVICE: "In service",
-  COMPLETED: "Completed",
-};
-
-const STATUS_BADGE_VARIANTS: Record<
-  ServiceStatus,
-  "default" | "secondary" | "destructive" | "outline"
-> = {
-  DUE: "destructive",
-  BOOKED: "secondary",
-  IN_SERVICE: "default",
-  COMPLETED: "outline",
-};
 
 const SORT_FIELDS = [
   { value: "updatedAt", label: "Last updated" },
@@ -74,35 +51,6 @@ interface TechnicianOption {
   name: string;
 }
 
-/** First-name initials, e.g. "Alice Manager" → "AM". */
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]!.toUpperCase())
-    .join("");
-}
-
-function formatDate(value: string | null): string {
-  if (!value) return "—";
-  return new Date(value).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
-
-function formatDateTime(value: string): string {
-  return new Date(value).toLocaleString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
-
 export default function ServiceRecordsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -112,6 +60,8 @@ export default function ServiceRecordsPage() {
   const [records, setRecords] = useState<ServiceRecordListItem[] | null>(null);
   const [total, setTotal] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
+  // Bumping this re-runs the fetch effect — the retry affordance.
+  const [retryNonce, setRetryNonce] = useState(0);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [technicians, setTechnicians] = useState<TechnicianOption[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -132,12 +82,6 @@ export default function ServiceRecordsPage() {
   const rangeStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(page * PAGE_SIZE, total);
   const loading = records === null;
-
-  const isCurrent = useCallback(
-    (name: string, value: string) =>
-      (searchParams.get(name) ?? "") === value,
-    [searchParams]
-  );
 
   // Every control rewrites the URL query params and lets the effect below
   // refetch — the URL is the single source of truth for the view (and the
@@ -186,7 +130,7 @@ export default function ServiceRecordsPage() {
         setLoadError(error instanceof Error ? error.message : "Failed to load records.");
       });
     return () => controller.abort();
-  }, [searchParams, q, vehicleId, status, technicianId, sortBy, sortDir, page]);
+  }, [searchParams, q, vehicleId, status, technicianId, sortBy, sortDir, page, retryNonce]);
 
   // Static filter options, fetched once: every vehicle, and every technician
   // (the technician dropdown is manager-only — a technician's view is scoped
@@ -222,12 +166,15 @@ export default function ServiceRecordsPage() {
             Every service across the fleet, searchable and filterable.
           </p>
         </div>
-        {isManager ? (
-          <Button size="sm" onClick={() => setDialogOpen(true)}>
-            <PlusIcon className="size-4" />
-            New Record
-          </Button>
-        ) : null}
+        <div className="flex items-center gap-2">
+          <ExportButton />
+          {isManager ? (
+            <Button size="sm" onClick={() => setDialogOpen(true)}>
+              <PlusIcon className="size-4" />
+              New Record
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       {/* Controls — always usable, even while a new page of results loads. */}
@@ -323,95 +270,17 @@ export default function ServiceRecordsPage() {
       {loadError ? (
         <div className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {loadError}
+          <Button
+            variant="link"
+            size="sm"
+            className="ml-2"
+            onClick={() => setRetryNonce((n) => n + 1)}
+          >
+            Retry
+          </Button>
         </div>
       ) : (
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Vehicle</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Scheduled</TableHead>
-                <TableHead>Last updated</TableHead>
-                <TableHead>Technicians</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <TableRow key={i}>
-                    {Array.from({ length: 6 }).map((_, j) => (
-                      <TableCell key={j}>
-                        <div className="h-4 animate-pulse rounded bg-muted" />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : records.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="py-16 text-center text-muted-foreground"
-                  >
-                    No service records match your filters.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                records.map((record) => (
-                  <TableRow
-                    key={record.id}
-                    className="cursor-pointer"
-                    onClick={() =>
-                      router.push(`/service-records/${record.id}`)
-                    }
-                  >
-                    <TableCell className="font-medium">
-                      {record.vehicle.registrationNumber}
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        title={record.description}
-                        className="block max-w-72 truncate"
-                      >
-                        {record.description}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={STATUS_BADGE_VARIANTS[record.status]}>
-                        {STATUS_LABELS[record.status]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      {formatDate(record.scheduledDate)}
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      {formatDateTime(record.updatedAt)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <div className="flex -space-x-1.5">
-                          {record.assignments.map((assignment) => (
-                            <span
-                              key={assignment.technician.name}
-                              title={assignment.technician.name}
-                              className="flex size-6 items-center justify-center rounded-full bg-muted text-[10px] font-medium text-muted-foreground ring-2 ring-background"
-                            >
-                              {initials(assignment.technician.name)}
-                            </span>
-                          ))}
-                        </div>
-                        {record.assignments.length === 0 ? (
-                          <span className="text-sm text-muted-foreground">—</span>
-                        ) : null}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+        <ServiceRecordsTable records={records} />
       )}
 
       {/* Pagination — hidden while the very first page is still loading, so the

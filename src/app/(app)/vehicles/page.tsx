@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { PlusIcon, TruckIcon } from "lucide-react";
+import { FileUpIcon, PlusIcon, TruckIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import type { Vehicle } from "@/lib/types";
 import { Role } from "@/generated/prisma/enums";
 import { VehicleDialog } from "@/components/vehicles/vehicle-dialog";
 import { ArchiveAction } from "@/components/vehicles/archive-action";
+import { BulkOdometerDialog } from "@/components/vehicles/bulk-odometer-dialog";
 
 export default function VehiclesPage() {
   const { data: session } = useSession();
@@ -28,6 +29,7 @@ export default function VehiclesPage() {
   const [vehicles, setVehicles] = useState<Vehicle[] | null>(null);
   const [showArchived, setShowArchived] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Vehicle | null>(null);
 
   const load = useCallback(async () => {
@@ -67,16 +69,26 @@ export default function VehiclesPage() {
             {showArchived ? "Showing archived" : "Show archived"}
           </Button>
           {isManager ? (
-            <Button
-              size="sm"
-              onClick={() => {
-                setEditing(null);
-                setDialogOpen(true);
-              }}
-            >
-              <PlusIcon className="size-4" />
-              Add Vehicle
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setBulkDialogOpen(true)}
+              >
+                <FileUpIcon className="size-4" />
+                Bulk Update Odometer
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  setEditing(null);
+                  setDialogOpen(true);
+                }}
+              >
+                <PlusIcon className="size-4" />
+                Add Vehicle
+              </Button>
+            </>
           ) : null}
         </div>
       </div>
@@ -182,6 +194,12 @@ export default function VehiclesPage() {
         onOpenChange={setDialogOpen}
         vehicle={editing}
         onSaved={load}
+      />
+
+      <BulkOdometerDialog
+        open={bulkDialogOpen}
+        onOpenChange={setBulkDialogOpen}
+        onImported={load}
       />
     </div>
   );

@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { apiFetch } from "@/lib/api-client";
+import { apiFetch, fieldErrorsOf, firstFieldError } from "@/lib/api-client";
 import type { CreateServiceRecordInput, Vehicle } from "@/lib/types";
 
 interface CreateRecordDialogProps {
@@ -41,12 +41,15 @@ export function CreateRecordDialog({
   const [vehicleId, setVehicleId] = useState("");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  // Server-side (Zod) field errors, surfaced inline next to the fields.
+  const [fieldErrors, setFieldErrors] = useState<ReturnType<typeof fieldErrorsOf>>(null);
 
   // Reset the form whenever the dialog opens fresh.
   useEffect(() => {
     if (open) {
       setVehicleId("");
       setDescription("");
+      setFieldErrors(null);
     }
   }, [open]);
 
@@ -65,9 +68,16 @@ export function CreateRecordDialog({
       onOpenChange(false);
       onCreated();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Something went wrong."
-      );
+      // The backend's Zod schema is the source of truth — surface its field
+      // messages inline rather than a generic toast.
+      const serverErrors = fieldErrorsOf(error);
+      if (serverErrors) {
+        setFieldErrors(serverErrors);
+      } else {
+        toast.error(
+          error instanceof Error ? error.message : "Something went wrong."
+        );
+      }
     } finally {
       setSubmitting(false);
     }
@@ -87,8 +97,21 @@ export function CreateRecordDialog({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="vehicle">Vehicle</Label>
-            <Select value={vehicleId} onValueChange={setVehicleId} required>
-              <SelectTrigger id="vehicle" className="w-full">
+            <Select
+              value={vehicleId}
+              onValueChange={(v) => {
+                setVehicleId(v);
+                setFieldErrors((prev) =>
+                  prev?.vehicleId ? { ...prev, vehicleId: undefined } : prev
+                );
+              }}
+              required
+            >
+              <SelectTrigger
+                id="vehicle"
+                className="w-full"
+                aria-invalid={Boolean(firstFieldError(fieldErrors, "vehicleId"))}
+              >
                 <SelectValue placeholder="Select a vehicle" />
               </SelectTrigger>
               <SelectContent>
@@ -99,6 +122,11 @@ export function CreateRecordDialog({
                 ))}
               </SelectContent>
             </Select>
+            {firstFieldError(fieldErrors, "vehicleId") ? (
+              <p className="text-sm text-destructive">
+                {firstFieldError(fieldErrors, "vehicleId")}
+              </p>
+            ) : null}
           </div>
 
           <div className="space-y-2">
@@ -106,13 +134,27 @@ export function CreateRecordDialog({
             <Input
               id="description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                setFieldErrors((prev) =>
+                  prev?.description ? { ...prev, description: undefined } : prev
+                );
+              }}
               placeholder="Brake pads and discs"
-              aria-invalid={description.trim().length === 0}
+              aria-invalid={Boolean(
+                description.trim().length === 0 ||
+                  firstFieldError(fieldErrors, "description")
+              )}
             />
-            <p className="text-xs text-muted-foreground">
-              What needs to be done — visible to technicians in the list.
-            </p>
+            {firstFieldError(fieldErrors, "description") ? (
+              <p className="text-sm text-destructive">
+                {firstFieldError(fieldErrors, "description")}
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                What needs to be done — visible to technicians in the list.
+              </p>
+            )}
           </div>
 
           <DialogFooter>

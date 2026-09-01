@@ -64,6 +64,9 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ id: st
         <BackLink />
         <div className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
+          <Button variant="link" size="sm" className="ml-2" onClick={load}>
+            Retry
+          </Button>
         </div>
       </div>
     );

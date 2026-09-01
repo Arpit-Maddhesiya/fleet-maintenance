@@ -5,6 +5,56 @@ import { updateServiceRecordDescriptionSchema } from "@/lib/validation/service-r
 import { handleError, NotFoundError } from "@/lib/api";
 import { Role } from "@/generated/prisma/enums";
 
+// GET /api/service-records/[id] — any authenticated user who can see the
+// record (a technician must be actively assigned; a fleet manager can fetch
+// any). Returns the record with its vehicle and currently assigned
+// technicians, so the detail page renders without follow-up requests.
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: "You must be signed in." },
+        { status: 401 }
+      );
+    }
+
+    const { id } = await params;
+    const record = await prisma.serviceRecord.findUnique({
+      where: { id },
+      include: {
+        vehicle: true,
+        assignments: {
+          where: { unassignedAt: null },
+          include: { technician: { select: { id: true, name: true } } },
+        },
+      },
+    });
+    if (!record) throw new NotFoundError("Service record not found.");
+
+    // Same scoping rule as the list endpoint and the timeline: a technician
+    // can only view records they're actively assigned to.
+    if (session.user.role !== Role.FLEET_MANAGER) {
+      const isAssigned = record.assignments.some(
+        (a) => a.technicianId === session.user.id
+      );
+      if (!isAssigned) {
+        return NextResponse.json(
+          { error: "You are not assigned to this service record." },
+          { status: 403 }
+        );
+      }
+    }
+
+    return NextResponse.json(record);
+  } catch (error) {
+    return handleError(error);
+  }
+}
+
 // PATCH /api/service-records/[id] — FLEET_MANAGER, or a technician with an
 // active assignment to this record. Only the description is editable here.
 // An assigned technician may update the description of their own record, but

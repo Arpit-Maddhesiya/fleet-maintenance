@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { apiFetch } from "@/lib/api-client";
+import { apiFetch, fieldErrorsOf } from "@/lib/api-client";
 import type { CreateVehicleInput, UpdateVehicleInput, Vehicle } from "@/lib/types";
 
 /**
@@ -110,6 +110,8 @@ export function VehicleDialog({ open, onOpenChange, vehicle, onSaved }: VehicleD
 
   const setField = useCallback((field: keyof VehicleFormValues, value: string) => {
     setValues((prev) => ({ ...prev, [field]: value }));
+    // Clear any error (client or server) for the field being edited.
+    setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -147,9 +149,24 @@ export function VehicleDialog({ open, onOpenChange, vehicle, onSaved }: VehicleD
       onOpenChange(false);
       onSaved();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Something went wrong."
-      );
+      // The backend re-validates (its Zod schemas are the source of truth).
+      // If it rejected a specific field, show that message inline next to the
+      // input rather than only a generic toast; otherwise fall back to the
+      // server's top-level message (e.g. a 409 duplicate registration).
+      const serverErrors = fieldErrorsOf(error);
+      if (serverErrors) {
+        const merged: FieldErrors = { ...nextErrors };
+        for (const [field, messages] of Object.entries(serverErrors)) {
+          if (messages && messages.length > 0) {
+            merged[field as keyof FieldErrors] = messages[0];
+          }
+        }
+        setErrors(merged);
+      } else {
+        toast.error(
+          error instanceof Error ? error.message : "Something went wrong."
+        );
+      }
     } finally {
       setSubmitting(false);
     }

@@ -81,3 +81,75 @@ export interface CreateServiceRecordInput {
   vehicleId: string;
   description: string;
 }
+
+/** Active assignment on a detail response — includes the technician's name. */
+export interface ServiceAssignmentDetail {
+  id: string;
+  technicianId: string;
+  technician: { id: string; name: string };
+}
+
+/** GET /api/service-records/[id] — record + vehicle + active assignments. */
+export interface ServiceRecordDetail extends ServiceRecord {
+  vehicle: Vehicle;
+  assignments: ServiceAssignmentDetail[];
+}
+
+/** Body for POST /api/service-records/[id]/assignments. */
+export interface CreateAssignmentInput {
+  technicianId: string;
+}
+
+/** Timeline event from GET /api/service-records/[id]/timeline. */
+export interface TimelineEvent {
+  id: string;
+  type: string;
+  createdAt: string;
+  actor: { id: string; name: string; role: string };
+  technician: { name: string } | null;
+  summary: string;
+}
+
+/** One row of the report from POST /api/vehicles/bulk-odometer. */
+export interface BulkOdometerRowResult {
+  /** 1-based CSV row number (header is row 1, so data starts at 2). */
+  row: number;
+  registrationNumber: string;
+  status: "success" | "rejected";
+  reason?: string;
+}
+
+/** POST /api/vehicles/bulk-odometer — per-row result report. */
+export interface BulkOdometerResponse {
+  results: BulkOdometerRowResult[];
+  successCount: number;
+  rejectedCount: number;
+}
+
+/** One row from GET /api/alerts — vehicle embedded so the list can render. */
+export interface Alert {
+  id: string;
+  vehicleId: string;
+  serviceCycle: number;
+  triggeredAt: string;
+  dismissedAt: string | null;
+  dismissedById: string | null;
+  vehicle: Vehicle;
+}
+
+/** GET /api/alerts — currently active (non-dismissed, current-cycle) alerts. */
+export interface AlertsResponse {
+  alerts: Alert[];
+  count: number;
+}
+
+/** GET /api/dashboard — aggregate stats for the landing page. */
+export interface DashboardData {
+  dueCount: number;
+  inServiceCount: number;
+  completedThisWeek: number;
+  overdueCount: number;
+  byStatus: Record<string, number>;
+  byTechnician: Record<string, number>;
+  completedPerWeek: { week: string; count: number }[];
+}

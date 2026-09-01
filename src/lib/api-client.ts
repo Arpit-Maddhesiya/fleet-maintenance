@@ -12,6 +12,7 @@
 
 export class ApiError extends Error {
   readonly status: number;
+  /** The parsed JSON error body (e.g. Zod `details` for 400s). */
   readonly details?: unknown;
 
   constructor(status: number, message: string, details?: unknown) {
@@ -20,6 +21,31 @@ export class ApiError extends Error {
     this.status = status;
     this.details = details;
   }
+}
+
+/**
+ * The field-error shape the API returns for Zod validation failures:
+ * `{ error: "Validation failed", details: { fieldErrors: { field: [msgs] } } }`.
+ */
+export interface ApiFieldErrors {
+  [field: string]: string[] | undefined;
+}
+
+/** Pull field errors out of an ApiError's details, if present. */
+export function fieldErrorsOf(error: unknown): ApiFieldErrors | null {
+  if (!(error instanceof ApiError)) return null;
+  const details = error.details as {
+    fieldErrors?: Record<string, string[] | undefined>;
+  } | null;
+  return details?.fieldErrors ?? null;
+}
+
+/** First message for a field, or undefined — the inline-error convention. */
+export function firstFieldError(
+  errors: ApiFieldErrors | null,
+  field: string
+): string | undefined {
+  return errors?.[field]?.[0];
 }
 
 interface ApiRequestOptions {
