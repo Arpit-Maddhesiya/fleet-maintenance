@@ -20,7 +20,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^26.4.0",
+    "@types/node": "26.4.0",
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
+    "@next/swc-win32-x64-msvc": "^16.3.3",
     "@prisma/adapter-neon": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "@tailwindcss/postcss": "^4.3.3",
