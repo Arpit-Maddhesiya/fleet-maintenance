@@ -103,6 +103,16 @@ export async function POST(
             technicianId: payload.technicianId!,
           },
         });
+        // Booking also assigns a technician, so the audit trail gets an
+        // ASSIGNED event naming them (not just the STATUS_CHANGE below).
+        await tx.serviceHistoryEvent.create({
+          data: {
+            serviceRecordId: record.id,
+            type: HistoryEventType.ASSIGNED,
+            actorId: session.user.id,
+            technicianId: payload.technicianId!,
+          },
+        });
       }
 
       // Every state change gets an audit trail entry.

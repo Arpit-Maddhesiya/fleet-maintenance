@@ -192,6 +192,7 @@ export type UserWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   assignments?: Prisma.ServiceAssignmentListRelationFilter
   historyEvents?: Prisma.ServiceHistoryEventListRelationFilter
+  assignedEvents?: Prisma.ServiceHistoryEventListRelationFilter
   dismissedAlerts?: Prisma.AlertListRelationFilter
 }
 
@@ -204,6 +205,7 @@ export type UserOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   assignments?: Prisma.ServiceAssignmentOrderByRelationAggregateInput
   historyEvents?: Prisma.ServiceHistoryEventOrderByRelationAggregateInput
+  assignedEvents?: Prisma.ServiceHistoryEventOrderByRelationAggregateInput
   dismissedAlerts?: Prisma.AlertOrderByRelationAggregateInput
 }
 
@@ -219,6 +221,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   assignments?: Prisma.ServiceAssignmentListRelationFilter
   historyEvents?: Prisma.ServiceHistoryEventListRelationFilter
+  assignedEvents?: Prisma.ServiceHistoryEventListRelationFilter
   dismissedAlerts?: Prisma.AlertListRelationFilter
 }, "id" | "email">
 
@@ -255,6 +258,7 @@ export type UserCreateInput = {
   createdAt?: Date | string
   assignments?: Prisma.ServiceAssignmentCreateNestedManyWithoutTechnicianInput
   historyEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutActorInput
+  assignedEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutTechnicianInput
   dismissedAlerts?: Prisma.AlertCreateNestedManyWithoutDismissedByInput
 }
 
@@ -267,6 +271,7 @@ export type UserUncheckedCreateInput = {
   createdAt?: Date | string
   assignments?: Prisma.ServiceAssignmentUncheckedCreateNestedManyWithoutTechnicianInput
   historyEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutActorInput
+  assignedEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutTechnicianInput
   dismissedAlerts?: Prisma.AlertUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
@@ -279,6 +284,7 @@ export type UserUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.ServiceAssignmentUpdateManyWithoutTechnicianNestedInput
   historyEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutActorNestedInput
+  assignedEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutTechnicianNestedInput
   dismissedAlerts?: Prisma.AlertUpdateManyWithoutDismissedByNestedInput
 }
 
@@ -291,6 +297,7 @@ export type UserUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.ServiceAssignmentUncheckedUpdateManyWithoutTechnicianNestedInput
   historyEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutActorNestedInput
+  assignedEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutTechnicianNestedInput
   dismissedAlerts?: Prisma.AlertUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
@@ -390,12 +397,28 @@ export type UserCreateNestedOneWithoutHistoryEventsInput = {
   connect?: Prisma.UserWhereUniqueInput
 }
 
+export type UserCreateNestedOneWithoutAssignedEventsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssignedEventsInput, Prisma.UserUncheckedCreateWithoutAssignedEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssignedEventsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
 export type UserUpdateOneRequiredWithoutHistoryEventsNestedInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutHistoryEventsInput, Prisma.UserUncheckedCreateWithoutHistoryEventsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutHistoryEventsInput
   upsert?: Prisma.UserUpsertWithoutHistoryEventsInput
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutHistoryEventsInput, Prisma.UserUpdateWithoutHistoryEventsInput>, Prisma.UserUncheckedUpdateWithoutHistoryEventsInput>
+}
+
+export type UserUpdateOneWithoutAssignedEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssignedEventsInput, Prisma.UserUncheckedCreateWithoutAssignedEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssignedEventsInput
+  upsert?: Prisma.UserUpsertWithoutAssignedEventsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAssignedEventsInput, Prisma.UserUpdateWithoutAssignedEventsInput>, Prisma.UserUncheckedUpdateWithoutAssignedEventsInput>
 }
 
 export type UserCreateNestedOneWithoutDismissedAlertsInput = {
@@ -422,6 +445,7 @@ export type UserCreateWithoutAssignmentsInput = {
   role: $Enums.Role
   createdAt?: Date | string
   historyEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutActorInput
+  assignedEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutTechnicianInput
   dismissedAlerts?: Prisma.AlertCreateNestedManyWithoutDismissedByInput
 }
 
@@ -433,6 +457,7 @@ export type UserUncheckedCreateWithoutAssignmentsInput = {
   role: $Enums.Role
   createdAt?: Date | string
   historyEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutActorInput
+  assignedEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutTechnicianInput
   dismissedAlerts?: Prisma.AlertUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
@@ -460,6 +485,7 @@ export type UserUpdateWithoutAssignmentsInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   historyEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutActorNestedInput
+  assignedEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutTechnicianNestedInput
   dismissedAlerts?: Prisma.AlertUpdateManyWithoutDismissedByNestedInput
 }
 
@@ -471,6 +497,7 @@ export type UserUncheckedUpdateWithoutAssignmentsInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   historyEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutActorNestedInput
+  assignedEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutTechnicianNestedInput
   dismissedAlerts?: Prisma.AlertUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
@@ -482,6 +509,7 @@ export type UserCreateWithoutHistoryEventsInput = {
   role: $Enums.Role
   createdAt?: Date | string
   assignments?: Prisma.ServiceAssignmentCreateNestedManyWithoutTechnicianInput
+  assignedEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutTechnicianInput
   dismissedAlerts?: Prisma.AlertCreateNestedManyWithoutDismissedByInput
 }
 
@@ -493,12 +521,42 @@ export type UserUncheckedCreateWithoutHistoryEventsInput = {
   role: $Enums.Role
   createdAt?: Date | string
   assignments?: Prisma.ServiceAssignmentUncheckedCreateNestedManyWithoutTechnicianInput
+  assignedEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutTechnicianInput
   dismissedAlerts?: Prisma.AlertUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutHistoryEventsInput = {
   where: Prisma.UserWhereUniqueInput
   create: Prisma.XOR<Prisma.UserCreateWithoutHistoryEventsInput, Prisma.UserUncheckedCreateWithoutHistoryEventsInput>
+}
+
+export type UserCreateWithoutAssignedEventsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  name: string
+  role: $Enums.Role
+  createdAt?: Date | string
+  assignments?: Prisma.ServiceAssignmentCreateNestedManyWithoutTechnicianInput
+  historyEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutActorInput
+  dismissedAlerts?: Prisma.AlertCreateNestedManyWithoutDismissedByInput
+}
+
+export type UserUncheckedCreateWithoutAssignedEventsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  name: string
+  role: $Enums.Role
+  createdAt?: Date | string
+  assignments?: Prisma.ServiceAssignmentUncheckedCreateNestedManyWithoutTechnicianInput
+  historyEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutActorInput
+  dismissedAlerts?: Prisma.AlertUncheckedCreateNestedManyWithoutDismissedByInput
+}
+
+export type UserCreateOrConnectWithoutAssignedEventsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssignedEventsInput, Prisma.UserUncheckedCreateWithoutAssignedEventsInput>
 }
 
 export type UserUpsertWithoutHistoryEventsInput = {
@@ -520,6 +578,7 @@ export type UserUpdateWithoutHistoryEventsInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.ServiceAssignmentUpdateManyWithoutTechnicianNestedInput
+  assignedEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutTechnicianNestedInput
   dismissedAlerts?: Prisma.AlertUpdateManyWithoutDismissedByNestedInput
 }
 
@@ -531,6 +590,42 @@ export type UserUncheckedUpdateWithoutHistoryEventsInput = {
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.ServiceAssignmentUncheckedUpdateManyWithoutTechnicianNestedInput
+  assignedEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutTechnicianNestedInput
+  dismissedAlerts?: Prisma.AlertUncheckedUpdateManyWithoutDismissedByNestedInput
+}
+
+export type UserUpsertWithoutAssignedEventsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAssignedEventsInput, Prisma.UserUncheckedUpdateWithoutAssignedEventsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssignedEventsInput, Prisma.UserUncheckedCreateWithoutAssignedEventsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAssignedEventsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAssignedEventsInput, Prisma.UserUncheckedUpdateWithoutAssignedEventsInput>
+}
+
+export type UserUpdateWithoutAssignedEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignments?: Prisma.ServiceAssignmentUpdateManyWithoutTechnicianNestedInput
+  historyEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutActorNestedInput
+  dismissedAlerts?: Prisma.AlertUpdateManyWithoutDismissedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAssignedEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignments?: Prisma.ServiceAssignmentUncheckedUpdateManyWithoutTechnicianNestedInput
+  historyEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutActorNestedInput
   dismissedAlerts?: Prisma.AlertUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
@@ -543,6 +638,7 @@ export type UserCreateWithoutDismissedAlertsInput = {
   createdAt?: Date | string
   assignments?: Prisma.ServiceAssignmentCreateNestedManyWithoutTechnicianInput
   historyEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutActorInput
+  assignedEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutTechnicianInput
 }
 
 export type UserUncheckedCreateWithoutDismissedAlertsInput = {
@@ -554,6 +650,7 @@ export type UserUncheckedCreateWithoutDismissedAlertsInput = {
   createdAt?: Date | string
   assignments?: Prisma.ServiceAssignmentUncheckedCreateNestedManyWithoutTechnicianInput
   historyEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutActorInput
+  assignedEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutTechnicianInput
 }
 
 export type UserCreateOrConnectWithoutDismissedAlertsInput = {
@@ -581,6 +678,7 @@ export type UserUpdateWithoutDismissedAlertsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.ServiceAssignmentUpdateManyWithoutTechnicianNestedInput
   historyEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutActorNestedInput
+  assignedEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutTechnicianNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDismissedAlertsInput = {
@@ -592,6 +690,7 @@ export type UserUncheckedUpdateWithoutDismissedAlertsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.ServiceAssignmentUncheckedUpdateManyWithoutTechnicianNestedInput
   historyEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutActorNestedInput
+  assignedEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutTechnicianNestedInput
 }
 
 
@@ -602,12 +701,14 @@ export type UserUncheckedUpdateWithoutDismissedAlertsInput = {
 export type UserCountOutputType = {
   assignments: number
   historyEvents: number
+  assignedEvents: number
   dismissedAlerts: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assignments?: boolean | UserCountOutputTypeCountAssignmentsArgs
   historyEvents?: boolean | UserCountOutputTypeCountHistoryEventsArgs
+  assignedEvents?: boolean | UserCountOutputTypeCountAssignedEventsArgs
   dismissedAlerts?: boolean | UserCountOutputTypeCountDismissedAlertsArgs
 }
 
@@ -638,6 +739,13 @@ export type UserCountOutputTypeCountHistoryEventsArgs<ExtArgs extends runtime.Ty
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountAssignedEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ServiceHistoryEventWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountDismissedAlertsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AlertWhereInput
 }
@@ -652,6 +760,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   assignments?: boolean | Prisma.User$assignmentsArgs<ExtArgs>
   historyEvents?: boolean | Prisma.User$historyEventsArgs<ExtArgs>
+  assignedEvents?: boolean | Prisma.User$assignedEventsArgs<ExtArgs>
   dismissedAlerts?: boolean | Prisma.User$dismissedAlertsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -687,6 +796,7 @@ export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assignments?: boolean | Prisma.User$assignmentsArgs<ExtArgs>
   historyEvents?: boolean | Prisma.User$historyEventsArgs<ExtArgs>
+  assignedEvents?: boolean | Prisma.User$assignedEventsArgs<ExtArgs>
   dismissedAlerts?: boolean | Prisma.User$dismissedAlertsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -698,6 +808,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     assignments: Prisma.$ServiceAssignmentPayload<ExtArgs>[]
     historyEvents: Prisma.$ServiceHistoryEventPayload<ExtArgs>[]
+    assignedEvents: Prisma.$ServiceHistoryEventPayload<ExtArgs>[]
     dismissedAlerts: Prisma.$AlertPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1103,6 +1214,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   assignments<T extends Prisma.User$assignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServiceAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   historyEvents<T extends Prisma.User$historyEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$historyEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServiceHistoryEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  assignedEvents<T extends Prisma.User$assignedEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assignedEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServiceHistoryEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   dismissedAlerts<T extends Prisma.User$dismissedAlertsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$dismissedAlertsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AlertPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1559,6 +1671,30 @@ export type User$assignmentsArgs<ExtArgs extends runtime.Types.Extensions.Intern
  * User.historyEvents
  */
 export type User$historyEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ServiceHistoryEvent
+   */
+  select?: Prisma.ServiceHistoryEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ServiceHistoryEvent
+   */
+  omit?: Prisma.ServiceHistoryEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ServiceHistoryEventInclude<ExtArgs> | null
+  where?: Prisma.ServiceHistoryEventWhereInput
+  orderBy?: Prisma.ServiceHistoryEventOrderByWithRelationInput | Prisma.ServiceHistoryEventOrderByWithRelationInput[]
+  cursor?: Prisma.ServiceHistoryEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ServiceHistoryEventScalarFieldEnum | Prisma.ServiceHistoryEventScalarFieldEnum[]
+}
+
+/**
+ * User.assignedEvents
+ */
+export type User$assignedEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the ServiceHistoryEvent
    */

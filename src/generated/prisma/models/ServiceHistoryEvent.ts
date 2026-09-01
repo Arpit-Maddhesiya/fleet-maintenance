@@ -32,6 +32,7 @@ export type ServiceHistoryEventMinAggregateOutputType = {
   toStatus: $Enums.ServiceStatus | null
   note: string | null
   actorId: string | null
+  technicianId: string | null
   createdAt: Date | null
 }
 
@@ -43,6 +44,7 @@ export type ServiceHistoryEventMaxAggregateOutputType = {
   toStatus: $Enums.ServiceStatus | null
   note: string | null
   actorId: string | null
+  technicianId: string | null
   createdAt: Date | null
 }
 
@@ -54,6 +56,7 @@ export type ServiceHistoryEventCountAggregateOutputType = {
   toStatus: number
   note: number
   actorId: number
+  technicianId: number
   createdAt: number
   _all: number
 }
@@ -67,6 +70,7 @@ export type ServiceHistoryEventMinAggregateInputType = {
   toStatus?: true
   note?: true
   actorId?: true
+  technicianId?: true
   createdAt?: true
 }
 
@@ -78,6 +82,7 @@ export type ServiceHistoryEventMaxAggregateInputType = {
   toStatus?: true
   note?: true
   actorId?: true
+  technicianId?: true
   createdAt?: true
 }
 
@@ -89,6 +94,7 @@ export type ServiceHistoryEventCountAggregateInputType = {
   toStatus?: true
   note?: true
   actorId?: true
+  technicianId?: true
   createdAt?: true
   _all?: true
 }
@@ -173,6 +179,7 @@ export type ServiceHistoryEventGroupByOutputType = {
   toStatus: $Enums.ServiceStatus | null
   note: string | null
   actorId: string
+  technicianId: string | null
   createdAt: Date
   _count: ServiceHistoryEventCountAggregateOutputType | null
   _min: ServiceHistoryEventMinAggregateOutputType | null
@@ -205,9 +212,11 @@ export type ServiceHistoryEventWhereInput = {
   toStatus?: Prisma.EnumServiceStatusNullableFilter<"ServiceHistoryEvent"> | $Enums.ServiceStatus | null
   note?: Prisma.StringNullableFilter<"ServiceHistoryEvent"> | string | null
   actorId?: Prisma.StringFilter<"ServiceHistoryEvent"> | string
+  technicianId?: Prisma.StringNullableFilter<"ServiceHistoryEvent"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ServiceHistoryEvent"> | Date | string
   serviceRecord?: Prisma.XOR<Prisma.ServiceRecordScalarRelationFilter, Prisma.ServiceRecordWhereInput>
   actor?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  technician?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type ServiceHistoryEventOrderByWithRelationInput = {
@@ -218,9 +227,11 @@ export type ServiceHistoryEventOrderByWithRelationInput = {
   toStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   actorId?: Prisma.SortOrder
+  technicianId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   serviceRecord?: Prisma.ServiceRecordOrderByWithRelationInput
   actor?: Prisma.UserOrderByWithRelationInput
+  technician?: Prisma.UserOrderByWithRelationInput
 }
 
 export type ServiceHistoryEventWhereUniqueInput = Prisma.AtLeast<{
@@ -234,9 +245,11 @@ export type ServiceHistoryEventWhereUniqueInput = Prisma.AtLeast<{
   toStatus?: Prisma.EnumServiceStatusNullableFilter<"ServiceHistoryEvent"> | $Enums.ServiceStatus | null
   note?: Prisma.StringNullableFilter<"ServiceHistoryEvent"> | string | null
   actorId?: Prisma.StringFilter<"ServiceHistoryEvent"> | string
+  technicianId?: Prisma.StringNullableFilter<"ServiceHistoryEvent"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ServiceHistoryEvent"> | Date | string
   serviceRecord?: Prisma.XOR<Prisma.ServiceRecordScalarRelationFilter, Prisma.ServiceRecordWhereInput>
   actor?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  technician?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id">
 
 export type ServiceHistoryEventOrderByWithAggregationInput = {
@@ -247,6 +260,7 @@ export type ServiceHistoryEventOrderByWithAggregationInput = {
   toStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   actorId?: Prisma.SortOrder
+  technicianId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.ServiceHistoryEventCountOrderByAggregateInput
   _max?: Prisma.ServiceHistoryEventMaxOrderByAggregateInput
@@ -264,6 +278,7 @@ export type ServiceHistoryEventScalarWhereWithAggregatesInput = {
   toStatus?: Prisma.EnumServiceStatusNullableWithAggregatesFilter<"ServiceHistoryEvent"> | $Enums.ServiceStatus | null
   note?: Prisma.StringNullableWithAggregatesFilter<"ServiceHistoryEvent"> | string | null
   actorId?: Prisma.StringWithAggregatesFilter<"ServiceHistoryEvent"> | string
+  technicianId?: Prisma.StringNullableWithAggregatesFilter<"ServiceHistoryEvent"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ServiceHistoryEvent"> | Date | string
 }
 
@@ -276,6 +291,7 @@ export type ServiceHistoryEventCreateInput = {
   createdAt?: Date | string
   serviceRecord: Prisma.ServiceRecordCreateNestedOneWithoutHistoryEventsInput
   actor: Prisma.UserCreateNestedOneWithoutHistoryEventsInput
+  technician?: Prisma.UserCreateNestedOneWithoutAssignedEventsInput
 }
 
 export type ServiceHistoryEventUncheckedCreateInput = {
@@ -286,6 +302,7 @@ export type ServiceHistoryEventUncheckedCreateInput = {
   toStatus?: $Enums.ServiceStatus | null
   note?: string | null
   actorId: string
+  technicianId?: string | null
   createdAt?: Date | string
 }
 
@@ -298,6 +315,7 @@ export type ServiceHistoryEventUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   serviceRecord?: Prisma.ServiceRecordUpdateOneRequiredWithoutHistoryEventsNestedInput
   actor?: Prisma.UserUpdateOneRequiredWithoutHistoryEventsNestedInput
+  technician?: Prisma.UserUpdateOneWithoutAssignedEventsNestedInput
 }
 
 export type ServiceHistoryEventUncheckedUpdateInput = {
@@ -308,6 +326,7 @@ export type ServiceHistoryEventUncheckedUpdateInput = {
   toStatus?: Prisma.NullableEnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorId?: Prisma.StringFieldUpdateOperationsInput | string
+  technicianId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -319,6 +338,7 @@ export type ServiceHistoryEventCreateManyInput = {
   toStatus?: $Enums.ServiceStatus | null
   note?: string | null
   actorId: string
+  technicianId?: string | null
   createdAt?: Date | string
 }
 
@@ -339,6 +359,7 @@ export type ServiceHistoryEventUncheckedUpdateManyInput = {
   toStatus?: Prisma.NullableEnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorId?: Prisma.StringFieldUpdateOperationsInput | string
+  technicianId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -360,6 +381,7 @@ export type ServiceHistoryEventCountOrderByAggregateInput = {
   toStatus?: Prisma.SortOrder
   note?: Prisma.SortOrder
   actorId?: Prisma.SortOrder
+  technicianId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -371,6 +393,7 @@ export type ServiceHistoryEventMaxOrderByAggregateInput = {
   toStatus?: Prisma.SortOrder
   note?: Prisma.SortOrder
   actorId?: Prisma.SortOrder
+  technicianId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -382,6 +405,7 @@ export type ServiceHistoryEventMinOrderByAggregateInput = {
   toStatus?: Prisma.SortOrder
   note?: Prisma.SortOrder
   actorId?: Prisma.SortOrder
+  technicianId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -392,10 +416,24 @@ export type ServiceHistoryEventCreateNestedManyWithoutActorInput = {
   connect?: Prisma.ServiceHistoryEventWhereUniqueInput | Prisma.ServiceHistoryEventWhereUniqueInput[]
 }
 
+export type ServiceHistoryEventCreateNestedManyWithoutTechnicianInput = {
+  create?: Prisma.XOR<Prisma.ServiceHistoryEventCreateWithoutTechnicianInput, Prisma.ServiceHistoryEventUncheckedCreateWithoutTechnicianInput> | Prisma.ServiceHistoryEventCreateWithoutTechnicianInput[] | Prisma.ServiceHistoryEventUncheckedCreateWithoutTechnicianInput[]
+  connectOrCreate?: Prisma.ServiceHistoryEventCreateOrConnectWithoutTechnicianInput | Prisma.ServiceHistoryEventCreateOrConnectWithoutTechnicianInput[]
+  createMany?: Prisma.ServiceHistoryEventCreateManyTechnicianInputEnvelope
+  connect?: Prisma.ServiceHistoryEventWhereUniqueInput | Prisma.ServiceHistoryEventWhereUniqueInput[]
+}
+
 export type ServiceHistoryEventUncheckedCreateNestedManyWithoutActorInput = {
   create?: Prisma.XOR<Prisma.ServiceHistoryEventCreateWithoutActorInput, Prisma.ServiceHistoryEventUncheckedCreateWithoutActorInput> | Prisma.ServiceHistoryEventCreateWithoutActorInput[] | Prisma.ServiceHistoryEventUncheckedCreateWithoutActorInput[]
   connectOrCreate?: Prisma.ServiceHistoryEventCreateOrConnectWithoutActorInput | Prisma.ServiceHistoryEventCreateOrConnectWithoutActorInput[]
   createMany?: Prisma.ServiceHistoryEventCreateManyActorInputEnvelope
+  connect?: Prisma.ServiceHistoryEventWhereUniqueInput | Prisma.ServiceHistoryEventWhereUniqueInput[]
+}
+
+export type ServiceHistoryEventUncheckedCreateNestedManyWithoutTechnicianInput = {
+  create?: Prisma.XOR<Prisma.ServiceHistoryEventCreateWithoutTechnicianInput, Prisma.ServiceHistoryEventUncheckedCreateWithoutTechnicianInput> | Prisma.ServiceHistoryEventCreateWithoutTechnicianInput[] | Prisma.ServiceHistoryEventUncheckedCreateWithoutTechnicianInput[]
+  connectOrCreate?: Prisma.ServiceHistoryEventCreateOrConnectWithoutTechnicianInput | Prisma.ServiceHistoryEventCreateOrConnectWithoutTechnicianInput[]
+  createMany?: Prisma.ServiceHistoryEventCreateManyTechnicianInputEnvelope
   connect?: Prisma.ServiceHistoryEventWhereUniqueInput | Prisma.ServiceHistoryEventWhereUniqueInput[]
 }
 
@@ -413,6 +451,20 @@ export type ServiceHistoryEventUpdateManyWithoutActorNestedInput = {
   deleteMany?: Prisma.ServiceHistoryEventScalarWhereInput | Prisma.ServiceHistoryEventScalarWhereInput[]
 }
 
+export type ServiceHistoryEventUpdateManyWithoutTechnicianNestedInput = {
+  create?: Prisma.XOR<Prisma.ServiceHistoryEventCreateWithoutTechnicianInput, Prisma.ServiceHistoryEventUncheckedCreateWithoutTechnicianInput> | Prisma.ServiceHistoryEventCreateWithoutTechnicianInput[] | Prisma.ServiceHistoryEventUncheckedCreateWithoutTechnicianInput[]
+  connectOrCreate?: Prisma.ServiceHistoryEventCreateOrConnectWithoutTechnicianInput | Prisma.ServiceHistoryEventCreateOrConnectWithoutTechnicianInput[]
+  upsert?: Prisma.ServiceHistoryEventUpsertWithWhereUniqueWithoutTechnicianInput | Prisma.ServiceHistoryEventUpsertWithWhereUniqueWithoutTechnicianInput[]
+  createMany?: Prisma.ServiceHistoryEventCreateManyTechnicianInputEnvelope
+  set?: Prisma.ServiceHistoryEventWhereUniqueInput | Prisma.ServiceHistoryEventWhereUniqueInput[]
+  disconnect?: Prisma.ServiceHistoryEventWhereUniqueInput | Prisma.ServiceHistoryEventWhereUniqueInput[]
+  delete?: Prisma.ServiceHistoryEventWhereUniqueInput | Prisma.ServiceHistoryEventWhereUniqueInput[]
+  connect?: Prisma.ServiceHistoryEventWhereUniqueInput | Prisma.ServiceHistoryEventWhereUniqueInput[]
+  update?: Prisma.ServiceHistoryEventUpdateWithWhereUniqueWithoutTechnicianInput | Prisma.ServiceHistoryEventUpdateWithWhereUniqueWithoutTechnicianInput[]
+  updateMany?: Prisma.ServiceHistoryEventUpdateManyWithWhereWithoutTechnicianInput | Prisma.ServiceHistoryEventUpdateManyWithWhereWithoutTechnicianInput[]
+  deleteMany?: Prisma.ServiceHistoryEventScalarWhereInput | Prisma.ServiceHistoryEventScalarWhereInput[]
+}
+
 export type ServiceHistoryEventUncheckedUpdateManyWithoutActorNestedInput = {
   create?: Prisma.XOR<Prisma.ServiceHistoryEventCreateWithoutActorInput, Prisma.ServiceHistoryEventUncheckedCreateWithoutActorInput> | Prisma.ServiceHistoryEventCreateWithoutActorInput[] | Prisma.ServiceHistoryEventUncheckedCreateWithoutActorInput[]
   connectOrCreate?: Prisma.ServiceHistoryEventCreateOrConnectWithoutActorInput | Prisma.ServiceHistoryEventCreateOrConnectWithoutActorInput[]
@@ -424,6 +476,20 @@ export type ServiceHistoryEventUncheckedUpdateManyWithoutActorNestedInput = {
   connect?: Prisma.ServiceHistoryEventWhereUniqueInput | Prisma.ServiceHistoryEventWhereUniqueInput[]
   update?: Prisma.ServiceHistoryEventUpdateWithWhereUniqueWithoutActorInput | Prisma.ServiceHistoryEventUpdateWithWhereUniqueWithoutActorInput[]
   updateMany?: Prisma.ServiceHistoryEventUpdateManyWithWhereWithoutActorInput | Prisma.ServiceHistoryEventUpdateManyWithWhereWithoutActorInput[]
+  deleteMany?: Prisma.ServiceHistoryEventScalarWhereInput | Prisma.ServiceHistoryEventScalarWhereInput[]
+}
+
+export type ServiceHistoryEventUncheckedUpdateManyWithoutTechnicianNestedInput = {
+  create?: Prisma.XOR<Prisma.ServiceHistoryEventCreateWithoutTechnicianInput, Prisma.ServiceHistoryEventUncheckedCreateWithoutTechnicianInput> | Prisma.ServiceHistoryEventCreateWithoutTechnicianInput[] | Prisma.ServiceHistoryEventUncheckedCreateWithoutTechnicianInput[]
+  connectOrCreate?: Prisma.ServiceHistoryEventCreateOrConnectWithoutTechnicianInput | Prisma.ServiceHistoryEventCreateOrConnectWithoutTechnicianInput[]
+  upsert?: Prisma.ServiceHistoryEventUpsertWithWhereUniqueWithoutTechnicianInput | Prisma.ServiceHistoryEventUpsertWithWhereUniqueWithoutTechnicianInput[]
+  createMany?: Prisma.ServiceHistoryEventCreateManyTechnicianInputEnvelope
+  set?: Prisma.ServiceHistoryEventWhereUniqueInput | Prisma.ServiceHistoryEventWhereUniqueInput[]
+  disconnect?: Prisma.ServiceHistoryEventWhereUniqueInput | Prisma.ServiceHistoryEventWhereUniqueInput[]
+  delete?: Prisma.ServiceHistoryEventWhereUniqueInput | Prisma.ServiceHistoryEventWhereUniqueInput[]
+  connect?: Prisma.ServiceHistoryEventWhereUniqueInput | Prisma.ServiceHistoryEventWhereUniqueInput[]
+  update?: Prisma.ServiceHistoryEventUpdateWithWhereUniqueWithoutTechnicianInput | Prisma.ServiceHistoryEventUpdateWithWhereUniqueWithoutTechnicianInput[]
+  updateMany?: Prisma.ServiceHistoryEventUpdateManyWithWhereWithoutTechnicianInput | Prisma.ServiceHistoryEventUpdateManyWithWhereWithoutTechnicianInput[]
   deleteMany?: Prisma.ServiceHistoryEventScalarWhereInput | Prisma.ServiceHistoryEventScalarWhereInput[]
 }
 
@@ -489,6 +555,7 @@ export type ServiceHistoryEventCreateWithoutActorInput = {
   note?: string | null
   createdAt?: Date | string
   serviceRecord: Prisma.ServiceRecordCreateNestedOneWithoutHistoryEventsInput
+  technician?: Prisma.UserCreateNestedOneWithoutAssignedEventsInput
 }
 
 export type ServiceHistoryEventUncheckedCreateWithoutActorInput = {
@@ -498,6 +565,7 @@ export type ServiceHistoryEventUncheckedCreateWithoutActorInput = {
   fromStatus?: $Enums.ServiceStatus | null
   toStatus?: $Enums.ServiceStatus | null
   note?: string | null
+  technicianId?: string | null
   createdAt?: Date | string
 }
 
@@ -508,6 +576,38 @@ export type ServiceHistoryEventCreateOrConnectWithoutActorInput = {
 
 export type ServiceHistoryEventCreateManyActorInputEnvelope = {
   data: Prisma.ServiceHistoryEventCreateManyActorInput | Prisma.ServiceHistoryEventCreateManyActorInput[]
+  skipDuplicates?: boolean
+}
+
+export type ServiceHistoryEventCreateWithoutTechnicianInput = {
+  id?: string
+  type: $Enums.HistoryEventType
+  fromStatus?: $Enums.ServiceStatus | null
+  toStatus?: $Enums.ServiceStatus | null
+  note?: string | null
+  createdAt?: Date | string
+  serviceRecord: Prisma.ServiceRecordCreateNestedOneWithoutHistoryEventsInput
+  actor: Prisma.UserCreateNestedOneWithoutHistoryEventsInput
+}
+
+export type ServiceHistoryEventUncheckedCreateWithoutTechnicianInput = {
+  id?: string
+  serviceRecordId: string
+  type: $Enums.HistoryEventType
+  fromStatus?: $Enums.ServiceStatus | null
+  toStatus?: $Enums.ServiceStatus | null
+  note?: string | null
+  actorId: string
+  createdAt?: Date | string
+}
+
+export type ServiceHistoryEventCreateOrConnectWithoutTechnicianInput = {
+  where: Prisma.ServiceHistoryEventWhereUniqueInput
+  create: Prisma.XOR<Prisma.ServiceHistoryEventCreateWithoutTechnicianInput, Prisma.ServiceHistoryEventUncheckedCreateWithoutTechnicianInput>
+}
+
+export type ServiceHistoryEventCreateManyTechnicianInputEnvelope = {
+  data: Prisma.ServiceHistoryEventCreateManyTechnicianInput | Prisma.ServiceHistoryEventCreateManyTechnicianInput[]
   skipDuplicates?: boolean
 }
 
@@ -538,7 +638,24 @@ export type ServiceHistoryEventScalarWhereInput = {
   toStatus?: Prisma.EnumServiceStatusNullableFilter<"ServiceHistoryEvent"> | $Enums.ServiceStatus | null
   note?: Prisma.StringNullableFilter<"ServiceHistoryEvent"> | string | null
   actorId?: Prisma.StringFilter<"ServiceHistoryEvent"> | string
+  technicianId?: Prisma.StringNullableFilter<"ServiceHistoryEvent"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ServiceHistoryEvent"> | Date | string
+}
+
+export type ServiceHistoryEventUpsertWithWhereUniqueWithoutTechnicianInput = {
+  where: Prisma.ServiceHistoryEventWhereUniqueInput
+  update: Prisma.XOR<Prisma.ServiceHistoryEventUpdateWithoutTechnicianInput, Prisma.ServiceHistoryEventUncheckedUpdateWithoutTechnicianInput>
+  create: Prisma.XOR<Prisma.ServiceHistoryEventCreateWithoutTechnicianInput, Prisma.ServiceHistoryEventUncheckedCreateWithoutTechnicianInput>
+}
+
+export type ServiceHistoryEventUpdateWithWhereUniqueWithoutTechnicianInput = {
+  where: Prisma.ServiceHistoryEventWhereUniqueInput
+  data: Prisma.XOR<Prisma.ServiceHistoryEventUpdateWithoutTechnicianInput, Prisma.ServiceHistoryEventUncheckedUpdateWithoutTechnicianInput>
+}
+
+export type ServiceHistoryEventUpdateManyWithWhereWithoutTechnicianInput = {
+  where: Prisma.ServiceHistoryEventScalarWhereInput
+  data: Prisma.XOR<Prisma.ServiceHistoryEventUpdateManyMutationInput, Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutTechnicianInput>
 }
 
 export type ServiceHistoryEventCreateWithoutServiceRecordInput = {
@@ -549,6 +666,7 @@ export type ServiceHistoryEventCreateWithoutServiceRecordInput = {
   note?: string | null
   createdAt?: Date | string
   actor: Prisma.UserCreateNestedOneWithoutHistoryEventsInput
+  technician?: Prisma.UserCreateNestedOneWithoutAssignedEventsInput
 }
 
 export type ServiceHistoryEventUncheckedCreateWithoutServiceRecordInput = {
@@ -558,6 +676,7 @@ export type ServiceHistoryEventUncheckedCreateWithoutServiceRecordInput = {
   toStatus?: $Enums.ServiceStatus | null
   note?: string | null
   actorId: string
+  technicianId?: string | null
   createdAt?: Date | string
 }
 
@@ -594,6 +713,18 @@ export type ServiceHistoryEventCreateManyActorInput = {
   fromStatus?: $Enums.ServiceStatus | null
   toStatus?: $Enums.ServiceStatus | null
   note?: string | null
+  technicianId?: string | null
+  createdAt?: Date | string
+}
+
+export type ServiceHistoryEventCreateManyTechnicianInput = {
+  id?: string
+  serviceRecordId: string
+  type: $Enums.HistoryEventType
+  fromStatus?: $Enums.ServiceStatus | null
+  toStatus?: $Enums.ServiceStatus | null
+  note?: string | null
+  actorId: string
   createdAt?: Date | string
 }
 
@@ -605,6 +736,7 @@ export type ServiceHistoryEventUpdateWithoutActorInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   serviceRecord?: Prisma.ServiceRecordUpdateOneRequiredWithoutHistoryEventsNestedInput
+  technician?: Prisma.UserUpdateOneWithoutAssignedEventsNestedInput
 }
 
 export type ServiceHistoryEventUncheckedUpdateWithoutActorInput = {
@@ -614,6 +746,7 @@ export type ServiceHistoryEventUncheckedUpdateWithoutActorInput = {
   fromStatus?: Prisma.NullableEnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus | null
   toStatus?: Prisma.NullableEnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  technicianId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -624,6 +757,40 @@ export type ServiceHistoryEventUncheckedUpdateManyWithoutActorInput = {
   fromStatus?: Prisma.NullableEnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus | null
   toStatus?: Prisma.NullableEnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  technicianId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ServiceHistoryEventUpdateWithoutTechnicianInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumHistoryEventTypeFieldUpdateOperationsInput | $Enums.HistoryEventType
+  fromStatus?: Prisma.NullableEnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus | null
+  toStatus?: Prisma.NullableEnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  serviceRecord?: Prisma.ServiceRecordUpdateOneRequiredWithoutHistoryEventsNestedInput
+  actor?: Prisma.UserUpdateOneRequiredWithoutHistoryEventsNestedInput
+}
+
+export type ServiceHistoryEventUncheckedUpdateWithoutTechnicianInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  serviceRecordId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumHistoryEventTypeFieldUpdateOperationsInput | $Enums.HistoryEventType
+  fromStatus?: Prisma.NullableEnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus | null
+  toStatus?: Prisma.NullableEnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ServiceHistoryEventUncheckedUpdateManyWithoutTechnicianInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  serviceRecordId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumHistoryEventTypeFieldUpdateOperationsInput | $Enums.HistoryEventType
+  fromStatus?: Prisma.NullableEnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus | null
+  toStatus?: Prisma.NullableEnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -634,6 +801,7 @@ export type ServiceHistoryEventCreateManyServiceRecordInput = {
   toStatus?: $Enums.ServiceStatus | null
   note?: string | null
   actorId: string
+  technicianId?: string | null
   createdAt?: Date | string
 }
 
@@ -645,6 +813,7 @@ export type ServiceHistoryEventUpdateWithoutServiceRecordInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   actor?: Prisma.UserUpdateOneRequiredWithoutHistoryEventsNestedInput
+  technician?: Prisma.UserUpdateOneWithoutAssignedEventsNestedInput
 }
 
 export type ServiceHistoryEventUncheckedUpdateWithoutServiceRecordInput = {
@@ -654,6 +823,7 @@ export type ServiceHistoryEventUncheckedUpdateWithoutServiceRecordInput = {
   toStatus?: Prisma.NullableEnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorId?: Prisma.StringFieldUpdateOperationsInput | string
+  technicianId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -664,6 +834,7 @@ export type ServiceHistoryEventUncheckedUpdateManyWithoutServiceRecordInput = {
   toStatus?: Prisma.NullableEnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorId?: Prisma.StringFieldUpdateOperationsInput | string
+  technicianId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -677,9 +848,11 @@ export type ServiceHistoryEventSelect<ExtArgs extends runtime.Types.Extensions.I
   toStatus?: boolean
   note?: boolean
   actorId?: boolean
+  technicianId?: boolean
   createdAt?: boolean
   serviceRecord?: boolean | Prisma.ServiceRecordDefaultArgs<ExtArgs>
   actor?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  technician?: boolean | Prisma.ServiceHistoryEvent$technicianArgs<ExtArgs>
 }, ExtArgs["result"]["serviceHistoryEvent"]>
 
 export type ServiceHistoryEventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -690,9 +863,11 @@ export type ServiceHistoryEventSelectCreateManyAndReturn<ExtArgs extends runtime
   toStatus?: boolean
   note?: boolean
   actorId?: boolean
+  technicianId?: boolean
   createdAt?: boolean
   serviceRecord?: boolean | Prisma.ServiceRecordDefaultArgs<ExtArgs>
   actor?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  technician?: boolean | Prisma.ServiceHistoryEvent$technicianArgs<ExtArgs>
 }, ExtArgs["result"]["serviceHistoryEvent"]>
 
 export type ServiceHistoryEventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -703,9 +878,11 @@ export type ServiceHistoryEventSelectUpdateManyAndReturn<ExtArgs extends runtime
   toStatus?: boolean
   note?: boolean
   actorId?: boolean
+  technicianId?: boolean
   createdAt?: boolean
   serviceRecord?: boolean | Prisma.ServiceRecordDefaultArgs<ExtArgs>
   actor?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  technician?: boolean | Prisma.ServiceHistoryEvent$technicianArgs<ExtArgs>
 }, ExtArgs["result"]["serviceHistoryEvent"]>
 
 export type ServiceHistoryEventSelectScalar = {
@@ -716,21 +893,25 @@ export type ServiceHistoryEventSelectScalar = {
   toStatus?: boolean
   note?: boolean
   actorId?: boolean
+  technicianId?: boolean
   createdAt?: boolean
 }
 
-export type ServiceHistoryEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "serviceRecordId" | "type" | "fromStatus" | "toStatus" | "note" | "actorId" | "createdAt", ExtArgs["result"]["serviceHistoryEvent"]>
+export type ServiceHistoryEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "serviceRecordId" | "type" | "fromStatus" | "toStatus" | "note" | "actorId" | "technicianId" | "createdAt", ExtArgs["result"]["serviceHistoryEvent"]>
 export type ServiceHistoryEventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   serviceRecord?: boolean | Prisma.ServiceRecordDefaultArgs<ExtArgs>
   actor?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  technician?: boolean | Prisma.ServiceHistoryEvent$technicianArgs<ExtArgs>
 }
 export type ServiceHistoryEventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   serviceRecord?: boolean | Prisma.ServiceRecordDefaultArgs<ExtArgs>
   actor?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  technician?: boolean | Prisma.ServiceHistoryEvent$technicianArgs<ExtArgs>
 }
 export type ServiceHistoryEventIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   serviceRecord?: boolean | Prisma.ServiceRecordDefaultArgs<ExtArgs>
   actor?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  technician?: boolean | Prisma.ServiceHistoryEvent$technicianArgs<ExtArgs>
 }
 
 export type $ServiceHistoryEventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -738,6 +919,7 @@ export type $ServiceHistoryEventPayload<ExtArgs extends runtime.Types.Extensions
   objects: {
     serviceRecord: Prisma.$ServiceRecordPayload<ExtArgs>
     actor: Prisma.$UserPayload<ExtArgs>
+    technician: Prisma.$UserPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -747,6 +929,7 @@ export type $ServiceHistoryEventPayload<ExtArgs extends runtime.Types.Extensions
     toStatus: $Enums.ServiceStatus | null
     note: string | null
     actorId: string
+    technicianId: string | null
     createdAt: Date
   }, ExtArgs["result"]["serviceHistoryEvent"]>
   composites: {}
@@ -1144,6 +1327,7 @@ export interface Prisma__ServiceHistoryEventClient<T, Null = never, ExtArgs exte
   readonly [Symbol.toStringTag]: "PrismaPromise"
   serviceRecord<T extends Prisma.ServiceRecordDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ServiceRecordDefaultArgs<ExtArgs>>): Prisma.Prisma__ServiceRecordClient<runtime.Types.Result.GetResult<Prisma.$ServiceRecordPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   actor<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  technician<T extends Prisma.ServiceHistoryEvent$technicianArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ServiceHistoryEvent$technicianArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1180,6 +1364,7 @@ export interface ServiceHistoryEventFieldRefs {
   readonly toStatus: Prisma.FieldRef<"ServiceHistoryEvent", 'ServiceStatus'>
   readonly note: Prisma.FieldRef<"ServiceHistoryEvent", 'String'>
   readonly actorId: Prisma.FieldRef<"ServiceHistoryEvent", 'String'>
+  readonly technicianId: Prisma.FieldRef<"ServiceHistoryEvent", 'String'>
   readonly createdAt: Prisma.FieldRef<"ServiceHistoryEvent", 'DateTime'>
 }
     
@@ -1579,6 +1764,25 @@ export type ServiceHistoryEventDeleteManyArgs<ExtArgs extends runtime.Types.Exte
    * Limit how many ServiceHistoryEvents to delete.
    */
   limit?: number
+}
+
+/**
+ * ServiceHistoryEvent.technician
+ */
+export type ServiceHistoryEvent$technicianArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

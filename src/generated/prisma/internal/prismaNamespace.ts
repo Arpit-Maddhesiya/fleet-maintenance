@@ -972,6 +972,7 @@ export const ServiceHistoryEventScalarFieldEnum = {
   toStatus: 'toStatus',
   note: 'note',
   actorId: 'actorId',
+  technicianId: 'technicianId',
   createdAt: 'createdAt'
 } as const
 

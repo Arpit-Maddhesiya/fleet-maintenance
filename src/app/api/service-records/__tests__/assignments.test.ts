@@ -123,6 +123,7 @@ describe("POST /api/service-records/[id]/assignments", () => {
         serviceRecordId: "r1",
         type: "ASSIGNED",
         actorId: "u-manager",
+        technicianId: "u-tech1",
       },
     });
   });

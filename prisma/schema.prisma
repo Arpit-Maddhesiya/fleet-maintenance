@@ -39,6 +39,7 @@ model User {
   createdAt      DateTime @default(now())
   assignments    ServiceAssignment[]
   historyEvents  ServiceHistoryEvent[]
+  assignedEvents ServiceHistoryEvent[] @relation("EventTechnician")
   dismissedAlerts Alert[]  @relation("AlertDismissedBy")
 
   @@index([role])
@@ -109,6 +110,11 @@ model ServiceHistoryEvent {
   note            String?
   actorId         String
   actor           User              @relation(fields: [actorId], references: [id])
+  // Which technician an ASSIGNED/UNASSIGNED event refers to (null for other
+  // event types). Captured at write time so the audit timeline can name the
+  // technician without guessing from the assignment history.
+  technicianId    String?
+  technician      User?             @relation("EventTechnician", fields: [technicianId], references: [id])
   createdAt       DateTime          @default(now())
 
   @@index([serviceRecordId, createdAt])

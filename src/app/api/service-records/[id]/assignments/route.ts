@@ -77,6 +77,7 @@ export async function POST(
           serviceRecordId: record.id,
           type: HistoryEventType.ASSIGNED,
           actorId: session.user.id,
+          technicianId: technician.id,
         },
       });
 
