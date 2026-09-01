@@ -2,7 +2,7 @@
 
 ## How the work was split
 
-The build followed the module plan in `backend-prompts.md` exactly — nine modules, each one a discrete slice of the system that the next module builds on:
+The build followed the module plan in `docs/ai-prompts.md` exactly — nine modules, each one a discrete slice of the system that the next module builds on:
 
 0. Schema & migration (models, enums, indexes, Neon datasource)
 1. Auth & role enforcement (Auth.js v5, JWT, `requireRole`)
