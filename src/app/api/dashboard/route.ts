@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { handleError } from "@/lib/api";
-import { GRACE_PERIOD_DAYS } from "@/lib/overdue";
+import { isOverdue } from "@/lib/overdue";
 import { ServiceStatus } from "@/generated/prisma/enums";
 
 /** ISO week: Monday-based, matching Date.prototype.toISOString (UTC). */
@@ -46,7 +46,6 @@ export async function GET() {
     const weekStart = startOfIsoWeek(isoWeekKey(now)); // Monday 00:00 UTC this week
     const nextWeekStart = new Date(weekStart);
     nextWeekStart.setUTCDate(nextWeekStart.getUTCDate() + 7);
-    const dueGraceCutoff = new Date(now.getTime() - GRACE_PERIOD_DAYS * 86400000);
 
     const last8Keys = Array.from({ length: 8 }, (_, i) => {
       const d = new Date(weekStart);
@@ -82,12 +81,14 @@ export async function GET() {
           completedAt: { gte: weekStart, lt: nextWeekStart },
         },
       }),
-      prisma.serviceRecord.count({
-        where: {
-          status: ServiceStatus.DUE,
-          dueSince: { lt: dueGraceCutoff },
-        },
-      }),
+      // Overdue count uses the shared isOverdue() definition (DUE + past the
+      // grace period) rather than re-expressing the cutoff here.
+      prisma.serviceRecord
+        .findMany({
+          where: { status: ServiceStatus.DUE },
+          select: { dueSince: true, status: true },
+        })
+        .then((dueRecords) => dueRecords.filter(isOverdue).length),
       prisma.serviceRecord.groupBy({
         by: ["status"],
         _count: { _all: true },

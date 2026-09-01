@@ -8,6 +8,7 @@ venv/
 .env
 .commandcode
 backend-prompts.md
+frontend-integration-prompts.md
 .env.local
 .env.*.local
 *.log
