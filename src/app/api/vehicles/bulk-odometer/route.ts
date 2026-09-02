@@ -10,7 +10,7 @@ interface OdometerRow {
   odometerReading: string;
 }
 
-// POST /api/vehicles/bulk-odometer — FLEET_MANAGER only
+// POST /api/vehicles/bulk-odometer — FLEET_MANAGER or ADMIN only
 // Accepts a CSV upload (multipart/form-data) with columns
 // registrationNumber, odometerReading. Rows are applied one at a time and
 // failures are per-row only: a lower-than-current reading or an unknown

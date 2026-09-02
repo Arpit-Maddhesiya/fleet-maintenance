@@ -39,7 +39,7 @@ export async function GET(
   }
 }
 
-// PATCH /api/vehicles/[id] — FLEET_MANAGER only
+// PATCH /api/vehicles/[id] — FLEET_MANAGER or ADMIN only
 // NOTE: currentOdometer is intentionally not editable here — updating a
 // vehicle's odometer is handled separately (bulk CSV update + a dedicated
 // reading endpoint later), and readings must never be lowered.

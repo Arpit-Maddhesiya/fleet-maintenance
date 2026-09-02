@@ -16,8 +16,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api-client";
 import { notifyAlertCountChanged } from "@/lib/alert-events";
+import { isManagerRole } from "@/lib/roles";
 import type { Alert, AlertsResponse } from "@/lib/types";
-import { Role } from "@/generated/prisma/enums";
 
 /** Whole days elapsed since an ISO date string, floored ("2 days"). */
 function daysSince(iso: string): number {
@@ -42,7 +42,7 @@ function formatShortDate(iso: string): string {
 
 export default function AlertsPage() {
   const { data: session } = useSession();
-  const isManager = session?.user?.role === Role.FLEET_MANAGER;
+  const isManager = isManagerRole(session?.user?.role);
 
   const [alerts, setAlerts] = useState<Alert[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);

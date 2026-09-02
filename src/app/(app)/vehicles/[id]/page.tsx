@@ -26,10 +26,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { apiFetch } from "@/lib/api-client";
+import { isManagerRole } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 import { getVehicleStatus } from "@/lib/vehicle-status";
 import type { ServiceRecord, VehicleWithRecords } from "@/lib/types";
-import { Role } from "@/generated/prisma/enums";
 import { VehicleDialog } from "@/components/vehicles/vehicle-dialog";
 
 const statusVariant: Record<
@@ -57,7 +57,7 @@ export default function VehicleDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { data: session } = useSession();
-  const isManager = session?.user?.role === Role.FLEET_MANAGER;
+  const isManager = isManagerRole(session?.user?.role);
   const [vehicle, setVehicle] = useState<VehicleWithRecords | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);

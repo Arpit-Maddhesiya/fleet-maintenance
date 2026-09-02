@@ -27,7 +27,8 @@ import type {
   Vehicle,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Role, ServiceStatus } from "@/generated/prisma/enums";
+import { ServiceStatus } from "@/generated/prisma/enums";
+import { isManagerRole } from "@/lib/roles";
 import { CreateRecordDialog } from "@/components/service-records/create-record-dialog";
 import { ExportButton } from "@/components/service-records/export-button";
 import {
@@ -55,7 +56,7 @@ export default function ServiceRecordsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
-  const isManager = session?.user?.role === Role.FLEET_MANAGER;
+  const isManager = isManagerRole(session?.user?.role);
 
   const [records, setRecords] = useState<ServiceRecordListItem[] | null>(null);
   const [total, setTotal] = useState(0);

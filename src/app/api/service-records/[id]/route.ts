@@ -1,13 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth, isManagerRole } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { updateServiceRecordDescriptionSchema } from "@/lib/validation/service-record";
 import { handleError, NotFoundError } from "@/lib/api";
-import { Role } from "@/generated/prisma/enums";
 
 // GET /api/service-records/[id] — any authenticated user who can see the
-// record (a technician must be actively assigned; a fleet manager can fetch
-// any). Returns the record with its vehicle and currently assigned
+// record (a technician must be actively assigned; a fleet manager or admin
+// can fetch any). Returns the record with its vehicle and currently assigned
 // technicians, so the detail page renders without follow-up requests.
 export async function GET(
   _request: NextRequest,
@@ -37,7 +36,7 @@ export async function GET(
 
     // Same scoping rule as the list endpoint and the timeline: a technician
     // can only view records they're actively assigned to.
-    if (session.user.role !== Role.FLEET_MANAGER) {
+    if (!isManagerRole(session.user.role)) {
       const isAssigned = record.assignments.some(
         (a) => a.technicianId === session.user.id
       );
@@ -89,7 +88,7 @@ export async function PATCH(
     });
     if (!record) throw new NotFoundError("Service record not found.");
 
-    if (session.user.role !== Role.FLEET_MANAGER) {
+    if (!isManagerRole(session.user.role)) {
       const isAssigned = record.assignments.some(
         (a) => a.technicianId === session.user.id && a.unassignedAt === null
       );

@@ -12,12 +12,13 @@ import {
   MenuIcon,
   TruckIcon,
   UserIcon,
+  UsersIcon,
   XIcon,
 } from "lucide-react";
 
 import { apiFetch } from "@/lib/api-client";
 import { ALERT_COUNT_EVENT } from "@/lib/alert-events";
-import { Role } from "@/generated/prisma/enums";
+import { isAdminRole, isManagerRole } from "@/lib/roles";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -39,7 +40,8 @@ export function AppNav() {
   const [alertCount, setAlertCount] = useState<number | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const isManager = session?.user?.role === Role.FLEET_MANAGER;
+  const isManager = isManagerRole(session?.user?.role);
+  const isAdmin = isAdminRole(session?.user?.role);
 
   const refreshAlertCount = useCallback(async () => {
     try {
@@ -127,6 +129,7 @@ export function AppNav() {
             </div>
             <NavContent
               isManager={isManager}
+              isAdmin={isAdmin}
               alertCount={alertCount}
               pathname={pathname}
             />
@@ -145,6 +148,7 @@ export function AppNav() {
         </div>
         <NavContent
           isManager={isManager}
+          isAdmin={isAdmin}
           alertCount={alertCount}
           pathname={pathname}
         />
@@ -156,10 +160,12 @@ export function AppNav() {
 
 function NavContent({
   isManager,
+  isAdmin,
   alertCount,
   pathname,
 }: {
   isManager: boolean;
+  isAdmin: boolean;
   alertCount: number | null;
   pathname: string;
 }) {
@@ -194,6 +200,13 @@ function NavContent({
           </Badge>
         ) : null}
       </NavLink>
+
+      {isAdmin ? (
+        <NavLink href="/users" active={pathname.startsWith("/users")}>
+          <UsersIcon className="size-4" />
+          Users
+        </NavLink>
+      ) : null}
     </nav>
   );
 }

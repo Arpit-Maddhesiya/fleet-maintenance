@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { auth, requireRole } from "@/lib/auth";
+import { auth, isManagerRole, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import {
   createServiceRecordSchema,
@@ -60,15 +60,14 @@ export async function GET(request: NextRequest) {
       ...(vehicleId ? { vehicleId } : {}),
       ...(status ? { status } : {}),
       // A technician can only ever see their own active assignments; anyone
-      // else (fleet manager) may filter by any technician.
-      ...(technicianId || session.user.role === Role.TECHNICIAN
+      // else (fleet manager or admin) may filter by any technician.
+      ...(technicianId || !isManagerRole(session.user.role)
         ? {
             assignments: {
               some: {
-                technicianId:
-                  session.user.role === Role.TECHNICIAN
-                    ? session.user.id
-                    : technicianId,
+                technicianId: !isManagerRole(session.user.role)
+                  ? session.user.id
+                  : technicianId,
                 unassignedAt: null,
               },
             },
@@ -102,13 +101,12 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/service-records — FLEET_MANAGER only
+// POST /api/service-records — FLEET_MANAGER or ADMIN only
 // A record starts life as DUE with dueSince = now; booking (scheduling +
 // assigning a technician) is a separate lifecycle step.
 export async function POST(request: NextRequest) {
   try {
     const session = await requireRole(Role.FLEET_MANAGER);
-
     const body = await request.json();
     const parsed = createServiceRecordSchema.safeParse(body);
     if (!parsed.success) {

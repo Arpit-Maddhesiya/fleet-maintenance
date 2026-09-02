@@ -14,7 +14,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api-client";
 import type { ServiceRecordListItem } from "@/lib/types";
-import { Role, ServiceStatus } from "@/generated/prisma/enums";
+import { ServiceStatus } from "@/generated/prisma/enums";
+import { isManagerRole } from "@/lib/roles";
 import {
   ServiceRecordsTable,
   STATUS_LABELS,
@@ -35,7 +36,7 @@ const ALL_STATUSES = "__all";
  */
 export default function MyRecordsPage() {
   const { data: session } = useSession();
-  const isManager = session?.user?.role === Role.FLEET_MANAGER;
+  const isManager = isManagerRole(session?.user?.role);
 
   const [records, setRecords] = useState<ServiceRecordListItem[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);

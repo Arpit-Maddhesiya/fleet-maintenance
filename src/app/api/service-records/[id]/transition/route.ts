@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { requireRole } from "@/lib/auth";
+import { requireRole, isManagerRole } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { transitionSchema } from "@/lib/validation/service-record";
 import { handleError, NotFoundError } from "@/lib/api";
@@ -48,10 +48,11 @@ export async function POST(
     });
     if (!record) throw new NotFoundError("Service record not found.");
 
-    // START and COMPLETE may be performed by the fleet manager, or by a
-    // technician the record is currently assigned to. BOOK is manager-only
-    // (checked above). Anyone else is rejected before the state machine runs.
-    if (action !== "BOOK" && session.user.role !== Role.FLEET_MANAGER) {
+    // START and COMPLETE may be performed by the fleet manager (or admin),
+    // or by a technician the record is currently assigned to. BOOK is
+    // manager-only (checked above). Anyone else is rejected before the state
+    // machine runs.
+    if (action !== "BOOK" && !isManagerRole(session.user.role)) {
       const isAssigned = record.assignments.some(
         (a) => a.technicianId === session.user.id && a.unassignedAt === null
       );

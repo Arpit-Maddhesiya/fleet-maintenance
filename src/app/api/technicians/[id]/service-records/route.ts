@@ -24,10 +24,10 @@ export async function GET(
 
     const { id } = await params;
 
-    if (
-      session.user.role === Role.TECHNICIAN &&
-      session.user.id !== id
-    ) {
+    // Admins and fleet managers may view any technician's list; a technician
+    // may only view their own.
+    const self = session.user.role === Role.TECHNICIAN ? session.user.id : null;
+    if (self && self !== id) {
       return NextResponse.json(
         { error: "You can only view your own service records." },
         { status: 403 }

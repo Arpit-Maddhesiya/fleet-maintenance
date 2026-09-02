@@ -50,27 +50,46 @@ export class UnauthenticatedError extends Error {
 export class ForbiddenError extends Error {
   constructor(
     message = "You do not have permission to perform this action.",
-    public requiredRole?: Role
+    public requiredRole?: Role | Role[]
   ) {
     super(message);
     this.name = "ForbiddenError";
   }
 }
 
+// Role helpers live in the client-safe module src/lib/roles.ts (shared with
+// client components); re-export so server routes can keep importing them from
+// here.
+import {
+  MANAGER_ROLES,
+  USER_ADMIN_ROLES,
+  isAdminRole,
+  isManagerRole,
+  allowedRoles,
+} from "@/lib/roles";
+export {
+  MANAGER_ROLES,
+  USER_ADMIN_ROLES,
+  isAdminRole,
+  isManagerRole,
+  allowedRoles,
+};
+
 /**
  * Guards a server action or route handler. Throws UnauthenticatedError when
  * the caller is not signed in, or ForbiddenError when their role does not
- * match.
+ * match. Pass the privileged roles (e.g. requireRole(Role.FLEET_MANAGER));
+ * an ADMIN is always allowed.
  */
-export async function requireRole(role: Role) {
+export async function requireRole(...roles: Role[]) {
   const session = await auth();
   if (!session?.user) {
     throw new UnauthenticatedError();
   }
-  if (session.user.role !== role) {
+  if (!allowedRoles(...roles).includes(session.user.role)) {
     throw new ForbiddenError(
-      `This action requires the ${role} role.`,
-      role
+      `This action requires one of the following roles: ${allowedRoles(...roles).join(", ")}.`,
+      allowedRoles(...roles)
     );
   }
   return session;

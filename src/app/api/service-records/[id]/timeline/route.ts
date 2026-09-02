@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth, isManagerRole } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { handleError, NotFoundError } from "@/lib/api";
 import { Role, HistoryEventType, ServiceStatus } from "@/generated/prisma/enums";
@@ -44,8 +44,9 @@ export function summarizeEvent(
 
 // GET /api/service-records/[id]/timeline — any authenticated user who can see
 // the record. Technician callers are scoped to records they're actively
-// assigned to (same rule as Module 5's list endpoint); a fleet manager can
-// fetch any. Returns events oldest-first with actor + technician resolved.
+// assigned to (same rule as Module 5's list endpoint); a fleet manager or
+// admin can fetch any. Returns events oldest-first with actor + technician
+// resolved.
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -66,7 +67,7 @@ export async function GET(
     });
     if (!record) throw new NotFoundError("Service record not found.");
 
-    if (session.user.role !== Role.FLEET_MANAGER) {
+    if (!isManagerRole(session.user.role)) {
       const isAssigned = record.assignments.some(
         (a) => a.technicianId === session.user.id && a.unassignedAt === null
       );

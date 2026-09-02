@@ -5,7 +5,7 @@ import { createVehicleSchema } from "@/lib/validation/vehicle";
 import { handleError } from "@/lib/api";
 import { Role } from "@/generated/prisma/enums";
 
-// POST /api/vehicles — FLEET_MANAGER only
+// POST /api/vehicles — FLEET_MANAGER or ADMIN only
 export async function POST(request: NextRequest) {
   try {
     await requireRole(Role.FLEET_MANAGER);

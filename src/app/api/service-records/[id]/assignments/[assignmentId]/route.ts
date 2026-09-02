@@ -4,7 +4,8 @@ import { prisma } from "@/lib/db";
 import { handleError, NotFoundError } from "@/lib/api";
 import { Role, HistoryEventType } from "@/generated/prisma/enums";
 
-// DELETE /api/service-records/[id]/assignments/[assignmentId] — FLEET_MANAGER only
+// DELETE /api/service-records/[id]/assignments/[assignmentId] — FLEET_MANAGER
+// or ADMIN only
 // Soft-removes an assignment: sets unassignedAt = now instead of deleting the
 // row, so the assignment stays in the audit history. The record itself is not
 // touched, and the endpoint is idempotent — unassigning an already-unassigned

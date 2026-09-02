@@ -47,7 +47,8 @@ import type {
   TimelineEvent,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Role, ServiceStatus } from "@/generated/prisma/enums";
+import { ServiceStatus } from "@/generated/prisma/enums";
+import { isManagerRole } from "@/lib/roles";
 
 const STATUS_LABELS: Record<ServiceStatus, string> = {
   DUE: "Due",
@@ -96,7 +97,7 @@ export default function ServiceRecordDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { data: session } = useSession();
-  const isManager = session?.user?.role === Role.FLEET_MANAGER;
+  const isManager = isManagerRole(session?.user?.role);
 
   const [record, setRecord] = useState<ServiceRecordDetail | null>(null);
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);

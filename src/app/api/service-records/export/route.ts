@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth, isManagerRole } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { listServiceRecordsQuerySchema } from "@/lib/validation/service-record";
 import { handleError } from "@/lib/api";
@@ -12,8 +12,9 @@ function escapeCsv(value: string): string {
 
 // GET /api/service-records/export — any authenticated user
 // Same authorization + filters as the list endpoint (Module 5): a technician
-// is scoped to their own active assignments, a manager sees everything and
-// may filter by the list query params. Streams back a CSV attachment.
+// is scoped to their own active assignments, a manager or admin sees
+// everything and may filter by the list query params. Streams back a CSV
+// attachment.
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
@@ -46,14 +47,13 @@ export async function GET(request: NextRequest) {
       ...(status ? { status } : {}),
       // Same technician scoping as the list endpoint: a technician's id wins
       // over any technicianId filter they pass.
-      ...(technicianId || session.user.role === Role.TECHNICIAN
+      ...(technicianId || !isManagerRole(session.user.role)
         ? {
             assignments: {
               some: {
-                technicianId:
-                  session.user.role === Role.TECHNICIAN
-                    ? session.user.id
-                    : technicianId,
+                technicianId: !isManagerRole(session.user.role)
+                  ? session.user.id
+                  : technicianId,
                 unassignedAt: null,
               },
             },

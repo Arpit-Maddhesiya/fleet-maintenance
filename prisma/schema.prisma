@@ -11,6 +11,7 @@ datasource db {
 }
 
 enum Role {
+  ADMIN
   FLEET_MANAGER
   TECHNICIAN
 }

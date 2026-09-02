@@ -153,3 +153,26 @@ export interface DashboardData {
   byTechnician: Record<string, number>;
   completedPerWeek: { week: string; count: number }[];
 }
+
+/** Roles an admin can assign when creating a user (ADMIN excluded — an
+ *  admin can only be created by seeding, never through the UI). */
+export type CreatableRole = "FLEET_MANAGER" | "TECHNICIAN";
+
+/** Body for POST /api/users (create user). */
+export interface CreateUserInput {
+  name: string;
+  email: string;
+  password: string;
+  role: CreatableRole;
+}
+
+/** GET /api/users — one row of the user-management list. */
+export interface UserRow {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  createdAt: string;
+  /** Count of active service assignments (unassignedAt = null). */
+  activeAssignments: number;
+}

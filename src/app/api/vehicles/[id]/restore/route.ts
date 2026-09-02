@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { handleError } from "@/lib/api";
 import { Role } from "@/generated/prisma/enums";
 
-// POST /api/vehicles/[id]/restore — FLEET_MANAGER only
+// POST /api/vehicles/[id]/restore — FLEET_MANAGER or ADMIN only
 export async function POST(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }

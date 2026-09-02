@@ -16,8 +16,10 @@ request can take up to a minute.>
 
 | Role | Email | Password |
 |------|-------|----------|
-| <role 1> | | |
-| <role 2> | | |
+| Admin | admin@fleet.test | password123 |
+| Fleet Manager | manager@fleet.test | password123 |
+| Technician | tech1@fleet.test | password123 |
+| Technician | tech2@fleet.test | password123 |
 
 ## Stack
 

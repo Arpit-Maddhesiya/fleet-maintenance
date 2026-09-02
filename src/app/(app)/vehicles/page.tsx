@@ -24,14 +24,14 @@ import {
 } from "@/components/ui/table";
 import { apiFetch } from "@/lib/api-client";
 import type { Vehicle } from "@/lib/types";
-import { Role } from "@/generated/prisma/enums";
+import { isManagerRole } from "@/lib/roles";
 import { VehicleDialog } from "@/components/vehicles/vehicle-dialog";
 import { ArchiveAction } from "@/components/vehicles/archive-action";
 import { BulkOdometerDialog } from "@/components/vehicles/bulk-odometer-dialog";
 
 export default function VehiclesPage() {
   const { data: session } = useSession();
-  const isManager = session?.user?.role === Role.FLEET_MANAGER;
+  const isManager = isManagerRole(session?.user?.role);
 
   const [vehicles, setVehicles] = useState<Vehicle[] | null>(null);
   const [showArchived, setShowArchived] = useState(false);

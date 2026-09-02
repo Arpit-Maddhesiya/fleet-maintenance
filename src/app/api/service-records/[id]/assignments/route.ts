@@ -5,7 +5,7 @@ import { createAssignmentSchema } from "@/lib/validation/service-record";
 import { handleError, NotFoundError } from "@/lib/api";
 import { Role, HistoryEventType } from "@/generated/prisma/enums";
 
-// POST /api/service-records/[id]/assignments — FLEET_MANAGER only
+// POST /api/service-records/[id]/assignments — FLEET_MANAGER or ADMIN only
 // Adds a technician to a record after booking. A technician with an active
 // (unassignedAt = null) assignment to this record cannot be added again — the
 // assignment is soft-removed (UNASSIGNED) rather than deleted so history is

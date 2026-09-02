@@ -13,6 +13,11 @@ async function main() {
 
   const users = [
     {
+      email: "admin@fleet.test",
+      name: "Administrator",
+      role: Role.ADMIN,
+    },
+    {
       email: "manager@fleet.test",
       name: "Fleet Manager",
       role: Role.FLEET_MANAGER,

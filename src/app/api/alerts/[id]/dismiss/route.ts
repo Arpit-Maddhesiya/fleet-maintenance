@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { handleError, NotFoundError } from "@/lib/api";
 import { Role } from "@/generated/prisma/enums";
 
-// POST /api/alerts/[id]/dismiss — FLEET_MANAGER only.
+// POST /api/alerts/[id]/dismiss — FLEET_MANAGER or ADMIN only.
 // Dismissing only stamps the alert row (dismissedAt + who did it); the row is
 // never deleted, so the timeline of "this alert existed and was dismissed"
 // survives. The unique [vehicleId, serviceCycle] constraint means dismissing
