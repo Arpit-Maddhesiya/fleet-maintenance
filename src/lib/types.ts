@@ -110,6 +110,40 @@ export interface TimelineEvent {
   summary: string;
 }
 
+/** One hit from GET /api/search for a vehicle (registration, make, model). */
+export interface SearchVehicleHit {
+  id: string;
+  registrationNumber: string;
+  make: string;
+  model: string;
+  currentOdometer: number;
+  archivedAt: string | null;
+}
+
+/** One hit from GET /api/search for a service record. */
+export interface SearchServiceRecordHit {
+  id: string;
+  description: string;
+  status: ServiceStatus;
+  vehicle: { registrationNumber: string };
+}
+
+/** One hit from GET /api/search for a person (technician or manager). */
+export interface SearchPersonHit {
+  id: string;
+  name: string;
+  email: string;
+  role: "ADMIN" | "FLEET_MANAGER" | "TECHNICIAN";
+}
+
+/** GET /api/search?q= — grouped universal-search response. */
+export interface SearchResponse {
+  vehicles: SearchVehicleHit[];
+  serviceRecords: SearchServiceRecordHit[];
+  technicians: SearchPersonHit[];
+  managers: SearchPersonHit[];
+}
+
 /** One row of the report from POST /api/vehicles/bulk-odometer. */
 export interface BulkOdometerRowResult {
   /** 1-based CSV row number (header is row 1, so data starts at 2). */

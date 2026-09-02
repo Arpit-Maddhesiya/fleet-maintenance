@@ -19,11 +19,13 @@ import {
   CheckCircle2Icon,
   ClipboardListIcon,
   RefreshCwIcon,
+  SearchIcon,
   UsersIcon,
   WrenchIcon,
 } from "lucide-react";
 
 import { apiFetch } from "@/lib/api-client";
+import { openCommandSearch } from "@/lib/command-search-events";
 import type { DashboardData } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { ServiceStatus } from "@/generated/prisma/enums";
@@ -196,6 +198,23 @@ export default function DashboardPage() {
             Updated {formatTime(loadedAt)}
           </p>
         ) : null}
+      </div>
+
+      {/* Header row: a universal-search trigger (Ctrl+K also works anywhere). */}
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={openCommandSearch}
+          className="group inline-flex h-9 w-full max-w-80 items-center gap-2 rounded-lg border bg-card px-3 text-sm text-muted-foreground shadow-xs transition-colors hover:border-ring hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none sm:w-72"
+        >
+          <SearchIcon className="size-4 shrink-0" aria-hidden />
+          <span className="min-w-0 flex-1 truncate text-left">
+            Search fleet, records, people…
+          </span>
+          <kbd className="hidden shrink-0 items-center gap-0.5 rounded border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline-flex">
+            Ctrl K
+          </kbd>
+        </button>
       </div>
 
       {/* KPI tiles — each deep-links to the pre-filtered records list. */}
