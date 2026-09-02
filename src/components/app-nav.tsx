@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 import {
-  BellIcon,
+  BellRingIcon,
   ClipboardListIcon,
   LayoutDashboardIcon,
   LogOutIcon,
@@ -26,7 +26,8 @@ interface AlertsResponse {
   count: number;
 }
 
-const navLinks = [
+/** Nav links that are always visible. */
+const PRIMARY_LINKS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboardIcon },
   { href: "/vehicles", label: "Vehicles", icon: TruckIcon },
   { href: "/service-records", label: "Service Records", icon: ClipboardListIcon },
@@ -74,67 +75,80 @@ export function AppNav() {
     return null;
   }
 
+  const initials =
+    session?.user?.name
+      ?.split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part: string) => part[0]?.toUpperCase() ?? "")
+      .join("") || "?";
+
+  const user = {
+    name: session?.user?.name,
+    email: session?.user?.email,
+    initials,
+  };
+
   return (
     <>
-      {/* Mobile header — a slim bar with a hamburger; the drawer slides in
-          over the content. The desktop sidebar is hidden below lg. */}
-      <div className="flex h-14 shrink-0 items-center gap-2 border-b bg-card px-4 lg:hidden">
-        <Button
-          variant="ghost"
-          size="icon"
+      {/* Mobile header — a slim branded bar with a hamburger; the drawer
+          slides in over the content. Hidden on desktop. */}
+      <div className="flex h-14 shrink-0 items-center gap-1 border-b border-white/[0.06] bg-[#161311] px-2 text-stone-100 lg:hidden">
+        <button
+          type="button"
           onClick={() => setMobileOpen(true)}
           aria-label="Open navigation menu"
+          className="flex size-9 items-center justify-center rounded-lg text-stone-300 transition-colors hover:bg-white/[0.06] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
         >
-          <MenuIcon className="size-5" />
-        </Button>
-        <span className="font-semibold">Fleet Maintenance</span>
+          <MenuIcon className="size-5" aria-hidden />
+        </button>
+        <BrandMark />
       </div>
 
       {/* Mobile drawer */}
       {mobileOpen ? (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
-            className="absolute inset-0 bg-black/50"
+            className="absolute inset-0 bg-black/60"
             onClick={() => setMobileOpen(false)}
             aria-hidden="true"
           />
-          <div className="absolute inset-y-0 left-0 flex w-72 flex-col border-r bg-card shadow-lg">
-            <div className="flex h-14 items-center justify-between border-b px-4">
-              <div className="flex items-center gap-2">
-                <TruckIcon className="size-5" />
-                <span className="font-semibold">Fleet Maintenance</span>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
+          <div className="absolute inset-y-0 left-0 flex w-72 flex-col border-r border-white/[0.06] bg-[#161311] text-stone-100 shadow-2xl">
+            <div className="flex h-14 shrink-0 items-center justify-between border-b border-white/[0.06] pl-3 pr-2">
+              <BrandMark />
+              <button
+                type="button"
                 onClick={() => setMobileOpen(false)}
                 aria-label="Close navigation menu"
+                className="flex size-9 items-center justify-center rounded-lg text-stone-300 transition-colors hover:bg-white/[0.06] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
               >
-                <XIcon className="size-5" />
-              </Button>
+                <XIcon className="size-5" aria-hidden />
+              </button>
             </div>
             <NavContent
               isManager={isManager}
               alertCount={alertCount}
               pathname={pathname}
             />
-            <UserFooter sessionName={session?.user?.name} sessionEmail={session?.user?.email} />
+            <UserFooter {...user} />
           </div>
         </div>
       ) : null}
 
-      {/* Desktop sidebar */}
-      <aside className="hidden w-60 shrink-0 flex-col border-r bg-card lg:flex">
-        <div className="flex h-14 items-center gap-2 border-b px-4">
-          <TruckIcon className="size-5" />
-          <span className="font-semibold">Fleet Maintenance</span>
+      {/* Desktop sidebar — an always-dark branded rail (matching the login
+          brand panel) sitting against the warm app canvas. It is fixed-height
+          in the viewport-locked shell; the nav scrolls internally on short
+          viewports while the brand and user footer stay pinned. */}
+      <aside className="hidden w-60 shrink-0 flex-col border-r border-white/[0.06] bg-[#161311] lg:flex">
+        <div className="flex h-14 shrink-0 items-center border-b border-white/[0.06] px-3">
+          <BrandMark />
         </div>
         <NavContent
           isManager={isManager}
           alertCount={alertCount}
           pathname={pathname}
         />
-        <UserFooter sessionName={session?.user?.name} sessionEmail={session?.user?.email} />
+        <UserFooter {...user} />
       </aside>
     </>
   );
@@ -150,8 +164,8 @@ function NavContent({
   pathname: string;
 }) {
   return (
-    <nav className="flex-1 space-y-1 p-2">
-      {navLinks.map(({ href, label, icon: Icon }) => (
+    <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto p-2">
+      {PRIMARY_LINKS.map(({ href, label, icon: Icon }) => (
         <NavLink key={href} href={href} active={pathname.startsWith(href)}>
           <Icon className="size-4" />
           {label}
@@ -172,44 +186,15 @@ function NavContent({
       )}
 
       <NavLink href="/alerts" active={pathname.startsWith("/alerts")}>
-        <BellIcon className="size-4" />
+        <BellRingIcon className="size-4" />
         Alerts
         {alertCount !== null && alertCount > 0 ? (
-          <Badge
-            variant={alertCount > 0 ? "destructive" : "secondary"}
-            className="ml-auto"
-          >
+          <Badge className="ml-auto rounded-full border-0 bg-red-600 px-1.5 text-white">
             {alertCount}
           </Badge>
         ) : null}
       </NavLink>
     </nav>
-  );
-}
-
-function UserFooter({
-  sessionName,
-  sessionEmail,
-}: {
-  sessionName?: string | null;
-  sessionEmail?: string | null;
-}) {
-  return (
-    <div className="border-t p-2">
-      <div className="px-2 py-1.5 text-sm">
-        <p className="truncate font-medium">{sessionName}</p>
-        <p className="truncate text-xs text-muted-foreground">{sessionEmail}</p>
-      </div>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="w-full justify-start gap-2 text-muted-foreground"
-        onClick={() => signOut({ callbackUrl: "/login" })}
-      >
-        <LogOutIcon className="size-4" />
-        Sign out
-      </Button>
-    </div>
   );
 }
 
@@ -226,13 +211,61 @@ function NavLink({
     <Link
       href={href}
       className={cn(
-        "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+        "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
         active
-          ? "bg-accent text-accent-foreground"
-          : "text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
+          ? "bg-white/[0.08] text-white [&_svg]:text-amber-400"
+          : "text-stone-400 hover:bg-white/[0.05] hover:text-stone-100"
       )}
     >
       {children}
     </Link>
+  );
+}
+
+function UserFooter({
+  name,
+  email,
+  initials,
+}: {
+  name?: string | null;
+  email?: string | null;
+  initials: string;
+}) {
+  return (
+    <div className="shrink-0 border-t border-white/[0.06] p-2">
+      <div className="flex items-center gap-3 px-2 py-2">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-xs font-semibold text-amber-300">
+          {initials}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium text-stone-100">
+            {name ?? "User"}
+          </p>
+          <p className="truncate text-xs text-stone-500">{email}</p>
+        </div>
+      </div>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="w-full justify-start gap-2 text-stone-400 hover:bg-white/[0.06] hover:text-white focus-visible:ring-white/60"
+        onClick={() => signOut({ callbackUrl: "/login" })}
+      >
+        <LogOutIcon className="size-4" />
+        Sign out
+      </Button>
+    </div>
+  );
+}
+
+function BrandMark() {
+  return (
+    <div className="flex min-w-0 items-center gap-2.5">
+      <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-amber-950 shadow-sm shadow-amber-950/30">
+        <TruckIcon className="size-4" aria-hidden />
+      </div>
+      <span className="truncate text-[15px] font-semibold leading-tight text-stone-100">
+        Fleet Maintenance
+      </span>
+    </div>
   );
 }

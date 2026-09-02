@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
+import { FilterIcon, RefreshCwIcon } from "lucide-react";
 
 import {
   Select,
@@ -19,6 +20,9 @@ import {
   STATUS_LABELS,
 } from "@/components/service-records/records-table";
 
+/** Sentinels: the select control uses "__all" for "no filter". */
+const ALL_STATUSES = "__all";
+
 /**
  * Technician-facing list of "records assigned to me", fetched from the
  * technician-scoped endpoint (GET /api/technicians/[id]/service-records)
@@ -35,16 +39,18 @@ export default function MyRecordsPage() {
 
   const [records, setRecords] = useState<ServiceRecordListItem[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [status, setStatus] = useState<string>("");
+  const [status, setStatus] = useState<string>(ALL_STATUSES);
+  // Bumping this re-runs the fetch — the retry affordance.
+  const [retryNonce, setRetryNonce] = useState(0);
 
   // Filter is applied client-side because the technician-scoped endpoint has
   // no query params — the list itself is already scoped to "assigned to me".
   const filtered =
     records === null
       ? null
-      : records.filter(
-          (record) => status === "" || record.status === status
-        );
+      : status === ALL_STATUSES
+        ? records
+        : records.filter((record) => record.status === status);
 
   const load = useCallback(async () => {
     // For a technician the backend only serves their own id anyway; for a
@@ -58,32 +64,53 @@ export default function MyRecordsPage() {
       setRecords(data);
       setLoadError(null);
     } catch (error) {
-      setLoadError(error instanceof Error ? error.message : "Failed to load records.");
+      setLoadError(
+        error instanceof Error ? error.message : "Failed to load records."
+      );
     }
   }, [session?.user?.id]);
 
   useEffect(() => {
     load();
-  }, [load]);
+  }, [load, retryNonce]);
+
+  const baseTotal = records?.length ?? 0;
+  const shownTotal = filtered?.length ?? 0;
+  const filtering = status !== ALL_STATUSES;
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      {/* Page header */}
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">My records</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-600 dark:text-amber-500">
+            Fleet maintenance
+          </p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight">My records</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             {isManager
               ? "Records assigned to you — useful as a manager only if you're also a technician."
               : "Service records currently assigned to you."}
           </p>
         </div>
+      </div>
 
+      {/* Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">
+          {records === null
+            ? "Loading your records…"
+            : filtering
+              ? `${shownTotal} of ${baseTotal} record${baseTotal === 1 ? "" : "s"}`
+              : `${baseTotal} record${baseTotal === 1 ? "" : "s"} assigned to you`}
+        </p>
         <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger size="sm" className="min-w-32">
+          <SelectTrigger size="sm" className="min-w-40">
+            <FilterIcon className="size-3.5 text-muted-foreground" aria-hidden />
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="__all">All statuses</SelectItem>
+            <SelectItem value={ALL_STATUSES}>All statuses</SelectItem>
             {(Object.keys(STATUS_LABELS) as ServiceStatus[]).map((value) => (
               <SelectItem key={value} value={value}>
                 {STATUS_LABELS[value]}
@@ -94,9 +121,18 @@ export default function MyRecordsPage() {
       </div>
 
       {loadError ? (
-        <div className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {loadError}
-          <Button variant="link" size="sm" className="ml-2" onClick={load}>
+        <div
+          role="alert"
+          className="flex max-w-2xl flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-red-500/30 bg-red-500/5 px-4 py-3.5 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-300"
+        >
+          <RefreshCwIcon className="size-4 shrink-0" aria-hidden />
+          <span className="flex-1">{loadError}</span>
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-red-500/30 text-red-700 hover:bg-red-500/10 dark:text-red-300"
+            onClick={() => setRetryNonce((n) => n + 1)}
+          >
             Retry
           </Button>
         </div>
@@ -104,9 +140,9 @@ export default function MyRecordsPage() {
         <ServiceRecordsTable
           records={filtered}
           emptyMessage={
-            status === ""
-              ? "You have no assigned records right now."
-              : "No assigned records match this status."
+            filtering
+              ? `No assigned records with status "${STATUS_LABELS[status as ServiceStatus] ?? status}".`
+              : "You're all caught up — no service records are assigned to you right now."
           }
           // This endpoint returns vehicle info but not the assignments list,
           // so the technicians column would be meaningless here.

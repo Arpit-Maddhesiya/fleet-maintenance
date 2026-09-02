@@ -8,9 +8,14 @@ import {
   ArrowLeftIcon,
   CalendarIcon,
   CheckCircle2Icon,
+  ClipboardListIcon,
+  ClockIcon,
+  GaugeIcon,
+  HistoryIcon,
   PencilIcon,
   PlayIcon,
   UserPlusIcon,
+  UsersIcon,
   WrenchIcon,
   XIcon,
 } from "lucide-react";
@@ -124,9 +129,7 @@ export default function ServiceRecordDetailPage({
       setLoadErrorStatus(null);
     } catch (error) {
       setLoadError(error instanceof Error ? error.message : "Failed to load record.");
-      setLoadErrorStatus(
-        error instanceof ApiError ? error.status : null
-      );
+      setLoadErrorStatus(error instanceof ApiError ? error.status : null);
     }
   }, [id]);
 
@@ -363,7 +366,7 @@ export default function ServiceRecordDetailPage({
     return (
       <div className="space-y-4">
         <BackLink />
-        <div className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div className="rounded-xl border border-red-500/30 bg-red-500/5 px-4 py-3.5 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-300">
           {isForbidden
             ? "This service record isn't assigned to you, so you can't view it."
             : loadError}
@@ -377,10 +380,10 @@ export default function ServiceRecordDetailPage({
       <div className="space-y-4">
         <BackLink />
         <div className="space-y-2">
-          <div className="h-8 w-64 animate-pulse rounded-md bg-muted" />
-          <div className="h-4 w-40 animate-pulse rounded-md bg-muted" />
-          <div className="h-32 animate-pulse rounded-md bg-muted" />
-          <div className="h-40 animate-pulse rounded-md bg-muted" />
+          <div className="h-8 w-64 animate-pulse rounded-md bg-stone-200 dark:bg-stone-800" />
+          <div className="h-4 w-40 animate-pulse rounded-md bg-stone-200 dark:bg-stone-800" />
+          <div className="h-32 animate-pulse rounded-2xl bg-stone-200 dark:bg-stone-800" />
+          <div className="h-40 animate-pulse rounded-2xl bg-stone-200 dark:bg-stone-800" />
         </div>
       </div>
     );
@@ -391,20 +394,25 @@ export default function ServiceRecordDetailPage({
       <BackLink />
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {record.vehicle.registrationNumber}
-            </h1>
-            <Badge variant={STATUS_BADGE_VARIANTS[record.status]}>
-              {STATUS_LABELS[record.status]}
-            </Badge>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <div className="hidden size-12 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 sm:flex dark:text-amber-400">
+            <WrenchIcon className="size-6" aria-hidden />
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {record.vehicle.make} {record.vehicle.model} · odometer{" "}
-            {record.vehicle.currentOdometer.toLocaleString()}
-          </p>
+          <div>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="text-2xl font-semibold tracking-tight">
+                {record.vehicle.registrationNumber}
+              </h1>
+              <Badge variant={STATUS_BADGE_VARIANTS[record.status]}>
+                {STATUS_LABELS[record.status]}
+              </Badge>
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {record.vehicle.make} {record.vehicle.model} — odometer{" "}
+              {record.vehicle.currentOdometer.toLocaleString()} km
+            </p>
+          </div>
         </div>
         {action ? (
           action === "BOOK" ? (
@@ -415,30 +423,61 @@ export default function ServiceRecordDetailPage({
                 setBookOpen(true);
               }}
             >
-              <CalendarIcon className="size-4" />
+              <CalendarIcon className="size-4" aria-hidden />
               Book Service
             </Button>
           ) : action === "START" ? (
             <Button size="sm" onClick={() => runTransition({ action: "START" })}>
-              <PlayIcon className="size-4" />
+              <PlayIcon className="size-4" aria-hidden />
               Start Service
             </Button>
           ) : (
             <Button size="sm" onClick={startEditingOdometer}>
-              <CheckCircle2Icon className="size-4" />
+              <CheckCircle2Icon className="size-4" aria-hidden />
               Complete Service
             </Button>
           )
         ) : null}
       </div>
 
+      {/* Status strip — quick facts at a glance, mirroring the card system. */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <FactCard
+          icon={<CalendarIcon className="size-4" aria-hidden />}
+          label="Scheduled date"
+          value={formatDate(record.scheduledDate)}
+        />
+        <FactCard
+          icon={<PlayIcon className="size-4" aria-hidden />}
+          label="Started"
+          value={record.startedAt ? formatDateTime(record.startedAt) : "Not started"}
+        />
+        <FactCard
+          icon={<CheckCircle2Icon className="size-4" aria-hidden />}
+          label="Completed"
+          value={record.completedAt ? formatDateTime(record.completedAt) : "—"}
+        />
+        <FactCard
+          icon={<GaugeIcon className="size-4" aria-hidden />}
+          label="Completed odometer"
+          value={
+            record.completedOdometer
+              ? `${record.completedOdometer.toLocaleString()} km`
+              : "—"
+          }
+        />
+      </div>
+
       {/* Description (inline-editable) */}
-      <div className="rounded-md border bg-card p-4">
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-sm font-medium text-muted-foreground">Description</h2>
+      <section className="rounded-2xl border bg-card p-5">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <ClipboardListIcon className="size-4 text-muted-foreground" aria-hidden />
+            <h2 className="text-sm font-semibold tracking-tight">Description</h2>
+          </div>
           {canEditDescription && !editingDescription ? (
             <Button variant="ghost" size="sm" onClick={startEditingDescription}>
-              <PencilIcon className="size-3.5" />
+              <PencilIcon className="size-3.5" aria-hidden />
               Edit
             </Button>
           ) : null}
@@ -471,148 +510,133 @@ export default function ServiceRecordDetailPage({
             </div>
           </form>
         ) : (
-          <p className="text-sm whitespace-pre-wrap">{record.description}</p>
+          <p className="text-sm whitespace-pre-wrap text-foreground">
+            {record.description}
+          </p>
         )}
-      </div>
+      </section>
 
-      {/* Details + assignments */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-md border bg-card p-4">
-          <h2 className="mb-3 text-lg font-semibold">Details</h2>
-          <dl className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">Scheduled date</dt>
-              <dd className="font-medium">{formatDate(record.scheduledDate)}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">Started</dt>
-              <dd className="font-medium">{formatDateTime(record.startedAt ?? "")}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">Completed</dt>
-              <dd className="font-medium">{formatDateTime(record.completedAt ?? "")}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">Completed odometer</dt>
-              <dd className="font-medium">
-                {record.completedOdometer?.toLocaleString() ?? "—"}
-              </dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">Due since</dt>
-              <dd className="font-medium">{formatDateTime(record.dueSince)}</dd>
-            </div>
-          </dl>
+      {/* Assigned technicians */}
+      <section className="rounded-2xl border bg-card p-5">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <UsersIcon className="size-4 text-muted-foreground" aria-hidden />
+            <h2 className="text-sm font-semibold tracking-tight">
+              Assigned technicians
+            </h2>
+          </div>
+          <Badge variant="secondary">{record.assignments.length}</Badge>
         </div>
 
-        <div className="rounded-md border bg-card p-4">
-          <h2 className="mb-3 text-lg font-semibold">
-            Assigned technicians
-            <span className="ml-2 text-sm font-normal text-muted-foreground">
-              ({record.assignments.length})
-            </span>
-          </h2>
-          {record.assignments.length === 0 ? (
+        {record.assignments.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-10 text-center">
+            <WrenchIcon className="size-5 text-muted-foreground/60" aria-hidden />
             <p className="text-sm text-muted-foreground">
               No technicians assigned yet.
             </p>
-          ) : (
-            <ul className="space-y-2">
-              {record.assignments.map((assignment) => (
-                <li
-                  key={assignment.id}
-                  className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
-                >
-                  <span className="flex items-center gap-2">
-                    <WrenchIcon className="size-4 text-muted-foreground" />
-                    {assignment.technician.name}
-                  </span>
-                  {isManager ? (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-muted-foreground hover:text-destructive"
-                      onClick={() => removeAssignment(assignment.id)}
-                      disabled={removingId === assignment.id}
-                      aria-label={`Unassign ${assignment.technician.name}`}
-                    >
-                      <XIcon className="size-4" />
-                    </Button>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {isManager ? (
-            <div className="mt-4 flex items-end gap-2 border-t pt-4">
-              <div className="flex-1 space-y-2">
-                <Label htmlFor="assign-technician">Assign technician</Label>
-                <Select
-                  value={assignTechnicianId}
-                  onValueChange={setAssignTechnicianId}
-                >
-                  <SelectTrigger id="assign-technician" size="sm" className="w-full">
-                    <SelectValue placeholder="Select a technician" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableTechnicians.length === 0 ? (
-                      <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                        All technicians already assigned
-                      </div>
-                    ) : (
-                      availableTechnicians.map((technician) => (
-                        <SelectItem key={technician.id} value={technician.id}>
-                          {technician.name}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button
-                size="sm"
-                onClick={addAssignment}
-                disabled={assigning || !assignTechnicianId}
-              >
-                <UserPlusIcon className="size-4" />
-                Assign
-              </Button>
-            </div>
-          ) : null}
-        </div>
-      </div>
-
-      {/* Timeline — read-only by design, no edit affordances anywhere near it. */}
-      <div>
-        <h2 className="mb-3 text-lg font-semibold">History</h2>
-        {timeline.length === 0 ? (
-          <div className="rounded-md border border-dashed py-10 text-center text-sm text-muted-foreground">
-            No history yet.
           </div>
         ) : (
-          <div className="rounded-md border bg-card p-4">
-            <ol className="space-y-4">
-              {timeline.map((event, index) => (
-                <li key={event.id} className="flex gap-3">
-                  <div className="flex flex-col items-center">
-                    <span className="mt-1.5 size-2 shrink-0 rounded-full bg-muted-foreground/40" />
-                    {index < timeline.length - 1 ? (
-                      <span className="w-px flex-1 bg-border" />
-                    ) : null}
-                  </div>
-                  <div className="pb-1">
-                    <p className="text-sm">{event.summary}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDateTime(event.createdAt)}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {record.assignments.map((assignment) => (
+              <li
+                key={assignment.id}
+                className="flex items-center justify-between gap-2 rounded-xl border bg-card px-3 py-2.5 text-sm"
+              >
+                <span className="flex min-w-0 items-center gap-2.5">
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                    {initials(assignment.technician.name)}
+                  </span>
+                  <span className="truncate font-medium">
+                    {assignment.technician.name}
+                  </span>
+                </span>
+                {isManager ? (
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    className="text-muted-foreground hover:text-destructive"
+                    onClick={() => removeAssignment(assignment.id)}
+                    disabled={removingId === assignment.id}
+                    aria-label={`Unassign ${assignment.technician.name}`}
+                  >
+                    <XIcon className="size-4" aria-hidden />
+                  </Button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
         )}
-      </div>
+
+        {isManager ? (
+          <div className="mt-4 flex items-end gap-2 border-t pt-4">
+            <div className="flex-1 space-y-2">
+              <Label htmlFor="assign-technician">Assign technician</Label>
+              <Select value={assignTechnicianId} onValueChange={setAssignTechnicianId}>
+                <SelectTrigger id="assign-technician" size="sm" className="w-full">
+                  <SelectValue placeholder="Select a technician" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableTechnicians.length === 0 ? (
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                      All technicians already assigned
+                    </div>
+                  ) : (
+                    availableTechnicians.map((technician) => (
+                      <SelectItem key={technician.id} value={technician.id}>
+                        {technician.name}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              size="sm"
+              onClick={addAssignment}
+              disabled={assigning || !assignTechnicianId}
+            >
+              <UserPlusIcon className="size-4" aria-hidden />
+              Assign
+            </Button>
+          </div>
+        ) : null}
+      </section>
+
+      {/* Timeline — read-only by design, no edit affordances anywhere near it. */}
+      <section className="rounded-2xl border bg-card p-5">
+        <div className="mb-4 flex items-center gap-2">
+          <HistoryIcon className="size-4 text-muted-foreground" aria-hidden />
+          <h2 className="text-sm font-semibold tracking-tight">History</h2>
+        </div>
+        {timeline.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-10 text-center">
+            <HistoryIcon className="size-5 text-muted-foreground/60" aria-hidden />
+            <p className="text-sm text-muted-foreground">
+              No activity recorded yet.
+            </p>
+          </div>
+        ) : (
+          <ol className="space-y-4">
+            {timeline.map((event, index) => (
+              <li key={event.id} className="flex gap-3">
+                <div className="flex flex-col items-center">
+                  <span className="mt-1.5 size-2 shrink-0 rounded-full bg-amber-500" />
+                  {index < timeline.length - 1 ? (
+                    <span className="w-px flex-1 bg-border" />
+                  ) : null}
+                </div>
+                <div className="pb-1">
+                  <p className="text-sm text-foreground">{event.summary}</p>
+                  <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                    <ClockIcon className="size-3" aria-hidden />
+                    {formatDateTime(event.createdAt)}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
 
       {/* Book dialog */}
       <Dialog open={bookOpen} onOpenChange={setBookOpen}>
@@ -714,7 +738,7 @@ export default function ServiceRecordDetailPage({
             <DialogDescription>
               Enter the final odometer reading. It must be at least the
               vehicle&apos;s current reading (
-              {record.vehicle.currentOdometer.toLocaleString()}).
+              {record.vehicle.currentOdometer.toLocaleString()} km).
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={submitComplete} className="space-y-4">
@@ -763,10 +787,41 @@ function BackLink() {
   return (
     <Link
       href="/service-records"
-      className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
     >
-      <ArrowLeftIcon className="size-4" />
+      <ArrowLeftIcon className="size-4" aria-hidden />
       Back to service records
     </Link>
   );
+}
+
+function FactCard({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-2xl border bg-card p-4">
+      <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+        {icon}
+        {label}
+      </div>
+      <p className="mt-1.5 text-[15px] font-semibold tabular-nums tracking-tight">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
 }

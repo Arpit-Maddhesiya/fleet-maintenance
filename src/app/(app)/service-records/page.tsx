@@ -158,22 +158,17 @@ export default function ServiceRecordsPage() {
     pushParams({ sortDir: sortDir === "asc" ? "desc" : "asc" });
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      {/* Page header */}
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Service records</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-600 dark:text-amber-500">
+            Fleet maintenance
+          </p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight">Service records</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Every service across the fleet, searchable and filterable.
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <ExportButton />
-          {isManager ? (
-            <Button size="sm" onClick={() => setDialogOpen(true)}>
-              <PlusIcon className="size-4" />
-              New Record
-            </Button>
-          ) : null}
         </div>
       </div>
 
@@ -186,7 +181,7 @@ export default function ServiceRecordsPage() {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search description…"
-            className="h-9 w-64 rounded-md border border-input bg-transparent pr-3 pl-9 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="h-9 w-full rounded-md border border-input bg-card pr-3 pl-9 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:w-64"
           />
         </div>
 
@@ -258,6 +253,7 @@ export default function ServiceRecordsPage() {
           size="sm"
           onClick={toggleSortDir}
           aria-label={`Sort ${sortDir === "asc" ? "ascending" : "descending"}`}
+          className="bg-card"
         >
           {sortDir === "asc" ? (
             <ArrowUpIcon className="size-4" />
@@ -265,6 +261,16 @@ export default function ServiceRecordsPage() {
             <ArrowDownIcon className="size-4" />
           )}
         </Button>
+
+        <div className="ml-auto flex items-center gap-2">
+          <ExportButton />
+          {isManager ? (
+            <Button size="sm" onClick={() => setDialogOpen(true)}>
+              <PlusIcon className="size-4" />
+              New Record
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       {loadError ? (
@@ -286,9 +292,13 @@ export default function ServiceRecordsPage() {
       {/* Pagination — hidden while the very first page is still loading, so the
           "X–Y of Z" doesn't flash "0–0 of 0". */}
       {!loading ? (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-muted-foreground">
-            {rangeStart}–{rangeEnd} of {total}
+            Showing <span className="font-medium text-foreground">{rangeStart}</span>
+            {" – "}
+            <span className="font-medium text-foreground">{rangeEnd}</span> of{" "}
+            <span className="font-medium text-foreground">{total}</span> record
+            {total === 1 ? "" : "s"}
           </p>
           <div className="flex items-center gap-1">
             <Button
@@ -296,6 +306,7 @@ export default function ServiceRecordsPage() {
               size="sm"
               disabled={page <= 1}
               onClick={() => pushParams({ page: String(page - 1) })}
+              className="bg-card"
             >
               <ChevronLeftIcon className="size-4" />
               Prev
@@ -316,6 +327,7 @@ export default function ServiceRecordsPage() {
               size="sm"
               disabled={page >= totalPages}
               onClick={() => pushParams({ page: String(page + 1) })}
+              className="bg-card"
             >
               Next
               <ChevronRightIcon className="size-4" />

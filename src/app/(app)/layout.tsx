@@ -24,9 +24,14 @@ export default async function AppLayout({
 
   return (
     <Providers>
-      <div className="flex min-h-screen flex-col bg-background lg:flex-row">
+      {/* Viewport-locked app frame: the page itself never scrolls. The nav
+          (sidebar on desktop, top bar on mobile) is a fixed-height rail and
+          <main> is the only element that scrolls, so tall pages scroll under
+          a stationary navbar instead of carrying it off-screen. The warm
+          backdrop matches the login page's surface language. */}
+      <div className="flex h-dvh flex-col bg-[#f6f4ef] lg:flex-row lg:overflow-hidden dark:bg-[#12100e]">
         <AppNav />
-        <main className="flex-1 overflow-x-auto p-6">{children}</main>
+        <main className="min-h-0 flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </Providers>
   );
