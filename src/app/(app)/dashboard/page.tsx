@@ -101,7 +101,11 @@ function ManagerDashboard() {
   const [technicianNames, setTechnicianNames] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    apiFetch<DashboardData>("/api/dashboard")
+    apiFetch<DashboardData>("/api/dashboard", {
+      // The API buckets "this week" and the per-week chart in the caller's
+      // calendar week; tell it which zone the browser is in.
+      headers: { "X-Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone },
+    })
       .then((d) => {
         setData(d);
         setLoadedAt(new Date().toISOString());
@@ -183,6 +187,8 @@ function ManagerDashboard() {
 
   const totalActiveAssignments = technicianData.reduce((sum, s) => sum + s.value, 0);
   const totalByStatus = statusData.reduce((sum, s) => sum + s.value, 0);
+  // Lifetime count of COMPLETED records (also the status-distribution total).
+  const totalCompleted = data.byStatus[ServiceStatus.COMPLETED] ?? 0;
 
   const firstGreeting = greeting();
 
@@ -243,8 +249,8 @@ function ManagerDashboard() {
         />
         <StatCard
           href="/service-records?status=COMPLETED"
-          label="Completed this week"
-          value={data.completedThisWeek}
+          label="Completed services"
+          value={totalCompleted}
           icon={<CheckCircle2Icon className="size-4" aria-hidden />}
           iconClass="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
         />

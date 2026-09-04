@@ -31,6 +31,11 @@ enum HistoryEventType {
   NOTE
 }
 
+enum DailyReportType {
+  TECHNICIAN
+  FLEET_MANAGER
+}
+
 model User {
   id             String   @id @default(cuid())
   email          String   @unique
@@ -42,6 +47,7 @@ model User {
   historyEvents  ServiceHistoryEvent[]
   assignedEvents ServiceHistoryEvent[] @relation("EventTechnician")
   dismissedAlerts Alert[]  @relation("AlertDismissedBy")
+  reports        DailyReport[] @relation("DailyReportAuthor")
 
   @@index([role])
 }
@@ -133,4 +139,32 @@ model Alert {
 
   @@unique([vehicleId, serviceCycle])
   @@index([vehicleId])
+}
+
+// A daily work report filed by a FLEET_MANAGER or TECHNICIAN after 5 PM local
+// time. One report per author per *local* calendar day: reportDate stores the
+// UTC instant of local midnight of the report's day in the author's timezone
+// (resolved from the X-Timezone header at write time), so the unique pair is
+// stable across DST and any IANA zone. The role decides which columns carry
+// meaning: managers fill bookingsCount/inspectionsCount/notes; technicians
+// fill jobsCompleted/hoursWorked/registrations (newline-separated)/notes.
+model DailyReport {
+  id              String          @id @default(cuid())
+  authorId        String
+  author          User            @relation("DailyReportAuthor", fields: [authorId], references: [id])
+  reportDate      DateTime // local-midnight instant of the report's day
+  type            DailyReportType
+  jobsCompleted   Int             @default(0)
+  hoursWorked     Int             @default(0)
+  registrations   String          @default("") // one per line
+  bookingsCount   Int             @default(0)
+  inspectionsCount Int            @default(0)
+  notes           String          @default("")
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@unique([authorId, reportDate])
+  @@index([reportDate])
+  @@index([authorId])
+  @@index([type])
 }

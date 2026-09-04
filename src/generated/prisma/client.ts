@@ -71,3 +71,8 @@ export type ServiceHistoryEvent = Prisma.ServiceHistoryEventModel
  * 
  */
 export type Alert = Prisma.AlertModel
+/**
+ * Model DailyReport
+ * 
+ */
+export type DailyReport = Prisma.DailyReportModel

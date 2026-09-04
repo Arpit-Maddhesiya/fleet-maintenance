@@ -8,6 +8,7 @@ Each module's prompt was pasted in full to the coding agent, then I read the dif
 
 ### Module 0 — Schema & Migration
 
+
 #### Prompt
 
 > Context: Fresh Next.js 15 App Router + TypeScript project with Tailwind already set up. I'm building a fleet maintenance system. Set up Prisma with a Neon Postgres datasource.

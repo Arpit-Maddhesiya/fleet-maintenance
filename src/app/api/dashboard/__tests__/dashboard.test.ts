@@ -3,6 +3,7 @@ import { GET as getDashboard } from "@/app/api/dashboard/route";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { ServiceStatus } from "@/generated/prisma/enums";
+import type { NextRequest } from "next/server";
 
 vi.mock("@/lib/auth", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/auth")>();
@@ -25,8 +26,24 @@ vi.mock("@/lib/db", () => ({
 const managerSession = { user: { id: "u-manager", role: "FLEET_MANAGER" } };
 const technicianSession = { user: { id: "u-tech", role: "TECHNICIAN" } };
 
-/** Monday 00:00 UTC of the ISO week containing `date` (same logic as the route). */
-function mondayOfWeek(date: Date): Date {
+/** Build the NextRequest the route reads X-Timezone from. */
+function requestWithTimezone(timeZone?: string): NextRequest {
+  return {
+    headers: new Headers(timeZone ? { "x-timezone": timeZone } : {}),
+  } as unknown as NextRequest;
+}
+
+/** Monday 00:00 local of the local calendar week containing `date`. */
+function mondayOfWeekLocal(date: Date): Date {
+  const day = (date.getDay() + 6) % 7; // Mon=0
+  const monday = new Date(date);
+  monday.setHours(0, 0, 0, 0);
+  monday.setDate(monday.getDate() - day);
+  return monday;
+}
+
+/** Monday 00:00 UTC of the UTC calendar week containing `date`. */
+function mondayOfWeekUtc(date: Date): Date {
   const day = date.getUTCDay() || 7;
   const monday = new Date(date);
   monday.setUTCDate(monday.getUTCDate() - (day - 1));
@@ -34,26 +51,8 @@ function mondayOfWeek(date: Date): Date {
   return monday;
 }
 
-function isoWeekKey(date: Date): string {
-  const d = new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
-  );
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const isoYear = d.getUTCFullYear();
-  const jan4 = new Date(Date.UTC(isoYear, 0, 4));
-  const jan4Day = jan4.getUTCDay() || 7;
-  jan4.setUTCDate(jan4.getUTCDate() + 4 - jan4Day);
-  const week =
-    1 +
-    Math.round(
-      ((d.getTime() - jan4.getTime()) / 86400000 - 3 + (((jan4Day + 4) % 7) - 3)) / 7
-    );
-  return `${isoYear}-W${String(week).padStart(2, "0")}`;
-}
-
-/** UTC-midnight Monday of the given ISO week key (V8 rejects "YYYY-Www" date strings). */
-function mondayOfIsoWeek(weekKey: string): Date {
+/** Monday 00:00 UTC of the given "YYYY-Www" ISO week key. */
+function utcMondayOfWeekKey(weekKey: string): Date {
   const [year, week] = weekKey.split("-W").map(Number);
   const jan4 = new Date(Date.UTC(year, 0, 4));
   const jan4Day = jan4.getUTCDay() || 7;
@@ -62,6 +61,36 @@ function mondayOfIsoWeek(weekKey: string): Date {
   const result = new Date(mondayOfWeek1);
   result.setUTCDate(result.getUTCDate() + (week - 1) * 7);
   return result;
+}
+
+/** ISO week key in the given timezone (mirrors lib/local-week for assertions). */
+function weekKeyInZone(date: Date, timeZone: string): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour12: false,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const get = (t: string) => Number(parts.find((p) => p.type === t)?.value);
+  const localMidnight = new Date(get("year"), get("month") - 1, get("day"));
+  const dow = (localMidnight.getDay() + 6) % 7;
+  const monday = new Date(localMidnight);
+  monday.setDate(monday.getDate() - dow);
+
+  const d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate());
+  const dayNum = d.getDay() || 7;
+  d.setDate(d.getDate() + 4 - dayNum);
+  const isoYear = d.getFullYear();
+  const jan4 = new Date(isoYear, 0, 4);
+  const jan4Day = jan4.getDay() || 7;
+  jan4.setDate(jan4.getDate() + 4 - jan4Day);
+  const week =
+    1 +
+    Math.round(
+      ((d.getTime() - jan4.getTime()) / 86400000 - 3 + (((jan4Day + 4) % 7) - 3)) / 7
+    );
+  return `${isoYear}-W${String(week).padStart(2, "0")}`;
 }
 
 const allStatuses = Object.values(ServiceStatus);
@@ -81,9 +110,9 @@ beforeEach(() => {
 describe("GET /api/dashboard", () => {
   it("returns completedPerWeek with exactly 8 entries when only 2 weeks have data", async () => {
     const now = new Date();
-    const thisMonday = mondayOfWeek(now);
+    const thisMonday = mondayOfWeekUtc(now); // default timezone is UTC
 
-    // Data in the current week and 5 weeks ago; the other 6 weeks are empty.
+    // Data in the current UTC week and 5 weeks ago; the other 6 weeks are empty.
     const completedAt = [
       new Date(thisMonday.getTime() + 2 * 86400000), // current week
       new Date(thisMonday.getTime() + 3 * 86400000), // current week
@@ -100,7 +129,7 @@ describe("GET /api/dashboard", () => {
       completedAt.map((completedAt) => ({ completedAt })) as never
     );
 
-    const res = await getDashboard();
+    const res = await getDashboard(requestWithTimezone());
 
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -114,8 +143,8 @@ describe("GET /api/dashboard", () => {
       const prev = body.completedPerWeek[i - 1];
       const curr = body.completedPerWeek[i];
       const diff =
-        (mondayOfIsoWeek(curr.week).getTime() -
-          mondayOfIsoWeek(prev.week).getTime()) /
+        (utcMondayOfWeekKey(curr.week).getTime() -
+          utcMondayOfWeekKey(prev.week).getTime()) /
         86400000;
       expect(diff).toBe(7);
     }
@@ -124,15 +153,42 @@ describe("GET /api/dashboard", () => {
     const withData = body.completedPerWeek.filter((w: { count: number }) => w.count > 0);
     expect(withData).toHaveLength(2);
     expect(withData.map((w: { week: string }) => w.week)).toEqual([
-      isoWeekKey(new Date(thisMonday.getTime() - 5 * 7 * 86400000)),
-      isoWeekKey(now),
+      weekKeyInZone(new Date(thisMonday.getTime() - 5 * 7 * 86400000), "UTC"),
+      weekKeyInZone(now, "UTC"),
     ]);
+  });
+
+  it("buckets weeks in the caller's timezone, not UTC", async () => {
+    // Asia/Kolkata (UTC+5:30): this local week starts 5.5h earlier than the
+    // UTC week. A completion 4h before UTC Monday belongs to the *previous*
+    // local week in UTC but to the *current* local week in Asia/Kolkata.
+    const now = new Date();
+    const utcMonday = mondayOfWeekUtc(now);
+    const boundary = new Date(utcMonday.getTime() - 4 * 3600000); // Sun 20:00 UTC
+    vi.mocked(prisma.serviceRecord.findMany).mockResolvedValue([
+      { completedAt: boundary },
+    ] as never);
+
+    const res = await getDashboard(requestWithTimezone("Asia/Kolkata"));
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    const currentKey = weekKeyInZone(now, "Asia/Kolkata");
+    expect(body.completedPerWeek[7].week).toBe(currentKey);
+    expect(body.completedPerWeek[7].count).toBe(1);
+    // completedThisWeek (the DB count query) uses the same local window.
+    expect(prisma.serviceRecord.count).toHaveBeenCalledWith({
+      where: {
+        status: ServiceStatus.COMPLETED,
+        completedAt: { gte: expect.any(Date), lt: expect.any(Date) },
+      },
+    });
   });
 
   it("rejects an unauthenticated caller with 401", async () => {
     vi.mocked(auth).mockResolvedValue(null as never);
 
-    const res = await getDashboard();
+    const res = await getDashboard(requestWithTimezone());
 
     expect(res.status).toBe(401);
     expect(prisma.vehicle.count).not.toHaveBeenCalled();
@@ -144,7 +200,7 @@ describe("GET /api/dashboard", () => {
       { status: "IN_SERVICE", _count: { _all: 3 } },
     ] as never);
 
-    const res = await getDashboard();
+    const res = await getDashboard(requestWithTimezone());
 
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -167,7 +223,7 @@ describe("GET /api/dashboard", () => {
     });
 
     it("returns a technician-scoped payload (not fleet-wide stats)", async () => {
-      const res = await getDashboard();
+      const res = await getDashboard(requestWithTimezone());
 
       expect(res.status).toBe(200);
       const body = await res.json();
@@ -183,7 +239,7 @@ describe("GET /api/dashboard", () => {
 
     it("buckets only the caller's own assignments", async () => {
       const now = new Date();
-      const thisMonday = mondayOfWeek(now);
+      const thisMonday = mondayOfWeekLocal(now);
       const inService = {
         id: "r-active",
         status: "IN_SERVICE",
@@ -215,7 +271,7 @@ describe("GET /api/dashboard", () => {
         }) as never
       );
 
-      const res = await getDashboard();
+      const res = await getDashboard(requestWithTimezone("UTC"));
 
       expect(res.status).toBe(200);
       const body = await res.json();

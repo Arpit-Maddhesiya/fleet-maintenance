@@ -76,6 +76,22 @@ function formatDateTime(value: string): string {
   });
 }
 
+/**
+ * The completion time shown for a row: only COMPLETED records carry one, and
+ * it is the real completedAt (the seed backdates completedAt across the last
+ * year, so updatedAt there would make every completed record look like it was
+ * finished on seed day). Non-completed rows have no completion — show "—".
+ */
+function rowDate(record: ServiceRecordListItem): string | null {
+  return record.status === ServiceStatus.COMPLETED ? record.completedAt : null;
+}
+
+/** "12 Sep 2026, 2:41 PM" for a completed record, else an em dash. */
+function formatRowDate(record: ServiceRecordListItem): string {
+  const completedAt = rowDate(record);
+  return completedAt ? formatDateTime(completedAt) : "—";
+}
+
 interface ServiceRecordsTableProps {
   /** Records to render, or null while the first fetch is in flight. */
   records: ServiceRecordListItem[] | null;
@@ -119,7 +135,7 @@ export function ServiceRecordsTable({
               <TableHead className="px-4">Vehicle</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Scheduled</TableHead>
-              <TableHead>Last updated</TableHead>
+              <TableHead>Completed</TableHead>
               {showTechnicians ? <TableHead className="px-4">Technicians</TableHead> : null}
             </TableRow>
           </TableHeader>
@@ -169,7 +185,7 @@ export function ServiceRecordsTable({
                     {formatDate(record.scheduledDate)}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {formatDateTime(record.updatedAt)}
+                    {rowDate(record) ? formatDateTime(rowDate(record)!) : "—"}
                   </TableCell>
                   {showTechnicians ? (
                     <TableCell className="px-4">
@@ -298,7 +314,7 @@ function RecordCard({
 
       <dl className="grid grid-cols-2 gap-px border-t bg-border/60 text-sm">
         <MobileMetric label="Scheduled" value={formatDate(record.scheduledDate)} />
-        <MobileMetric label="Last updated" value={formatDateTime(record.updatedAt)} />
+        <MobileMetric label="Completed" value={formatRowDate(record)} />
         {showTechnicians ? (
           <div className="col-span-2 bg-card px-4 py-2.5">
             <dt className="text-xs text-muted-foreground">Technicians</dt>

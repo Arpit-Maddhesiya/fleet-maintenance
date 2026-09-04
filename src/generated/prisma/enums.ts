@@ -37,3 +37,11 @@ export const HistoryEventType = {
 } as const
 
 export type HistoryEventType = (typeof HistoryEventType)[keyof typeof HistoryEventType]
+
+
+export const DailyReportType = {
+  TECHNICIAN: 'TECHNICIAN',
+  FLEET_MANAGER: 'FLEET_MANAGER'
+} as const
+
+export type DailyReportType = (typeof DailyReportType)[keyof typeof DailyReportType]

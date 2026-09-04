@@ -402,7 +402,8 @@ export const ModelName = {
   ServiceRecord: 'ServiceRecord',
   ServiceAssignment: 'ServiceAssignment',
   ServiceHistoryEvent: 'ServiceHistoryEvent',
-  Alert: 'Alert'
+  Alert: 'Alert',
+  DailyReport: 'DailyReport'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -418,7 +419,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "vehicle" | "serviceRecord" | "serviceAssignment" | "serviceHistoryEvent" | "alert"
+    modelProps: "user" | "vehicle" | "serviceRecord" | "serviceAssignment" | "serviceHistoryEvent" | "alert" | "dailyReport"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -866,6 +867,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DailyReport: {
+      payload: Prisma.$DailyReportPayload<ExtArgs>
+      fields: Prisma.DailyReportFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DailyReportFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyReportPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DailyReportFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyReportPayload>
+        }
+        findFirst: {
+          args: Prisma.DailyReportFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyReportPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DailyReportFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyReportPayload>
+        }
+        findMany: {
+          args: Prisma.DailyReportFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyReportPayload>[]
+        }
+        create: {
+          args: Prisma.DailyReportCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyReportPayload>
+        }
+        createMany: {
+          args: Prisma.DailyReportCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DailyReportCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyReportPayload>[]
+        }
+        delete: {
+          args: Prisma.DailyReportDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyReportPayload>
+        }
+        update: {
+          args: Prisma.DailyReportUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyReportPayload>
+        }
+        deleteMany: {
+          args: Prisma.DailyReportDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DailyReportUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DailyReportUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyReportPayload>[]
+        }
+        upsert: {
+          args: Prisma.DailyReportUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyReportPayload>
+        }
+        aggregate: {
+          args: Prisma.DailyReportAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDailyReport>
+        }
+        groupBy: {
+          args: Prisma.DailyReportGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DailyReportGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DailyReportCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DailyReportCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -991,6 +1066,24 @@ export const AlertScalarFieldEnum = {
 export type AlertScalarFieldEnum = (typeof AlertScalarFieldEnum)[keyof typeof AlertScalarFieldEnum]
 
 
+export const DailyReportScalarFieldEnum = {
+  id: 'id',
+  authorId: 'authorId',
+  reportDate: 'reportDate',
+  type: 'type',
+  jobsCompleted: 'jobsCompleted',
+  hoursWorked: 'hoursWorked',
+  registrations: 'registrations',
+  bookingsCount: 'bookingsCount',
+  inspectionsCount: 'inspectionsCount',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DailyReportScalarFieldEnum = (typeof DailyReportScalarFieldEnum)[keyof typeof DailyReportScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1102,6 +1195,20 @@ export type EnumHistoryEventTypeFieldRefInput<$PrismaModel> = FieldRefInputType<
  * Reference to a field of type 'HistoryEventType[]'
  */
 export type ListEnumHistoryEventTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'HistoryEventType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DailyReportType'
+ */
+export type EnumDailyReportTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DailyReportType'>
+    
+
+
+/**
+ * Reference to a field of type 'DailyReportType[]'
+ */
+export type ListEnumDailyReportTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DailyReportType[]'>
     
 
 
@@ -1275,6 +1382,7 @@ export type GlobalOmitConfig = {
   serviceAssignment?: Prisma.ServiceAssignmentOmit
   serviceHistoryEvent?: Prisma.ServiceHistoryEventOmit
   alert?: Prisma.AlertOmit
+  dailyReport?: Prisma.DailyReportOmit
 }
 
 /* Types for Logging */

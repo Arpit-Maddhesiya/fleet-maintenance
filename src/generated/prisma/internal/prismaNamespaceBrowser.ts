@@ -56,7 +56,8 @@ export const ModelName = {
   ServiceRecord: 'ServiceRecord',
   ServiceAssignment: 'ServiceAssignment',
   ServiceHistoryEvent: 'ServiceHistoryEvent',
-  Alert: 'Alert'
+  Alert: 'Alert',
+  DailyReport: 'DailyReport'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -159,6 +160,24 @@ export const AlertScalarFieldEnum = {
 } as const
 
 export type AlertScalarFieldEnum = (typeof AlertScalarFieldEnum)[keyof typeof AlertScalarFieldEnum]
+
+
+export const DailyReportScalarFieldEnum = {
+  id: 'id',
+  authorId: 'authorId',
+  reportDate: 'reportDate',
+  type: 'type',
+  jobsCompleted: 'jobsCompleted',
+  hoursWorked: 'hoursWorked',
+  registrations: 'registrations',
+  bookingsCount: 'bookingsCount',
+  inspectionsCount: 'inspectionsCount',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DailyReportScalarFieldEnum = (typeof DailyReportScalarFieldEnum)[keyof typeof DailyReportScalarFieldEnum]
 
 
 export const SortOrder = {

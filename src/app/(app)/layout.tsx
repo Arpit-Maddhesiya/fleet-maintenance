@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { AppNav } from "@/components/app-nav";
 import { Providers } from "@/components/providers";
 import { CommandSearch } from "@/components/command-search";
+import { DailyReportReminder } from "@/components/daily-report-reminder";
 
 /**
  * Authenticated app shell. Every route under /(app) gets the sidebar nav
@@ -32,7 +33,10 @@ export default async function AppLayout({
           backdrop matches the login page's surface language. */}
       <div className="flex h-dvh flex-col bg-[#f6f4ef] lg:flex-row lg:overflow-hidden dark:bg-[#12100e]">
         <AppNav />
-        <main className="min-h-0 flex-1 overflow-y-auto p-6">{children}</main>
+        <div className="flex min-h-0 flex-1 flex-col">
+          <DailyReportReminder />
+          <main className="min-h-0 flex-1 overflow-y-auto p-6">{children}</main>
+        </div>
         <CommandSearch />
       </div>
     </Providers>

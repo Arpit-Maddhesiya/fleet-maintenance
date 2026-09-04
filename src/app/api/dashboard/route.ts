@@ -1,34 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { handleError } from "@/lib/api";
 import { isOverdue } from "@/lib/overdue";
+import {
+  addLocalDays,
+  localWeekKey,
+  startOfLocalWeek,
+  timezoneFromHeader,
+} from "@/lib/local-week";
 import { Role, ServiceStatus } from "@/generated/prisma/enums";
-
-/** ISO week: Monday-based, matching Date.prototype.toISOString (UTC). */
-function isoWeekKey(date: Date): string {
-  const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
-  const dayNum = d.getUTCDay() || 7; // Mon=1 ... Sun=7
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum); // move to Thursday of this week
-  const isoYear = d.getUTCFullYear();
-  const jan4 = new Date(Date.UTC(isoYear, 0, 4));
-  const jan4Day = jan4.getUTCDay() || 7;
-  jan4.setUTCDate(jan4.getUTCDate() + 4 - jan4Day); // Thursday of ISO week 1
-  const week = 1 + Math.round(((d.getTime() - jan4.getTime()) / 86400000 - 3 + ((jan4Day + 4) % 7 - 3)) / 7);
-  return `${isoYear}-W${String(week).padStart(2, "0")}`;
-}
-
-/** UTC midnight on the Monday that starts the given ISO week. */
-function startOfIsoWeek(weekKey: string): Date {
-  const [year, week] = weekKey.split("-W").map(Number);
-  const jan4 = new Date(Date.UTC(year, 0, 4));
-  const jan4Day = jan4.getUTCDay() || 7;
-  const mondayOfWeek1 = new Date(jan4);
-  mondayOfWeek1.setUTCDate(jan4.getUTCDate() - (jan4Day - 1));
-  const result = new Date(mondayOfWeek1);
-  result.setUTCDate(result.getUTCDate() + (week - 1) * 7);
-  return result;
-}
 
 /** Shared vehicle projection for technician dashboard rows. */
 const TECH_VEHICLE_SELECT = {
@@ -46,7 +27,7 @@ const TECH_VEHICLE_SELECT = {
  * and their recent completions. Managers/admins get the fleet-wide payload
  * (the original function below).
  */
-async function technicianDashboard(userId: string) {
+async function technicianDashboard(userId: string, timeZone: string) {
   const [me, activeAssignments, closedAssignments] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
@@ -111,9 +92,8 @@ async function technicianDashboard(userId: string) {
     );
 
   const now = new Date();
-  const weekStart = startOfIsoWeek(isoWeekKey(now));
-  const nextWeekStart = new Date(weekStart);
-  nextWeekStart.setUTCDate(nextWeekStart.getUTCDate() + 7);
+  const weekStart = startOfLocalWeek(now, timeZone);
+  const nextWeekStart = addLocalDays(weekStart, 7, timeZone);
 
   const dueCount = assigned.filter((r) => {
     if (r.status !== ServiceStatus.DUE) return false;
@@ -156,7 +136,8 @@ async function technicianDashboard(userId: string) {
 
 // GET /api/dashboard — any authenticated user. All aggregates run
 // concurrently via Promise.all; the response is assembled from their results.
-export async function GET() {
+// "This week" / per-week buckets follow the caller's timezone (X-Timezone).
+export async function GET(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user) {
@@ -166,21 +147,21 @@ export async function GET() {
       );
     }
 
+    const timeZone = timezoneFromHeader(request.headers.get("x-timezone"));
+
     // Technicians get a personal dashboard scoped to their own assignments,
     // not the fleet-wide numbers.
     if (session.user.role === Role.TECHNICIAN) {
-      return NextResponse.json(await technicianDashboard(session.user.id));
+      return NextResponse.json(await technicianDashboard(session.user.id, timeZone));
     }
 
     const now = new Date();
-    const weekStart = startOfIsoWeek(isoWeekKey(now)); // Monday 00:00 UTC this week
-    const nextWeekStart = new Date(weekStart);
-    nextWeekStart.setUTCDate(nextWeekStart.getUTCDate() + 7);
+    const weekStart = startOfLocalWeek(now, timeZone); // Monday 00:00 local this week
+    const nextWeekStart = addLocalDays(weekStart, 7, timeZone);
 
     const last8Keys = Array.from({ length: 8 }, (_, i) => {
-      const d = new Date(weekStart);
-      d.setUTCDate(d.getUTCDate() + (i - 7) * 7); // i=0 -> 7 weeks ago ... i=7 -> this week
-      return isoWeekKey(d);
+      const d = addLocalDays(weekStart, (i - 7) * 7, timeZone); // i=0 -> 7 weeks ago ... i=7 -> this week
+      return localWeekKey(d, timeZone);
     });
 
     const [
@@ -250,7 +231,7 @@ export async function GET() {
     const countsByWeek = new Map(last8Keys.map((k) => [k, 0]));
     for (const { completedAt } of completedRecords) {
       if (!completedAt) continue;
-      const key = isoWeekKey(completedAt);
+      const key = localWeekKey(completedAt, timeZone);
       if (countsByWeek.has(key)) countsByWeek.set(key, countsByWeek.get(key)! + 1);
     }
     const completedPerWeek = last8Keys.map((key) => ({

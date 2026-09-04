@@ -1,5 +1,5 @@
-import type { NextAuthConfig } from "next-auth";
-import type { Role } from "@/generated/prisma/enums";
+import type { NextAuthConfig, Session, User } from "next-auth";
+import type { JWT } from "next-auth/jwt";
 
 /**
  * We use the JWT session strategy rather than database sessions.
@@ -19,18 +19,20 @@ export const authConfig = {
   trustHost: true,
   providers: [],
   callbacks: {
-    async jwt({ token, user }) {
-      // user is only present on sign-in; persist role + id into the token
-      if (user) {
+    async jwt({ token, user }: { token: JWT; user?: User }) {
+      // user is only present on sign-in; persist role + id into the token.
+      // The base Auth.js User type leaves id optional, but our Credentials
+      // authorize() always sets it, so narrow before writing.
+      if (user?.id && user.role) {
         token.id = user.id;
-        token.role = (user as { role?: Role }).role ?? null;
+        token.role = user.role;
       }
       return token;
     },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as Role;
+    async session({ session, token }: { session: Session; token: JWT }) {
+      if (session.user && token.id && token.role) {
+        session.user.id = token.id;
+        session.user.role = token.role;
       }
       return session;
     },

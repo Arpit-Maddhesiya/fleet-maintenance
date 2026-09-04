@@ -194,6 +194,7 @@ export type UserWhereInput = {
   historyEvents?: Prisma.ServiceHistoryEventListRelationFilter
   assignedEvents?: Prisma.ServiceHistoryEventListRelationFilter
   dismissedAlerts?: Prisma.AlertListRelationFilter
+  reports?: Prisma.DailyReportListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -207,6 +208,7 @@ export type UserOrderByWithRelationInput = {
   historyEvents?: Prisma.ServiceHistoryEventOrderByRelationAggregateInput
   assignedEvents?: Prisma.ServiceHistoryEventOrderByRelationAggregateInput
   dismissedAlerts?: Prisma.AlertOrderByRelationAggregateInput
+  reports?: Prisma.DailyReportOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -223,6 +225,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   historyEvents?: Prisma.ServiceHistoryEventListRelationFilter
   assignedEvents?: Prisma.ServiceHistoryEventListRelationFilter
   dismissedAlerts?: Prisma.AlertListRelationFilter
+  reports?: Prisma.DailyReportListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -260,6 +263,7 @@ export type UserCreateInput = {
   historyEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutActorInput
   assignedEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutTechnicianInput
   dismissedAlerts?: Prisma.AlertCreateNestedManyWithoutDismissedByInput
+  reports?: Prisma.DailyReportCreateNestedManyWithoutAuthorInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -273,6 +277,7 @@ export type UserUncheckedCreateInput = {
   historyEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutActorInput
   assignedEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutTechnicianInput
   dismissedAlerts?: Prisma.AlertUncheckedCreateNestedManyWithoutDismissedByInput
+  reports?: Prisma.DailyReportUncheckedCreateNestedManyWithoutAuthorInput
 }
 
 export type UserUpdateInput = {
@@ -286,6 +291,7 @@ export type UserUpdateInput = {
   historyEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutActorNestedInput
   assignedEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutTechnicianNestedInput
   dismissedAlerts?: Prisma.AlertUpdateManyWithoutDismissedByNestedInput
+  reports?: Prisma.DailyReportUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -299,6 +305,7 @@ export type UserUncheckedUpdateInput = {
   historyEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutActorNestedInput
   assignedEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutTechnicianNestedInput
   dismissedAlerts?: Prisma.AlertUncheckedUpdateManyWithoutDismissedByNestedInput
+  reports?: Prisma.DailyReportUncheckedUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -437,6 +444,20 @@ export type UserUpdateOneWithoutDismissedAlertsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDismissedAlertsInput, Prisma.UserUpdateWithoutDismissedAlertsInput>, Prisma.UserUncheckedUpdateWithoutDismissedAlertsInput>
 }
 
+export type UserCreateNestedOneWithoutReportsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReportsInput, Prisma.UserUncheckedCreateWithoutReportsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReportsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutReportsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReportsInput, Prisma.UserUncheckedCreateWithoutReportsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReportsInput
+  upsert?: Prisma.UserUpsertWithoutReportsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReportsInput, Prisma.UserUpdateWithoutReportsInput>, Prisma.UserUncheckedUpdateWithoutReportsInput>
+}
+
 export type UserCreateWithoutAssignmentsInput = {
   id?: string
   email: string
@@ -447,6 +468,7 @@ export type UserCreateWithoutAssignmentsInput = {
   historyEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutActorInput
   assignedEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutTechnicianInput
   dismissedAlerts?: Prisma.AlertCreateNestedManyWithoutDismissedByInput
+  reports?: Prisma.DailyReportCreateNestedManyWithoutAuthorInput
 }
 
 export type UserUncheckedCreateWithoutAssignmentsInput = {
@@ -459,6 +481,7 @@ export type UserUncheckedCreateWithoutAssignmentsInput = {
   historyEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutActorInput
   assignedEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutTechnicianInput
   dismissedAlerts?: Prisma.AlertUncheckedCreateNestedManyWithoutDismissedByInput
+  reports?: Prisma.DailyReportUncheckedCreateNestedManyWithoutAuthorInput
 }
 
 export type UserCreateOrConnectWithoutAssignmentsInput = {
@@ -487,6 +510,7 @@ export type UserUpdateWithoutAssignmentsInput = {
   historyEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutActorNestedInput
   assignedEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutTechnicianNestedInput
   dismissedAlerts?: Prisma.AlertUpdateManyWithoutDismissedByNestedInput
+  reports?: Prisma.DailyReportUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAssignmentsInput = {
@@ -499,6 +523,7 @@ export type UserUncheckedUpdateWithoutAssignmentsInput = {
   historyEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutActorNestedInput
   assignedEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutTechnicianNestedInput
   dismissedAlerts?: Prisma.AlertUncheckedUpdateManyWithoutDismissedByNestedInput
+  reports?: Prisma.DailyReportUncheckedUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserCreateWithoutHistoryEventsInput = {
@@ -511,6 +536,7 @@ export type UserCreateWithoutHistoryEventsInput = {
   assignments?: Prisma.ServiceAssignmentCreateNestedManyWithoutTechnicianInput
   assignedEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutTechnicianInput
   dismissedAlerts?: Prisma.AlertCreateNestedManyWithoutDismissedByInput
+  reports?: Prisma.DailyReportCreateNestedManyWithoutAuthorInput
 }
 
 export type UserUncheckedCreateWithoutHistoryEventsInput = {
@@ -523,6 +549,7 @@ export type UserUncheckedCreateWithoutHistoryEventsInput = {
   assignments?: Prisma.ServiceAssignmentUncheckedCreateNestedManyWithoutTechnicianInput
   assignedEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutTechnicianInput
   dismissedAlerts?: Prisma.AlertUncheckedCreateNestedManyWithoutDismissedByInput
+  reports?: Prisma.DailyReportUncheckedCreateNestedManyWithoutAuthorInput
 }
 
 export type UserCreateOrConnectWithoutHistoryEventsInput = {
@@ -540,6 +567,7 @@ export type UserCreateWithoutAssignedEventsInput = {
   assignments?: Prisma.ServiceAssignmentCreateNestedManyWithoutTechnicianInput
   historyEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutActorInput
   dismissedAlerts?: Prisma.AlertCreateNestedManyWithoutDismissedByInput
+  reports?: Prisma.DailyReportCreateNestedManyWithoutAuthorInput
 }
 
 export type UserUncheckedCreateWithoutAssignedEventsInput = {
@@ -552,6 +580,7 @@ export type UserUncheckedCreateWithoutAssignedEventsInput = {
   assignments?: Prisma.ServiceAssignmentUncheckedCreateNestedManyWithoutTechnicianInput
   historyEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutActorInput
   dismissedAlerts?: Prisma.AlertUncheckedCreateNestedManyWithoutDismissedByInput
+  reports?: Prisma.DailyReportUncheckedCreateNestedManyWithoutAuthorInput
 }
 
 export type UserCreateOrConnectWithoutAssignedEventsInput = {
@@ -580,6 +609,7 @@ export type UserUpdateWithoutHistoryEventsInput = {
   assignments?: Prisma.ServiceAssignmentUpdateManyWithoutTechnicianNestedInput
   assignedEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutTechnicianNestedInput
   dismissedAlerts?: Prisma.AlertUpdateManyWithoutDismissedByNestedInput
+  reports?: Prisma.DailyReportUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutHistoryEventsInput = {
@@ -592,6 +622,7 @@ export type UserUncheckedUpdateWithoutHistoryEventsInput = {
   assignments?: Prisma.ServiceAssignmentUncheckedUpdateManyWithoutTechnicianNestedInput
   assignedEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutTechnicianNestedInput
   dismissedAlerts?: Prisma.AlertUncheckedUpdateManyWithoutDismissedByNestedInput
+  reports?: Prisma.DailyReportUncheckedUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserUpsertWithoutAssignedEventsInput = {
@@ -615,6 +646,7 @@ export type UserUpdateWithoutAssignedEventsInput = {
   assignments?: Prisma.ServiceAssignmentUpdateManyWithoutTechnicianNestedInput
   historyEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutActorNestedInput
   dismissedAlerts?: Prisma.AlertUpdateManyWithoutDismissedByNestedInput
+  reports?: Prisma.DailyReportUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAssignedEventsInput = {
@@ -627,6 +659,7 @@ export type UserUncheckedUpdateWithoutAssignedEventsInput = {
   assignments?: Prisma.ServiceAssignmentUncheckedUpdateManyWithoutTechnicianNestedInput
   historyEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutActorNestedInput
   dismissedAlerts?: Prisma.AlertUncheckedUpdateManyWithoutDismissedByNestedInput
+  reports?: Prisma.DailyReportUncheckedUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserCreateWithoutDismissedAlertsInput = {
@@ -639,6 +672,7 @@ export type UserCreateWithoutDismissedAlertsInput = {
   assignments?: Prisma.ServiceAssignmentCreateNestedManyWithoutTechnicianInput
   historyEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutActorInput
   assignedEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutTechnicianInput
+  reports?: Prisma.DailyReportCreateNestedManyWithoutAuthorInput
 }
 
 export type UserUncheckedCreateWithoutDismissedAlertsInput = {
@@ -651,6 +685,7 @@ export type UserUncheckedCreateWithoutDismissedAlertsInput = {
   assignments?: Prisma.ServiceAssignmentUncheckedCreateNestedManyWithoutTechnicianInput
   historyEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutActorInput
   assignedEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutTechnicianInput
+  reports?: Prisma.DailyReportUncheckedCreateNestedManyWithoutAuthorInput
 }
 
 export type UserCreateOrConnectWithoutDismissedAlertsInput = {
@@ -679,6 +714,7 @@ export type UserUpdateWithoutDismissedAlertsInput = {
   assignments?: Prisma.ServiceAssignmentUpdateManyWithoutTechnicianNestedInput
   historyEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutActorNestedInput
   assignedEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutTechnicianNestedInput
+  reports?: Prisma.DailyReportUpdateManyWithoutAuthorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDismissedAlertsInput = {
@@ -691,6 +727,75 @@ export type UserUncheckedUpdateWithoutDismissedAlertsInput = {
   assignments?: Prisma.ServiceAssignmentUncheckedUpdateManyWithoutTechnicianNestedInput
   historyEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutActorNestedInput
   assignedEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutTechnicianNestedInput
+  reports?: Prisma.DailyReportUncheckedUpdateManyWithoutAuthorNestedInput
+}
+
+export type UserCreateWithoutReportsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  name: string
+  role: $Enums.Role
+  createdAt?: Date | string
+  assignments?: Prisma.ServiceAssignmentCreateNestedManyWithoutTechnicianInput
+  historyEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutActorInput
+  assignedEvents?: Prisma.ServiceHistoryEventCreateNestedManyWithoutTechnicianInput
+  dismissedAlerts?: Prisma.AlertCreateNestedManyWithoutDismissedByInput
+}
+
+export type UserUncheckedCreateWithoutReportsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  name: string
+  role: $Enums.Role
+  createdAt?: Date | string
+  assignments?: Prisma.ServiceAssignmentUncheckedCreateNestedManyWithoutTechnicianInput
+  historyEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutActorInput
+  assignedEvents?: Prisma.ServiceHistoryEventUncheckedCreateNestedManyWithoutTechnicianInput
+  dismissedAlerts?: Prisma.AlertUncheckedCreateNestedManyWithoutDismissedByInput
+}
+
+export type UserCreateOrConnectWithoutReportsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutReportsInput, Prisma.UserUncheckedCreateWithoutReportsInput>
+}
+
+export type UserUpsertWithoutReportsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutReportsInput, Prisma.UserUncheckedUpdateWithoutReportsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutReportsInput, Prisma.UserUncheckedCreateWithoutReportsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutReportsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutReportsInput, Prisma.UserUncheckedUpdateWithoutReportsInput>
+}
+
+export type UserUpdateWithoutReportsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignments?: Prisma.ServiceAssignmentUpdateManyWithoutTechnicianNestedInput
+  historyEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutActorNestedInput
+  assignedEvents?: Prisma.ServiceHistoryEventUpdateManyWithoutTechnicianNestedInput
+  dismissedAlerts?: Prisma.AlertUpdateManyWithoutDismissedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutReportsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignments?: Prisma.ServiceAssignmentUncheckedUpdateManyWithoutTechnicianNestedInput
+  historyEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutActorNestedInput
+  assignedEvents?: Prisma.ServiceHistoryEventUncheckedUpdateManyWithoutTechnicianNestedInput
+  dismissedAlerts?: Prisma.AlertUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 
@@ -703,6 +808,7 @@ export type UserCountOutputType = {
   historyEvents: number
   assignedEvents: number
   dismissedAlerts: number
+  reports: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -710,6 +816,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   historyEvents?: boolean | UserCountOutputTypeCountHistoryEventsArgs
   assignedEvents?: boolean | UserCountOutputTypeCountAssignedEventsArgs
   dismissedAlerts?: boolean | UserCountOutputTypeCountDismissedAlertsArgs
+  reports?: boolean | UserCountOutputTypeCountReportsArgs
 }
 
 /**
@@ -750,6 +857,13 @@ export type UserCountOutputTypeCountDismissedAlertsArgs<ExtArgs extends runtime.
   where?: Prisma.AlertWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountReportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DailyReportWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -762,6 +876,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   historyEvents?: boolean | Prisma.User$historyEventsArgs<ExtArgs>
   assignedEvents?: boolean | Prisma.User$assignedEventsArgs<ExtArgs>
   dismissedAlerts?: boolean | Prisma.User$dismissedAlertsArgs<ExtArgs>
+  reports?: boolean | Prisma.User$reportsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -798,6 +913,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   historyEvents?: boolean | Prisma.User$historyEventsArgs<ExtArgs>
   assignedEvents?: boolean | Prisma.User$assignedEventsArgs<ExtArgs>
   dismissedAlerts?: boolean | Prisma.User$dismissedAlertsArgs<ExtArgs>
+  reports?: boolean | Prisma.User$reportsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -810,6 +926,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     historyEvents: Prisma.$ServiceHistoryEventPayload<ExtArgs>[]
     assignedEvents: Prisma.$ServiceHistoryEventPayload<ExtArgs>[]
     dismissedAlerts: Prisma.$AlertPayload<ExtArgs>[]
+    reports: Prisma.$DailyReportPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1216,6 +1333,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   historyEvents<T extends Prisma.User$historyEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$historyEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServiceHistoryEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assignedEvents<T extends Prisma.User$assignedEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assignedEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServiceHistoryEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   dismissedAlerts<T extends Prisma.User$dismissedAlertsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$dismissedAlertsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AlertPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reports<T extends Prisma.User$reportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DailyReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1737,6 +1855,30 @@ export type User$dismissedAlertsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.AlertScalarFieldEnum | Prisma.AlertScalarFieldEnum[]
+}
+
+/**
+ * User.reports
+ */
+export type User$reportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DailyReport
+   */
+  select?: Prisma.DailyReportSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DailyReport
+   */
+  omit?: Prisma.DailyReportOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DailyReportInclude<ExtArgs> | null
+  where?: Prisma.DailyReportWhereInput
+  orderBy?: Prisma.DailyReportOrderByWithRelationInput | Prisma.DailyReportOrderByWithRelationInput[]
+  cursor?: Prisma.DailyReportWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DailyReportScalarFieldEnum | Prisma.DailyReportScalarFieldEnum[]
 }
 
 /**

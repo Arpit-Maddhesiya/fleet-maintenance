@@ -64,7 +64,10 @@ export function TechnicianDashboard() {
   const [odometerError, setOdometerError] = useState<string | null>(null);
 
   const load = useCallback(() => {
-    apiFetch<TechnicianDashboardData>("/api/dashboard")
+    apiFetch<TechnicianDashboardData>("/api/dashboard", {
+      // "Completed this week" follows the caller's calendar week.
+      headers: { "X-Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone },
+    })
       .then((d) => {
         setData(d);
         setLoadError(null);
@@ -198,8 +201,8 @@ export function TechnicianDashboard() {
               iconClass="bg-violet-500/10 text-violet-600 dark:text-violet-400"
             />
             <StatTile
-              label="Completed this week"
-              value={data.stats.completedThisWeek}
+              label="Completed services"
+              value={data.stats.completedAllTime}
               icon={
                 <CheckCircle2Icon className="size-4" aria-hidden />
               }
@@ -454,10 +457,7 @@ function StatTile({
         >
           {icon}
         </span>
-        <ArrowRightIcon
-          className="size-4 text-muted-foreground/40"
-          aria-hidden
-        />
+        
       </div>
       <p className="mt-3 text-sm text-muted-foreground">{label}</p>
       <p className="mt-1 text-3xl font-semibold tabular-nums tracking-tight">

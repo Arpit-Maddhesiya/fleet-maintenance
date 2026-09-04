@@ -76,7 +76,7 @@ export default async function LoginPage({
             </div>
             <div>
               <p className="text-base font-semibold leading-none text-white">
-                Fleet <span className="text-amber-400">Maintenance</span>
+                Fleet Maintenance
               </p>
               <p className="mt-1.5 text-xs text-stone-400">
                 Operations portal
@@ -138,10 +138,7 @@ export default async function LoginPage({
                 <TruckIcon className="size-6" aria-hidden />
               </div>
               <p className="mt-3 text-lg font-semibold tracking-tight text-stone-900 dark:text-stone-100">
-                Fleet{" "}
-                <span className="text-amber-600 dark:text-amber-400">
-                  Maintenance
-                </span>
+                Fleet Maintenance
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
                 Keep every vehicle on schedule.

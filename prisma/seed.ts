@@ -1,7 +1,12 @@
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import bcrypt from "bcryptjs";
-import { Role, ServiceStatus, HistoryEventType } from "@/generated/prisma/enums";
+import {
+  Role,
+  ServiceStatus,
+  HistoryEventType,
+  DailyReportType,
+} from "@/generated/prisma/enums";
 
 /**
  * Idempotent demo seed.
@@ -357,6 +362,7 @@ async function main() {
 
   // Wipe existing fleet data (dependency order). Users are kept so FKs and any
   // existing sessions keep working.
+  await prisma.dailyReport.deleteMany();
   await prisma.serviceHistoryEvent.deleteMany();
   await prisma.serviceAssignment.deleteMany();
   await prisma.serviceRecord.deleteMany();
@@ -570,6 +576,11 @@ async function main() {
         completedAt: row.completedAt ?? null,
         completedOdometer: row.completedOdometer ?? null,
         createdAt: row.createdAt,
+        // The rows are backdated history, so updatedAt must reflect the last
+        // real activity on the record, not the seed-insert time. Otherwise
+        // Prisma's @updatedAt (now) makes every completed record look like it
+        // was edited on seed day — the "Updated" filter would match them all.
+        updatedAt: row.completedAt ?? row.createdAt,
       },
     });
 
@@ -649,11 +660,126 @@ async function main() {
     skipDuplicates: true,
   });
 
+  // ----------------------------------------------------------- daily reports
+  // Backdated daily reports so the manager/admin review screens have history:
+  // the fleet manager and each technician file after 5 PM on recent weekdays.
+  // reportDate stores the UTC instant of local midnight of the report's day in
+  // the author's timezone. The seed fixes the demo zone to Asia/Kolkata
+  // (UTC+5:30): its local date rolls over at 18:30Z, so the "local day" of a
+  // UTC date is the UTC date + 1 once the UTC clock passes 18:30. We simply
+  // generate the last 8 UTC midnights, skip weekends by checking the IST
+  // calendar day, and store the IST-local midnight instant for each.
+  const istOffsetMs = 5.5 * 60 * 60 * 1000; // Asia/Kolkata (UTC+5:30)
+
+  // The IST calendar day label ("YYYY-MM-DD") of a UTC-midnight instant.
+  const istDateKeyOfUtcMidnight = (utcMidnight: Date) => {
+    const ist = new Date(utcMidnight.getTime() + istOffsetMs);
+    return ist.toISOString().slice(0, 10);
+  };
+  const istDayOfWeek = (utcMidnight: Date) =>
+    new Date(utcMidnight.getTime() + istOffsetMs).getUTCDay();
+
+  // Collect up to 5 recent weekday report dates, ending yesterday (skip today
+  // so a fresh seed shows an "open" form — filing today is a live action).
+  const reportDays: Date[] = [];
+  for (let d = 1; reportDays.length < 5 && d < 12; d++) {
+    const utcMidnight = new Date();
+    utcMidnight.setUTCDate(utcMidnight.getUTCDate() - d);
+    utcMidnight.setUTCHours(0, 0, 0, 0);
+    const dow = istDayOfWeek(utcMidnight);
+    if (dow !== 0 && dow !== 6) reportDays.push(utcMidnight); // skip weekends
+  }
+
+  // The report's reportDate is IST midnight = (UTC midnight of the IST date
+  // that this UTC date falls in) - 5.5h. If the UTC date is "2026-09-03", IST
+  // midnight of the IST calendar day equal to that UTC date is at
+  // 2026-09-02T18:30Z.
+  const istLocalMidnightFor = (utcMidnight: Date) => {
+    // The IST calendar day for this UTC date is istDateKeyOfUtcMidnight; its
+    // local midnight (as a UTC instant) is that date at 18:30Z the day prior.
+    const [y, m, day] = istDateKeyOfUtcMidnight(utcMidnight).split("-").map(Number);
+    return new Date(Date.UTC(y, m - 1, day - 1, 18, 30, 0));
+  };
+
+  const reportRows: {
+    authorId: string;
+    type: DailyReportType;
+    reportDate: Date;
+    createdAt: Date;
+    data: Record<string, number | string>;
+  }[] = [];
+
+  for (const utcMidnight of reportDays) {
+    const reportDate = istLocalMidnightFor(utcMidnight);
+    // Filed at ~5:30 PM IST (17:30 IST = 12:00Z) on the same local day.
+    const filedAt = new Date(reportDate.getTime() + 17.5 * 60 * 60 * 1000);
+    const daysAgoVal = Math.round((Date.now() - reportDate.getTime()) / DAY);
+
+    // The manager files a fleet-level summary.
+    reportRows.push({
+      authorId: manager.id,
+      type: DailyReportType.FLEET_MANAGER,
+      reportDate,
+      createdAt: filedAt,
+      data: {
+        bookingsCount: 2 + (daysAgoVal % 3),
+        inspectionsCount: 3 + (daysAgoVal % 2),
+        notes: `Booked the next round of services and checked in on the bay schedule. ${
+          daysAgoVal % 2 === 0
+            ? "One van flagged for a brake follow-up."
+            : "All technicians cleared their boards."
+        }`,
+      },
+    });
+
+    // Technicians file their hands-on work.
+    techs.forEach((tech, ti) => {
+      const registrations =
+        ti % 2 === 0 ? ["AB12 CDE", "FG34 HIJ"] : ["KL56 MNO", "PQ78 RST"];
+      reportRows.push({
+        authorId: tech.id,
+        type: DailyReportType.TECHNICIAN,
+        reportDate,
+        createdAt: filedAt,
+        data: {
+          jobsCompleted: 2 + ((daysAgoVal + ti) % 3),
+          hoursWorked: 8,
+          registrations: registrations.join("\n"),
+          notes:
+            ti % 2 === 0
+              ? "All good — no issues to flag."
+              : "Needed an extra part for the Sprinter.",
+        },
+      });
+    });
+  }
+
+  const { count: reportCount } = await prisma.dailyReport.createMany({
+    data: reportRows.map((r) => ({
+      authorId: r.authorId,
+      reportDate: r.reportDate,
+      type: r.type,
+      createdAt: r.createdAt,
+      updatedAt: r.createdAt, // backdated history, like the service records
+      jobsCompleted: typeof r.data.jobsCompleted === "number" ? r.data.jobsCompleted : 0,
+      hoursWorked: typeof r.data.hoursWorked === "number" ? r.data.hoursWorked : 0,
+      registrations:
+        typeof r.data.registrations === "string" ? r.data.registrations : "",
+      bookingsCount:
+        typeof r.data.bookingsCount === "number" ? r.data.bookingsCount : 0,
+      inspectionsCount:
+        typeof r.data.inspectionsCount === "number" ? r.data.inspectionsCount : 0,
+      notes: typeof r.data.notes === "string" ? r.data.notes : "",
+    })),
+  });
+  console.log(`Seeded ${reportCount} daily reports`);
+
   console.log("\nSeed complete.");
   console.log(`  users: ${users.length}`);
   console.log(`  vehicles: ${vehicles.length}`);
   console.log(`  service records: ${recordCount}`);
   console.log(`  active alerts: ${alertCount}`);
+  console.log(`  daily reports: ${reportCount}`);
 
   await prisma.$disconnect();
 }

@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   BellRingIcon,
   ClipboardListIcon,
+  FileTextIcon,
   LayoutDashboardIcon,
   LogOutIcon,
   MenuIcon,
@@ -181,6 +182,15 @@ function NavContent({
         Dashboard
       </NavLink>
 
+      {/* Daily reports: technicians file their own; managers/admins review. */}
+      <NavLink
+        href="/daily-reports"
+        active={pathname.startsWith("/daily-reports")}
+      >
+        <FileTextIcon className="size-4" />
+        Daily Reports
+      </NavLink>
+
       {isManager ? (
         <>
           <NavLink href="/vehicles" active={pathname.startsWith("/vehicles")}>
@@ -288,8 +298,8 @@ function BrandMark() {
       <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-amber-950 shadow-sm shadow-amber-950/30">
         <TruckIcon className="size-4" aria-hidden />
       </div>
-      <span className="truncate text-[15px] leading-tight text-stone-100">
-        Fleet <span className="font-semibold text-amber-400">Maintenance</span>
+      <span className="truncate text-[15px] font-semibold leading-tight text-stone-100">
+        Fleet Maintenance
       </span>
     </div>
   );

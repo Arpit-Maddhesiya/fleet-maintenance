@@ -257,6 +257,23 @@ export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedStringNullableFilter<$PrismaModel>
 }
 
+export type EnumDailyReportTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.DailyReportType | Prisma.EnumDailyReportTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.DailyReportType[] | Prisma.ListEnumDailyReportTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DailyReportType[] | Prisma.ListEnumDailyReportTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDailyReportTypeFilter<$PrismaModel> | $Enums.DailyReportType
+}
+
+export type EnumDailyReportTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DailyReportType | Prisma.EnumDailyReportTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.DailyReportType[] | Prisma.ListEnumDailyReportTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DailyReportType[] | Prisma.ListEnumDailyReportTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDailyReportTypeWithAggregatesFilter<$PrismaModel> | $Enums.DailyReportType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDailyReportTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDailyReportTypeFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -511,6 +528,23 @@ export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedStringNullableFilter<$PrismaModel>
   _max?: Prisma.NestedStringNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumDailyReportTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.DailyReportType | Prisma.EnumDailyReportTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.DailyReportType[] | Prisma.ListEnumDailyReportTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DailyReportType[] | Prisma.ListEnumDailyReportTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDailyReportTypeFilter<$PrismaModel> | $Enums.DailyReportType
+}
+
+export type NestedEnumDailyReportTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DailyReportType | Prisma.EnumDailyReportTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.DailyReportType[] | Prisma.ListEnumDailyReportTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DailyReportType[] | Prisma.ListEnumDailyReportTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDailyReportTypeWithAggregatesFilter<$PrismaModel> | $Enums.DailyReportType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDailyReportTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDailyReportTypeFilter<$PrismaModel>
 }
 
 

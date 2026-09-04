@@ -181,10 +181,12 @@ export interface AlertsResponse {
 export interface DashboardData {
   dueCount: number;
   inServiceCount: number;
+  /** Completions in the caller's current calendar week (viewer timezone). */
   completedThisWeek: number;
   overdueCount: number;
   byStatus: Record<string, number>;
   byTechnician: Record<string, number>;
+  /** Last 8 calendar weeks in the caller's timezone, oldest first. */
   completedPerWeek: { week: string; count: number }[];
 }
 
@@ -221,7 +223,8 @@ export interface TechnicianDashboardData {
     dueCount: number;
     /** Of my assignments: records currently IN_SERVICE. */
     inServiceCount: number;
-    /** Of my completed work: completed in the current UTC week. */
+    /** Of my completed work: completed in the caller's current calendar week
+     *  (viewer timezone, Monday-based). */
     completedThisWeek: number;
     /** Total service records I have ever completed. */
     completedAllTime: number;
@@ -252,3 +255,47 @@ export interface UserRow {
   /** Count of active service assignments (unassignedAt = null). */
   activeAssignments: number;
 }
+
+export type DailyReportType = "TECHNICIAN" | "FLEET_MANAGER";
+
+/** A daily work report as returned by the daily-reports endpoints. */
+export interface DailyReportDto {
+  id: string;
+  authorId: string;
+  authorName: string;
+  role: "TECHNICIAN" | "FLEET_MANAGER";
+  /** The local day the report is for. */
+  reportDate: string;
+  type: DailyReportType;
+  /** Technician fields. */
+  jobsCompleted: number;
+  hoursWorked: number;
+  /** One vehicle registration per line. */
+  registrations: string;
+  /** Fleet-manager fields. */
+  bookingsCount: number;
+  inspectionsCount: number;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** GET /api/daily-reports — a technician (or manager viewing self). */
+export interface DailyReportResponse {
+  report: DailyReportDto | null;
+}
+
+/** GET /api/daily-reports — a manager/admin viewing a day's reports. */
+export interface DailyReportsListResponse {
+  date: string;
+  /** Role-appropriate subset for the caller (never another manager's report for a manager). */
+  reports: DailyReportDto[];
+  /** The people whose reports the caller may view, for an author filter. */
+  authors: { id: string; name: string; role: "FLEET_MANAGER" | "TECHNICIAN" }[];
+}
+
+/** GET /api/daily-reports?history=true — the caller's own past reports. */
+export interface DailyReportHistoryResponse {
+  reports: DailyReportDto[];
+}
+

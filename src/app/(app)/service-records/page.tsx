@@ -91,9 +91,7 @@ function ServiceRecordsPageContent() {
   // Overdue is a derived status (DUE past the grace period) expressed as its
   // own query param. The status Select presents it as a first-class option.
   const overdue = searchParams.get("overdue") === "true";
-  const statusFilterValue = overdue
-    ? "__overdue"
-    : status || "__all";
+  const statusFilterValue = overdue ? "__overdue" : status || "__all";
 
   // The <Select> controls use "__all" as the "no filter" sentinel — map it
   // back to an empty string so pushParams removes the param entirely
@@ -152,6 +150,10 @@ function ServiceRecordsPageContent() {
         dirty = true;
       }
     }
+    if (params.get("overdue") === "true") {
+      params.delete("status");
+      dirty = true;
+    }
     if (dirty) {
       router.replace(`/service-records?${params.toString()}`, { scroll: false });
     }
@@ -182,7 +184,18 @@ function ServiceRecordsPageContent() {
         setLoadError(error instanceof Error ? error.message : "Failed to load records.");
       });
     return () => controller.abort();
-  }, [searchParams, q, vehicleId, status, overdue, technicianId, sortBy, sortDir, page, retryNonce]);
+  }, [
+    searchParams,
+    q,
+    vehicleId,
+    status,
+    overdue,
+    technicianId,
+    sortBy,
+    sortDir,
+    page,
+    retryNonce,
+  ]);
 
   // Static filter options, fetched once: every vehicle, and every technician
   // (the technician dropdown is manager-only — a technician's view is scoped
