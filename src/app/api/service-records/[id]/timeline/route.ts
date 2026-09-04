@@ -69,7 +69,7 @@ export async function GET(
 
     if (!isManagerRole(session.user.role)) {
       const isAssigned = record.assignments.some(
-        (a) => a.technicianId === session.user.id && a.unassignedAt === null
+        (a) => a.technicianId === session.user.id
       );
       if (!isAssigned) {
         return NextResponse.json(

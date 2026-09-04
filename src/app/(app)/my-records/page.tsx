@@ -91,7 +91,7 @@ export default function MyRecordsPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             {isManager
               ? "Records assigned to you — useful as a manager only if you're also a technician."
-              : "Service records currently assigned to you."}
+              : "Every service record you've worked on — current jobs and completed history."}
           </p>
         </div>
       </div>
@@ -103,7 +103,7 @@ export default function MyRecordsPage() {
             ? "Loading your records…"
             : filtering
               ? `${shownTotal} of ${baseTotal} record${baseTotal === 1 ? "" : "s"}`
-              : `${baseTotal} record${baseTotal === 1 ? "" : "s"} assigned to you`}
+              : `${baseTotal} record${baseTotal === 1 ? "" : "s"} assigned to you over time`}
         </p>
         <Select value={status} onValueChange={setStatus}>
           <SelectTrigger size="sm" className="min-w-40">
@@ -142,8 +142,8 @@ export default function MyRecordsPage() {
           records={filtered}
           emptyMessage={
             filtering
-              ? `No assigned records with status "${STATUS_LABELS[status as ServiceStatus] ?? status}".`
-              : "You're all caught up — no service records are assigned to you right now."
+              ? `No records with status "${STATUS_LABELS[status as ServiceStatus] ?? status}".`
+              : "No service records yet — once a manager assigns work to you, it will show up here."
           }
           // This endpoint returns vehicle info but not the assignments list,
           // so the technicians column would be meaningless here.

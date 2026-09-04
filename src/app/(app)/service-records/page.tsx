@@ -27,8 +27,9 @@ import type {
   Vehicle,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { ServiceStatus } from "@/generated/prisma/enums";
+import { Role, ServiceStatus } from "@/generated/prisma/enums";
 import { isManagerRole } from "@/lib/roles";
+import { RoleRestrictedPage } from "@/lib/role-restricted-page";
 import { CreateRecordDialog } from "@/components/service-records/create-record-dialog";
 import { ExportButton } from "@/components/service-records/export-button";
 import {
@@ -53,6 +54,14 @@ interface TechnicianOption {
 }
 
 export default function ServiceRecordsPage() {
+  return (
+    <RoleRestrictedPage allowedRoles={[Role.FLEET_MANAGER, Role.ADMIN]}>
+      <ServiceRecordsPageContent />
+    </RoleRestrictedPage>
+  );
+}
+
+function ServiceRecordsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
@@ -78,6 +87,26 @@ export default function ServiceRecordsPage() {
   const sortBy = (searchParams.get("sortBy") as SortBy) || "updatedAt";
   const sortDir: SortDir = searchParams.get("sortDir") === "asc" ? "asc" : "desc";
   const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
+
+  // Overdue is a derived status (DUE past the grace period) expressed as its
+  // own query param. The status Select presents it as a first-class option.
+  const overdue = searchParams.get("overdue") === "true";
+  const statusFilterValue = overdue
+    ? "__overdue"
+    : status || "__all";
+
+  // The <Select> controls use "__all" as the "no filter" sentinel — map it
+  // back to an empty string so pushParams removes the param entirely
+  // instead of sending "__all" to the API (which would fail validation).
+  const toQueryValue = (v: string) => (v === "__all" ? "" : v);
+
+  function setStatusFilter(v: string) {
+    if (v === "__overdue") {
+      pushParams({ status: null, overdue: "true" });
+    } else {
+      pushParams({ status: toQueryValue(v), overdue: null });
+    }
+  }
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const rangeStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
@@ -110,9 +139,31 @@ export default function ServiceRecordsPage() {
     return () => clearTimeout(timer);
   }, [searchInput, q, pushParams]);
 
+  // Normalize a legacy/edge-case URL: the filter selects use "__all" as a
+  // UI sentinel, but it must never reach the API or stay in the address bar.
+  // If it appears (e.g. from an old bookmarked URL), strip it via a replace
+  // so the Selects show their placeholder and the fetch below is valid.
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    let dirty = false;
+    for (const key of ["vehicleId", "status", "technicianId"]) {
+      if (params.get(key) === "__all") {
+        params.delete(key);
+        dirty = true;
+      }
+    }
+    if (dirty) {
+      router.replace(`/service-records?${params.toString()}`, { scroll: false });
+    }
+  }, [searchParams, router]);
+
   // Fetch the current page whenever the URL query params change.
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
+    // Belt-and-braces: never forward the "__all" UI sentinel to the API.
+    for (const key of ["vehicleId", "status", "technicianId"]) {
+      if (params.get(key) === "__all") params.delete(key);
+    }
     params.set("pageSize", String(PAGE_SIZE));
     if (sortBy) params.set("sortBy", sortBy);
     if (sortDir) params.set("sortDir", sortDir);
@@ -131,7 +182,7 @@ export default function ServiceRecordsPage() {
         setLoadError(error instanceof Error ? error.message : "Failed to load records.");
       });
     return () => controller.abort();
-  }, [searchParams, q, vehicleId, status, technicianId, sortBy, sortDir, page, retryNonce]);
+  }, [searchParams, q, vehicleId, status, overdue, technicianId, sortBy, sortDir, page, retryNonce]);
 
   // Static filter options, fetched once: every vehicle, and every technician
   // (the technician dropdown is manager-only — a technician's view is scoped
@@ -187,8 +238,8 @@ export default function ServiceRecordsPage() {
         </div>
 
         <Select
-          value={vehicleId}
-          onValueChange={(v) => pushParams({ vehicleId: v })}
+          value={vehicleId || "__all"}
+          onValueChange={(v) => pushParams({ vehicleId: toQueryValue(v) })}
         >
           <SelectTrigger size="sm" className="min-w-36">
             <SelectValue placeholder="All vehicles" />
@@ -203,12 +254,14 @@ export default function ServiceRecordsPage() {
           </SelectContent>
         </Select>
 
-        <Select value={status} onValueChange={(v) => pushParams({ status: v })}>
-          <SelectTrigger size="sm" className="min-w-32">
+        <Select value={statusFilterValue} onValueChange={setStatusFilter}>
+          <SelectTrigger size="sm" className="min-w-36">
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="__all">All statuses</SelectItem>
+            {/* Overdue is a derived filter (DUE past the grace period). */}
+            <SelectItem value="__overdue">Overdue</SelectItem>
             {(Object.keys(STATUS_LABELS) as ServiceStatus[]).map((value) => (
               <SelectItem key={value} value={value}>
                 {STATUS_LABELS[value]}
@@ -219,8 +272,8 @@ export default function ServiceRecordsPage() {
 
         {isManager ? (
           <Select
-            value={technicianId}
-            onValueChange={(v) => pushParams({ technicianId: v })}
+            value={technicianId || "__all"}
+            onValueChange={(v) => pushParams({ technicianId: toQueryValue(v) })}
           >
             <SelectTrigger size="sm" className="min-w-36">
               <SelectValue placeholder="All technicians" />

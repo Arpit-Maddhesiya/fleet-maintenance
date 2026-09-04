@@ -17,13 +17,17 @@ import {
 // thing that touches the database, and it does so inside a single transaction
 // so the record update, the vehicle counters, and the history event are
 // committed together or not at all.
+//
+// Authorization:
+//  - BOOK (scheduling + assigning) is manager-only.
+//  - START and COMPLETE may be performed by a manager/admin OR by a
+//    technician the record is currently assigned to. Non-assigned
+//    technicians are rejected below, before the state machine runs.
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await requireRole(Role.FLEET_MANAGER);
-
     const { id } = await params;
     const body = await request.json();
     const parsed = transitionSchema.safeParse(body);
@@ -35,6 +39,14 @@ export async function POST(
     }
 
     const { action } = parsed.data;
+
+    // BOOK requires a manager/admin. START/COMPLETE accept a manager/admin OR
+    // a technician; the assignment check below then decides whether this
+    // technician may act on this specific record.
+    const session =
+      action === "BOOK"
+        ? await requireRole(Role.FLEET_MANAGER)
+        : await requireRole(Role.FLEET_MANAGER, Role.TECHNICIAN);
     const payload =
       action === "BOOK"
         ? { scheduledDate: parsed.data.scheduledDate, technicianId: parsed.data.technicianId }
@@ -48,10 +60,8 @@ export async function POST(
     });
     if (!record) throw new NotFoundError("Service record not found.");
 
-    // START and COMPLETE may be performed by the fleet manager (or admin),
-    // or by a technician the record is currently assigned to. BOOK is
-    // manager-only (checked above). Anyone else is rejected before the state
-    // machine runs.
+    // A technician may only START/COMPLETE a record they are currently
+    // assigned to; a manager/admin has already passed the gate above.
     if (action !== "BOOK" && !isManagerRole(session.user.role)) {
       const isAssigned = record.assignments.some(
         (a) => a.technicianId === session.user.id && a.unassignedAt === null

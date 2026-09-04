@@ -9,6 +9,7 @@ import {
   ChevronRightIcon,
   FileUpIcon,
   PlusIcon,
+  SearchIcon,
   TruckIcon,
 } from "lucide-react";
 
@@ -25,11 +26,21 @@ import {
 import { apiFetch } from "@/lib/api-client";
 import type { Vehicle } from "@/lib/types";
 import { isManagerRole } from "@/lib/roles";
+import { Role } from "@/generated/prisma/enums";
+import { RoleRestrictedPage } from "@/lib/role-restricted-page";
 import { VehicleDialog } from "@/components/vehicles/vehicle-dialog";
 import { ArchiveAction } from "@/components/vehicles/archive-action";
 import { BulkOdometerDialog } from "@/components/vehicles/bulk-odometer-dialog";
 
 export default function VehiclesPage() {
+  return (
+    <RoleRestrictedPage allowedRoles={[Role.FLEET_MANAGER, Role.ADMIN]}>
+      <VehiclesPageContent />
+    </RoleRestrictedPage>
+  );
+}
+
+function VehiclesPageContent() {
   const { data: session } = useSession();
   const isManager = isManagerRole(session?.user?.role);
 
@@ -38,6 +49,8 @@ export default function VehiclesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Vehicle | null>(null);
+  // Client-side search over the loaded fleet (registration/make/model).
+  const [query, setQuery] = useState("");
 
   const [loadError, setLoadError] = useState<string | null>(null);
   // Bumping this re-runs the fetch effect — the retry affordance.
@@ -63,6 +76,20 @@ export default function VehiclesPage() {
     load();
   }, [load, retryNonce]);
 
+  // Case-insensitive match on registration, make, or model.
+  const needle = query.trim().toLowerCase();
+  const filtered =
+    vehicles === null
+      ? null
+      : needle.length === 0
+        ? vehicles
+        : vehicles.filter((v) =>
+            [v.registrationNumber, v.make, v.model]
+              .join(" ")
+              .toLowerCase()
+              .includes(needle)
+          );
+
   return (
     <div className="space-y-6">
       {/* Page header */}
@@ -80,11 +107,29 @@ export default function VehiclesPage() {
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-muted-foreground">
-          {vehicles === null
-            ? "Loading vehicles…"
-            : `${vehicles.length} vehicle${vehicles.length === 1 ? "" : "s"}${showArchived ? " including archived" : ""}`}
-        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative">
+            <SearchIcon
+              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden
+            />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by registration, make, model…"
+              className="h-9 w-full rounded-md border border-input bg-card pr-3 pl-9 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:w-72"
+              aria-label="Search vehicles"
+            />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {vehicles === null
+              ? "Loading vehicles…"
+              : needle.length > 0
+                ? `${filtered?.length ?? 0} of ${vehicles.length} vehicle${vehicles.length === 1 ? "" : "s"}`
+                : `${vehicles.length} vehicle${vehicles.length === 1 ? "" : "s"}${showArchived ? " including archived" : ""}`}
+          </p>
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button
             variant={showArchived ? "secondary" : "outline"}
@@ -148,6 +193,21 @@ export default function VehiclesPage() {
             setDialogOpen(true);
           }}
         />
+      ) : (filtered?.length ?? 0) === 0 ? (
+        // The fleet loaded, but nothing matches the search query.
+        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed bg-card/50 px-6 py-16 text-center">
+          <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+            <SearchIcon className="size-6" aria-hidden />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground">
+              No vehicles match &ldquo;{query.trim()}&rdquo;
+            </p>
+            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+              Try a different registration, make, or model.
+            </p>
+          </div>
+        </div>
       ) : (
         <>
           {/* Desktop: card-framed table. Mobile: one card per vehicle. */}
@@ -166,7 +226,7 @@ export default function VehiclesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {vehicles.map((vehicle) => (
+                {filtered!.map((vehicle) => (
                   <TableRow key={vehicle.id}>
                     <TableCell className="px-4">
                       <div className="flex items-center gap-3">
@@ -227,7 +287,7 @@ export default function VehiclesPage() {
 
           {/* Mobile cards */}
           <ul className="space-y-3 md:hidden">
-            {vehicles.map((vehicle) => (
+            {filtered!.map((vehicle) => (
               <li
                 key={vehicle.id}
                 className="overflow-hidden rounded-2xl border bg-card"

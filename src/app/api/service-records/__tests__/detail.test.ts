@@ -73,12 +73,13 @@ describe("GET /api/service-records/[id]", () => {
       vehicle: { registrationNumber: "AB12 CDE" },
       assignments: [{ technician: { name: "Bob Tech" } }],
     });
+    // All assignments are loaded (so a technician's history can be authorized)
+    // but only active ones are returned to the client.
     expect(prisma.serviceRecord.findUnique).toHaveBeenCalledWith({
       where: { id: "r1" },
       include: {
         vehicle: true,
         assignments: {
-          where: { unassignedAt: null },
           include: { technician: { select: { id: true, name: true } } },
         },
       },
@@ -94,6 +95,28 @@ describe("GET /api/service-records/[id]", () => {
     );
 
     expect(res.status).toBe(200);
+  });
+
+  it("allows a technician to view a record they previously worked on (closed assignment)", async () => {
+    vi.mocked(auth).mockResolvedValue(technicianSession as never);
+    vi.mocked(prisma.serviceRecord.findUnique).mockResolvedValue({
+      ...baseRecord,
+      status: "COMPLETED",
+      // The assignment is now closed (the tech completed this job).
+      assignments: [
+        { ...baseRecord.assignments[0], unassignedAt: new Date() },
+      ],
+    } as never);
+
+    const res = await getRecord(
+      asNextRequest(new Request("http://localhost/api/service-records/r1")),
+      params
+    );
+
+    expect(res.status).toBe(200);
+    // Closed assignments are filtered out of the response shape.
+    const body = await res.json();
+    expect(body.assignments).toEqual([]);
   });
 
   it("rejects a technician not assigned to the record with 403", async () => {

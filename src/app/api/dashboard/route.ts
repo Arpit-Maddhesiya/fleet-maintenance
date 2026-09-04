@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { handleError } from "@/lib/api";
 import { isOverdue } from "@/lib/overdue";
-import { ServiceStatus } from "@/generated/prisma/enums";
+import { Role, ServiceStatus } from "@/generated/prisma/enums";
 
 /** ISO week: Monday-based, matching Date.prototype.toISOString (UTC). */
 function isoWeekKey(date: Date): string {
@@ -30,6 +30,130 @@ function startOfIsoWeek(weekKey: string): Date {
   return result;
 }
 
+/** Shared vehicle projection for technician dashboard rows. */
+const TECH_VEHICLE_SELECT = {
+  select: {
+    id: true,
+    registrationNumber: true,
+    make: true,
+    model: true,
+  },
+} as const;
+
+/**
+ * GET /api/dashboard for a TECHNICIAN caller — only their own work.
+ * Returns their active assignments, headline stats over those assignments,
+ * and their recent completions. Managers/admins get the fleet-wide payload
+ * (the original function below).
+ */
+async function technicianDashboard(userId: string) {
+  const [me, activeAssignments, closedAssignments] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, name: true },
+    }),
+    prisma.serviceAssignment.findMany({
+      where: { technicianId: userId, unassignedAt: null },
+      select: {
+        serviceRecord: {
+          select: {
+            id: true,
+            status: true,
+            description: true,
+            scheduledDate: true,
+            startedAt: true,
+            dueSince: true,
+            vehicle: TECH_VEHICLE_SELECT,
+          },
+        },
+      },
+      orderBy: { assignedAt: "asc" },
+    }),
+    prisma.serviceAssignment.findMany({
+      where: { technicianId: userId, unassignedAt: { not: null } },
+      select: {
+        serviceRecord: {
+          select: {
+            id: true,
+            status: true,
+            description: true,
+            completedAt: true,
+            completedOdometer: true,
+            vehicle: TECH_VEHICLE_SELECT,
+          },
+        },
+      },
+    }),
+  ]);
+
+  if (!me) {
+    throw new Error("Technician user not found.");
+  }
+
+  const assigned = activeAssignments.map(({ serviceRecord }) => ({
+    id: serviceRecord.id,
+    status: serviceRecord.status,
+    description: serviceRecord.description,
+    scheduledDate: serviceRecord.scheduledDate,
+    startedAt: serviceRecord.startedAt,
+    dueSince: serviceRecord.dueSince,
+    vehicle: serviceRecord.vehicle,
+  }));
+
+  // "My completions" = closed assignments whose record is COMPLETED. A closed
+  // assignment on a non-completed record (e.g. manager reassigned mid-job)
+  // is not a completion.
+  const completions = closedAssignments
+    .map(({ serviceRecord }) => serviceRecord)
+    .filter(
+      (r): r is typeof r & { completedAt: Date } =>
+        r.status === ServiceStatus.COMPLETED && r.completedAt !== null
+    );
+
+  const now = new Date();
+  const weekStart = startOfIsoWeek(isoWeekKey(now));
+  const nextWeekStart = new Date(weekStart);
+  nextWeekStart.setUTCDate(nextWeekStart.getUTCDate() + 7);
+
+  const dueCount = assigned.filter((r) => {
+    if (r.status !== ServiceStatus.DUE) return false;
+    return isOverdue({ status: r.status, dueSince: new Date(r.dueSince) });
+  }).length;
+  const inServiceCount = assigned.filter(
+    (r) => r.status === ServiceStatus.IN_SERVICE
+  ).length;
+  const completedThisWeek = completions.filter((r) => {
+    const at = r.completedAt;
+    return at >= weekStart && at < nextWeekStart;
+  }).length;
+
+  const recentCompleted = completions
+    .slice()
+    .sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime())
+    .slice(0, 5)
+    .map((r) => ({
+      id: r.id,
+      description: r.description,
+      completedAt: r.completedAt.toISOString(),
+      completedOdometer: r.completedOdometer,
+      vehicle: r.vehicle,
+    }));
+
+  return {
+    role: Role.TECHNICIAN,
+    technician: { id: me.id, name: me.name },
+    assigned,
+    stats: {
+      assignedCount: assigned.length,
+      dueCount,
+      inServiceCount,
+      completedThisWeek,
+      completedAllTime: completions.length,
+    },
+    recentCompleted,
+  };
+}
+
 // GET /api/dashboard — any authenticated user. All aggregates run
 // concurrently via Promise.all; the response is assembled from their results.
 export async function GET() {
@@ -40,6 +164,12 @@ export async function GET() {
         { error: "You must be signed in." },
         { status: 401 }
       );
+    }
+
+    // Technicians get a personal dashboard scoped to their own assignments,
+    // not the fleet-wide numbers.
+    if (session.user.role === Role.TECHNICIAN) {
+      return NextResponse.json(await technicianDashboard(session.user.id));
     }
 
     const now = new Date();

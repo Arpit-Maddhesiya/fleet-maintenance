@@ -7,7 +7,9 @@ import {
   MailIcon,
   PlusIcon,
   RefreshCwIcon,
+  SearchIcon,
   ShieldIcon,
+  AlertTriangleIcon,
   Trash2Icon,
   UserRoundIcon,
   UsersIcon,
@@ -24,6 +26,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -78,6 +90,8 @@ export default function UsersPage() {
   const [retryNonce, setRetryNonce] = useState(0);
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<UserRow | null>(null);
+  // Client-side search over the loaded users (name/email/role).
+  const [query, setQuery] = useState("");
 
   const load = useCallback(async () => {
     try {
@@ -96,6 +110,20 @@ export default function UsersPage() {
     load();
   }, [load, retryNonce]);
 
+  // Case-insensitive match on name, email, or role label.
+  const needle = query.trim().toLowerCase();
+  const filtered =
+    users === null
+      ? null
+      : needle.length === 0
+        ? users
+        : users.filter((user) =>
+            [user.name, user.email, ROLE_META[user.role]?.label ?? user.role]
+              .join(" ")
+              .toLowerCase()
+              .includes(needle)
+          );
+
   return (
     <div className="space-y-6">
       {/* Page header */}
@@ -113,11 +141,29 @@ export default function UsersPage() {
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-muted-foreground">
-          {users === null
-            ? "Loading users…"
-            : `${users.length} user${users.length === 1 ? "" : "s"}`}
-        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative">
+            <SearchIcon
+              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden
+            />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by name, email, role…"
+              className="h-9 w-full rounded-md border border-input bg-card pr-3 pl-9 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:w-72"
+              aria-label="Search users"
+            />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {users === null
+              ? "Loading users…"
+              : needle.length > 0
+                ? `${filtered?.length ?? 0} of ${users.length} user${users.length === 1 ? "" : "s"}`
+                : `${users.length} user${users.length === 1 ? "" : "s"}`}
+          </p>
+        </div>
         <Button size="sm" onClick={() => setCreateOpen(true)}>
           <PlusIcon className="size-4" aria-hidden />
           Add user
@@ -154,6 +200,21 @@ export default function UsersPage() {
             </p>
           </div>
         </div>
+      ) : (filtered?.length ?? 0) === 0 ? (
+        // The list loaded, but nothing matches the search query.
+        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed bg-card/50 px-6 py-16 text-center">
+          <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+            <SearchIcon className="size-6" aria-hidden />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground">
+              No users match &ldquo;{query.trim()}&rdquo;
+            </p>
+            <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
+              Try a different name, email, or role.
+            </p>
+          </div>
+        </div>
       ) : (
         <>
           {/* Desktop: card-framed table. Mobile: one card per user. */}
@@ -168,7 +229,7 @@ export default function UsersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.map((user) => (
+                {filtered!.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell className="px-4">
                       <div className="flex items-center gap-3">
@@ -216,7 +277,7 @@ export default function UsersPage() {
 
           {/* Mobile cards */}
           <ul className="space-y-3 md:hidden">
-            {users.map((user) => (
+            {filtered!.map((user) => (
               <li key={user.id} className="overflow-hidden rounded-2xl border bg-card">
                 <div className="flex items-center justify-between gap-3 px-4 py-3">
                   <div className="flex min-w-0 items-center gap-3">
@@ -484,6 +545,11 @@ function CreateUserDialog({ open, onOpenChange, onCreated }: CreateUserDialogPro
 }
 
 // ----- Delete-user dialog ------------------------------------------------
+//
+// A destructive confirmation built on AlertDialog (not a plain Dialog) so
+// screen readers announce it as an alert and the user is forced to make an
+// explicit choice. It dismisses like any alert — Esc, overlay click, or the
+// Cancel button — and only the confirm button performs the delete.
 
 interface DeleteUserDialogProps {
   user: UserRow | null;
@@ -515,37 +581,52 @@ function DeleteUserDialog({ user, onClose, onDeleted }: DeleteUserDialogProps) {
   }
 
   return (
-    <Dialog open={Boolean(user)} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Delete user</DialogTitle>
-          <DialogDescription>
-            {user
-              ? `Remove ${user.name} (${user.email})? This cannot be undone.`
-              : "Remove this user?"}
-          </DialogDescription>
-        </DialogHeader>
-        {user && user.activeAssignments > 0 ? (
-          <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-sm text-amber-700 dark:text-amber-300">
-            This user still has {user.activeAssignments} active service
-            assignment{user.activeAssignments === 1 ? "" : "s"}. Unassign them
-            first — the record keeps its technician until then.
-          </p>
-        ) : null}
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-            disabled={submitting}
-          >
+    <AlertDialog open={Boolean(user)} onOpenChange={(open) => !open && onClose()}>
+      <AlertDialogContent className="sm:max-w-md">
+        <div className="flex items-start gap-4">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-red-500/10 text-red-600 dark:text-red-400">
+            <Trash2Icon className="size-5" aria-hidden />
+          </div>
+          <div className="min-w-0 flex-1">
+            <AlertDialogHeader className="gap-1.5">
+              <AlertDialogTitle>Delete user?</AlertDialogTitle>
+              {user ? (
+                <AlertDialogDescription>
+                  You&apos;re about to permanently delete{" "}
+                  <span className="font-medium text-foreground">{user.name}</span>{" "}
+                  ({user.email}). This action cannot be undone.
+                </AlertDialogDescription>
+              ) : (
+                <AlertDialogDescription>
+                  This action cannot be undone.
+                </AlertDialogDescription>
+              )}
+            </AlertDialogHeader>
+
+            {user && user.activeAssignments > 0 ? (
+              <div className="mt-3 flex items-start gap-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-sm text-amber-700 dark:text-amber-300">
+                <AlertTriangleIcon className="mt-0.5 size-4 shrink-0" aria-hidden />
+                <p>
+                  This user still has {user.activeAssignments} active service
+                  assignment{user.activeAssignments === 1 ? "" : "s"}. Unassign
+                  them first — the record keeps its technician until then.
+                </p>
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={onClose} disabled={submitting}>
             Cancel
-          </Button>
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={handleDelete}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={(e) => {
+              e.preventDefault();
+              handleDelete();
+            }}
             disabled={submitting || (user?.activeAssignments ?? 0) > 0}
+            className="bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60"
           >
             {submitting ? (
               <>
@@ -558,10 +639,10 @@ function DeleteUserDialog({ user, onClose, onDeleted }: DeleteUserDialogProps) {
                 Delete user
               </>
             )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 

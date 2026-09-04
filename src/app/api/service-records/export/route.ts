@@ -3,7 +3,8 @@ import { auth, isManagerRole } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { listServiceRecordsQuerySchema } from "@/lib/validation/service-record";
 import { handleError } from "@/lib/api";
-import { Role } from "@/generated/prisma/enums";
+import { isOverdue } from "@/lib/overdue";
+import { Role, ServiceStatus } from "@/generated/prisma/enums";
 import { Prisma } from "@/generated/prisma/client";
 
 function escapeCsv(value: string): string {
@@ -30,6 +31,7 @@ export async function GET(request: NextRequest) {
       q: searchParams.get("q") ?? undefined,
       vehicleId: searchParams.get("vehicleId") ?? undefined,
       status: searchParams.get("status") ?? undefined,
+      overdue: searchParams.get("overdue") ?? undefined,
       technicianId: searchParams.get("technicianId") ?? undefined,
     });
     if (!parsed.success) {
@@ -39,11 +41,23 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { q, vehicleId, status, technicianId } = parsed.data;
+    const { q, vehicleId, status, overdue, technicianId } = parsed.data;
 
     const where: Prisma.ServiceRecordWhereInput = {
       ...(q ? { description: { contains: q, mode: "insensitive" } } : {}),
       ...(vehicleId ? { vehicleId } : {}),
+      // "overdue" is a derived status — DUE past the shared grace period.
+      ...(overdue === "true"
+        ? await (async () => {
+            const due = await prisma.serviceRecord.findMany({
+              where: { status: ServiceStatus.DUE },
+              select: { id: true, status: true, dueSince: true },
+            });
+            return {
+              id: { in: due.filter(isOverdue).map((r) => r.id) },
+            };
+          })()
+        : {}),
       ...(status ? { status } : {}),
       // Same technician scoping as the list endpoint: a technician's id wins
       // over any technicianId filter they pass.

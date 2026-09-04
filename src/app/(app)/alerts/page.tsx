@@ -10,13 +10,27 @@ import {
   CheckIcon,
   RefreshCwIcon,
   TruckIcon,
+  Loader2Icon,
+  AlertTriangleIcon,
 } from "lucide-react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api-client";
 import { notifyAlertCountChanged } from "@/lib/alert-events";
 import { isManagerRole } from "@/lib/roles";
+import { Role } from "@/generated/prisma/enums";
+import { RoleRestrictedPage } from "@/lib/role-restricted-page";
 import type { Alert, AlertsResponse } from "@/lib/types";
 
 /** Whole days elapsed since an ISO date string, floored ("2 days"). */
@@ -41,12 +55,22 @@ function formatShortDate(iso: string): string {
 }
 
 export default function AlertsPage() {
+  return (
+    <RoleRestrictedPage allowedRoles={[Role.FLEET_MANAGER, Role.ADMIN]}>
+      <AlertsPageContent />
+    </RoleRestrictedPage>
+  );
+}
+
+function AlertsPageContent() {
   const { data: session } = useSession();
   const isManager = isManagerRole(session?.user?.role);
 
   const [alerts, setAlerts] = useState<Alert[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [dismissingId, setDismissingId] = useState<string | null>(null);
+  // The alert being confirmed for dismissal (opens the confirmation modal).
+  const [dismissTarget, setDismissTarget] = useState<Alert | null>(null);
   // Bumping this re-runs the fetch effect — the retry affordance.
   const [retryNonce, setRetryNonce] = useState(0);
 
@@ -68,6 +92,7 @@ export default function AlertsPage() {
 
   async function dismiss(alert: Alert) {
     setDismissingId(alert.id);
+    setDismissTarget(null);
     try {
       await apiFetch(`/api/alerts/${alert.id}/dismiss`, { method: "POST" });
       // Optimistic removal: the row is gone from the list immediately and the
@@ -199,7 +224,7 @@ export default function AlertsPage() {
                     variant="outline"
                     size="sm"
                     disabled={dismissingId === alert.id}
-                    onClick={() => dismiss(alert)}
+                    onClick={() => setDismissTarget(alert)}
                     className="shrink-0 border-red-500/30 text-red-700 hover:bg-red-500/10 dark:text-red-300"
                   >
                     <CheckIcon className="size-4" aria-hidden />
@@ -216,6 +241,80 @@ export default function AlertsPage() {
           </ul>
         </>
       )}
+
+      {/* Dismiss confirmation — a destructive action gets an explicit
+          confirm step (same pattern as the delete-user confirmation). */}
+      <AlertDialog
+        open={Boolean(dismissTarget)}
+        onOpenChange={(open) => !open && setDismissTarget(null)}
+      >
+        <AlertDialogContent className="sm:max-w-md">
+          <div className="flex items-start gap-4">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-red-500/10 text-red-600 dark:text-red-400">
+              <BellOffIcon className="size-5" aria-hidden />
+            </div>
+            <div className="min-w-0 flex-1">
+              <AlertDialogHeader className="gap-1.5">
+                <AlertDialogTitle>Dismiss alert?</AlertDialogTitle>
+                {dismissTarget ? (
+                  <AlertDialogDescription>
+                    You&apos;re about to dismiss the overdue alert for{" "}
+                    <span className="font-medium text-foreground">
+                      {dismissTarget.vehicle.registrationNumber}
+                    </span>{" "}
+                    ({dismissTarget.vehicle.make}{" "}
+                    {dismissTarget.vehicle.model}). The vehicle will stop
+                    appearing in this list until its next service cycle.
+                  </AlertDialogDescription>
+                ) : (
+                  <AlertDialogDescription>
+                    The vehicle will stop appearing in this list until its next
+                    service cycle.
+                  </AlertDialogDescription>
+                )}
+              </AlertDialogHeader>
+
+              <div className="mt-3 flex items-start gap-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-sm text-amber-700 dark:text-amber-300">
+                <AlertTriangleIcon className="mt-0.5 size-4 shrink-0" aria-hidden />
+                <p>
+                  Dismissing only hides the alert — it doesn&apos;t change the
+                  vehicle&apos;s service status. The alert will return after the
+                  next service cycle if the vehicle is still due.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => setDismissTarget(null)}
+              disabled={dismissingId !== null}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (dismissTarget) dismiss(dismissTarget);
+              }}
+              disabled={dismissingId !== null}
+              className="bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60"
+            >
+              {dismissingId !== null ? (
+                <>
+                  <Loader2Icon className="size-4 animate-spin" aria-hidden />
+                  Dismissing…
+                </>
+              ) : (
+                <>
+                  <BellOffIcon className="size-4" aria-hidden />
+                  Dismiss alert
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

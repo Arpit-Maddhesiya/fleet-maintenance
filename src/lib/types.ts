@@ -188,6 +188,48 @@ export interface DashboardData {
   completedPerWeek: { week: string; count: number }[];
 }
 
+/** One active assignment shown on the technician dashboard. */
+export interface TechnicianAssignment {
+  id: string;
+  status: ServiceStatus;
+  description: string;
+  scheduledDate: string | null;
+  startedAt: string | null;
+  dueSince: string;
+  vehicle: Pick<Vehicle, "id" | "registrationNumber" | "make" | "model">;
+}
+
+/** One completed job shown on the technician dashboard. */
+export interface TechnicianCompletedJob {
+  id: string;
+  description: string;
+  completedAt: string;
+  completedOdometer: number | null;
+  vehicle: Pick<Vehicle, "id" | "registrationNumber" | "make" | "model">;
+}
+
+/** GET /api/dashboard — technician-scoped payload when the caller is TECHNICIAN. */
+export interface TechnicianDashboardData {
+  role: "TECHNICIAN";
+  technician: { id: string; name: string };
+  /** Active (unassignedAt null) assignments — the technician's open work. */
+  assigned: TechnicianAssignment[];
+  stats: {
+    /** Number of active assignments. */
+    assignedCount: number;
+    /** Of my assignments: records DUE past the grace period. */
+    dueCount: number;
+    /** Of my assignments: records currently IN_SERVICE. */
+    inServiceCount: number;
+    /** Of my completed work: completed in the current UTC week. */
+    completedThisWeek: number;
+    /** Total service records I have ever completed. */
+    completedAllTime: number;
+  };
+  /** My most recent completed jobs (newest first). */
+  recentCompleted: TechnicianCompletedJob[];
+}
+
 /** Roles an admin can assign when creating a user (ADMIN excluded — an
  *  admin can only be created by seeding, never through the UI). */
 export type CreatableRole = "FLEET_MANAGER" | "TECHNICIAN";

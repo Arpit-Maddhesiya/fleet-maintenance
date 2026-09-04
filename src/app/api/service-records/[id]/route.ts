@@ -5,8 +5,9 @@ import { updateServiceRecordDescriptionSchema } from "@/lib/validation/service-r
 import { handleError, NotFoundError } from "@/lib/api";
 
 // GET /api/service-records/[id] — any authenticated user who can see the
-// record (a technician must be actively assigned; a fleet manager or admin
-// can fetch any). Returns the record with its vehicle and currently assigned
+// record. A technician may view a record they are (or were) assigned to — both
+// their active jobs and their completed history. A fleet manager or admin can
+// fetch any. Returns the record with its vehicle and currently assigned
 // technicians, so the detail page renders without follow-up requests.
 export async function GET(
   _request: NextRequest,
@@ -27,7 +28,6 @@ export async function GET(
       include: {
         vehicle: true,
         assignments: {
-          where: { unassignedAt: null },
           include: { technician: { select: { id: true, name: true } } },
         },
       },
@@ -35,7 +35,8 @@ export async function GET(
     if (!record) throw new NotFoundError("Service record not found.");
 
     // Same scoping rule as the list endpoint and the timeline: a technician
-    // can only view records they're actively assigned to.
+    // can view records they are assigned to — including closed assignments so
+    // they can revisit their own completed work.
     if (!isManagerRole(session.user.role)) {
       const isAssigned = record.assignments.some(
         (a) => a.technicianId === session.user.id
@@ -48,7 +49,13 @@ export async function GET(
       }
     }
 
-    return NextResponse.json(record);
+    // Only currently-active technicians are part of the response shape (the
+    // detail page lists who is assigned now); closed assignments were used
+    // above purely to authorize a technician viewing their own history.
+    return NextResponse.json({
+      ...record,
+      assignments: record.assignments.filter((a) => a.unassignedAt === null),
+    });
   } catch (error) {
     return handleError(error);
   }

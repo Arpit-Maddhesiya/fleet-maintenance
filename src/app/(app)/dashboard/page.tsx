@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import {
   Bar,
@@ -28,7 +29,8 @@ import { apiFetch } from "@/lib/api-client";
 import { openCommandSearch } from "@/lib/command-search-events";
 import type { DashboardData } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { ServiceStatus } from "@/generated/prisma/enums";
+import { Role, ServiceStatus } from "@/generated/prisma/enums";
+import { TechnicianDashboard } from "./technician-dashboard";
 
 const STATUS_LABELS: Record<ServiceStatus, string> = {
   DUE: "Due",
@@ -57,21 +59,12 @@ const STATUS_ORDER = [
   ServiceStatus.COMPLETED,
 ];
 
-// Chart colors that resolve via the theme tokens so axes/grids/tooltips
-// adapt automatically in dark mode.
+// Chart colors that resolve via the theme tokens so axes/grids/cursor
+// adapt automatically in dark mode. Tooltips are fully custom (ChartTooltip)
+// because the default Recharts tooltip hard-codes black item text.
 const AXIS_COLOR = "var(--color-muted-foreground, #71717a)";
 const GRID_COLOR = "var(--color-border, #e4e4e7)";
-const TOOLTIP_BG = "var(--color-popover, #ffffff)";
-const TOOLTIP_BORDER = "var(--color-border, #e4e4e7)";
 const CURSOR_FILL = "var(--color-accent, #f4f4f5)";
-
-const CHART_TOOLTIP_STYLE = {
-  background: TOOLTIP_BG,
-  border: `1px solid ${TOOLTIP_BORDER}`,
-  borderRadius: 12,
-  boxShadow: "0 8px 24px -12px rgb(0 0 0 / 0.25)",
-  fontSize: 13,
-} as const;
 
 const EMPTY_CHART_HEIGHT = 240;
 
@@ -84,6 +77,21 @@ function formatTime(iso: string): string {
 }
 
 export default function DashboardPage() {
+  const { data: session, status } = useSession();
+
+  // Technicians get their own personal dashboard — fleet-wide aggregates are
+  // manager/admin concerns and would be misleading here. While the session
+  // loads, avoid flashing the wrong view.
+  if (status === "loading") {
+    return <DashboardSkeleton />;
+  }
+  if (session?.user?.role === Role.TECHNICIAN) {
+    return <TechnicianDashboard />;
+  }
+  return <ManagerDashboard />;
+}
+
+function ManagerDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loadedAt, setLoadedAt] = useState<string | null>(null);
@@ -242,7 +250,7 @@ export default function DashboardPage() {
         />
         {/* Overdue is the operationally-critical one — visually distinct. */}
         <StatCard
-          href="/service-records?status=DUE"
+          href="/service-records?overdue=true"
           label="Overdue"
           value={data.overdueCount}
           icon={<AlertTriangleIcon className="size-4" aria-hidden />}
@@ -289,8 +297,9 @@ export default function DashboardPage() {
                 />
                 <Tooltip
                   cursor={{ fill: CURSOR_FILL }}
-                  formatter={(v) => [v, "Records"]}
-                  contentStyle={CHART_TOOLTIP_STYLE}
+                  content={
+                    <ChartTooltip seriesName="Records" />
+                  }
                 />
                 <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={18}>
                   {statusData.map((entry) => (
@@ -336,8 +345,9 @@ export default function DashboardPage() {
                 />
                 <Tooltip
                   cursor={{ fill: CURSOR_FILL }}
-                  formatter={(v) => [v, "Active assignments"]}
-                  contentStyle={CHART_TOOLTIP_STYLE}
+                  content={
+                    <ChartTooltip seriesName="Active assignments" />
+                  }
                 />
                 <Bar
                   dataKey="value"
@@ -383,8 +393,9 @@ export default function DashboardPage() {
             />
             <Tooltip
               cursor={{ fill: CURSOR_FILL }}
-              formatter={(v) => [v, "Completed"]}
-              contentStyle={CHART_TOOLTIP_STYLE}
+              content={
+                <ChartTooltip seriesName="Completed" />
+              }
             />
             <Bar
               dataKey="count"
@@ -406,6 +417,67 @@ function greeting(): string {
   if (hour < 12) return "Good morning";
   if (hour < 18) return "Good afternoon";
   return "Good evening";
+}
+
+// Theme-aware text color used by the custom tooltip. The default Recharts
+// tooltip hard-codes black item text, which disappears on the dark popover.
+const TOOLTIP_TEXT = "var(--color-popover-foreground, #18181b)";
+
+/** Custom tooltip so item text uses the theme foreground instead of the
+ * black that Recharts' default tooltip hard-codes. `name` is optional —
+ * charts that show a single series label it via `seriesName`. */
+function ChartTooltip({
+  active,
+  payload,
+  label,
+  seriesName,
+  valueFormatter = (v: number) => String(v),
+}: {
+  active?: boolean;
+  payload?: ReadonlyArray<{ value?: number | string; color?: string; dataKey?: string | number }>;
+  label?: string | number;
+  seriesName?: string;
+  valueFormatter?: (v: number) => string;
+}) {
+  if (!active || !payload || payload.length === 0) return null;
+  const row = payload[0];
+  const value = typeof row.value === "number" ? row.value : Number(row.value);
+  const color = row.color;
+  return (
+    <div
+      style={{
+        background: "var(--color-popover, #ffffff)",
+        color: TOOLTIP_TEXT,
+        border: "1px solid var(--color-border, #e4e4e7)",
+        borderRadius: 12,
+        boxShadow: "0 8px 24px -12px rgb(0 0 0 / 0.25)",
+        fontSize: 13,
+        padding: "10px 12px",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {label != null && label !== "" ? (
+        <div style={{ fontWeight: 600, marginBottom: 4 }}>{label}</div>
+      ) : null}
+      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        {color ? (
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: 9999,
+              background: color,
+              display: "inline-block",
+            }}
+          />
+        ) : null}
+        <span>
+          {seriesName ?? "Records"}
+          <span style={{ fontWeight: 600 }}>: {valueFormatter(value)}</span>
+        </span>
+      </div>
+    </div>
+  );
 }
 
 function ChartCard({

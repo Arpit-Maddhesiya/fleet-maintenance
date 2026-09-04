@@ -104,29 +104,19 @@ describe("GET /api/search", () => {
     );
   });
 
-  it("never queries or returns manager accounts for a technician", async () => {
+  it("never queries vehicles or people for a technician", async () => {
     vi.mocked(auth).mockResolvedValue(technicianSession as never);
-    // Mock respects the role filter the route applies for technicians, so a
-    // manager row can never come back from the query in the first place.
-    vi.mocked(prisma.user.findMany).mockImplementation((async (args?: {
-      where?: { role?: string };
-    }) => {
-      const rows = [technicianRow, managerRow];
-      if (args?.where?.role) {
-        return rows.filter((r) => r.role === args.where!.role) as never;
-      }
-      return rows as never;
-    }) as never);
 
     const res = await search(asNextRequest("?q=@fleet.test"));
     const body = await res.json();
-    expect(prisma.user.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({ role: "TECHNICIAN" }),
-      })
-    );
-    expect(body.technicians).toEqual([technicianRow]);
+
+    // Technicians only search their own scoped service records.
+    expect(prisma.vehicle.findMany).not.toHaveBeenCalled();
+    expect(prisma.user.findMany).not.toHaveBeenCalled();
+    expect(body.vehicles).toEqual([]);
+    expect(body.technicians).toEqual([]);
     expect(body.managers).toEqual([]);
+    expect(prisma.serviceRecord.findMany).toHaveBeenCalled();
   });
 
   it("rejects an unauthenticated caller with 401", async () => {

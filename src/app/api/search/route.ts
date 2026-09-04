@@ -9,9 +9,10 @@ import type { Prisma, User } from "@/generated/prisma/client";
 // (Ctrl+K). Any authenticated user. Returns grouped results:
 //   vehicles, serviceRecords, technicians, managers
 // A TECHNICIAN caller is scoped to records they're actively assigned to and
-// never sees manager accounts; a manager sees all non-archived vehicles and
-// all records. ADMINS and FLEET_MANAGERs are visible only to managers/admins,
-// because technicians have no reason to browse management accounts.
+// never sees manager accounts or fleet vehicles (they have no vehicles page);
+// a manager sees all non-archived vehicles and all records. ADMINS and
+// FLEET_MANAGERs are visible only to managers/admins, because technicians
+// have no reason to browse management accounts.
 
 const SEARCH_LIMIT = 6;
 
@@ -43,27 +44,30 @@ export async function GET(request: NextRequest) {
     const contains: Prisma.StringFilter = { contains: q, mode: "insensitive" };
 
     const [vehicles, serviceRecords, people] = await Promise.all([
-      // Anyone signed in can look up vehicles (archive flag shown by the UI).
-      prisma.vehicle.findMany({
-        where: {
-          archivedAt: null,
-          OR: [
-            { registrationNumber: contains },
-            { make: contains },
-            { model: contains },
-          ],
-        },
-        select: {
-          id: true,
-          registrationNumber: true,
-          make: true,
-          model: true,
-          currentOdometer: true,
-          archivedAt: true,
-        },
-        orderBy: { registrationNumber: "asc" },
-        take: SEARCH_LIMIT,
-      }),
+      // Vehicles are a manager/admin concern — technicians have no vehicles
+      // pages, so skip the query entirely for them.
+      isManager
+        ? prisma.vehicle.findMany({
+            where: {
+              archivedAt: null,
+              OR: [
+                { registrationNumber: contains },
+                { make: contains },
+                { model: contains },
+              ],
+            },
+            select: {
+              id: true,
+              registrationNumber: true,
+              make: true,
+              model: true,
+              currentOdometer: true,
+              archivedAt: true,
+            },
+            orderBy: { registrationNumber: "asc" },
+            take: SEARCH_LIMIT,
+          })
+        : Promise.resolve([]),
       // Technicians only ever see their own active assignments; managers see
       // every record (same rule as the list endpoint).
       prisma.serviceRecord.findMany({
@@ -86,20 +90,19 @@ export async function GET(request: NextRequest) {
         orderBy: { updatedAt: "desc" },
         take: SEARCH_LIMIT,
       }),
-      // Technicians/managers are browsable by managers and admins; a manager
-      // may want to find a technician to assign, so people search is not
-      // manager-scoped. Technicians never see manager/admin accounts.
-      prisma.user.findMany({
-        where: {
-          ...(isManager
-            ? {}
-            : { role: Role.TECHNICIAN }),
-          OR: [{ name: contains }, { email: contains }],
-        },
-        select: { id: true, name: true, email: true, role: true },
-        orderBy: { name: "asc" },
-        take: SEARCH_LIMIT,
-      }),
+      // People search (technicians/managers) is for managers and admins — a
+      // manager may want to find a technician to assign. Technicians only get
+      // their own scoped service records, so skip people entirely for them.
+      isManager
+        ? prisma.user.findMany({
+            where: {
+              OR: [{ name: contains }, { email: contains }],
+            },
+            select: { id: true, name: true, email: true, role: true },
+            orderBy: { name: "asc" },
+            take: SEARCH_LIMIT,
+          })
+        : Promise.resolve([]),
     ]);
 
     const technicians = people.filter(

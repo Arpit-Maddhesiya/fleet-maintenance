@@ -203,6 +203,9 @@ const VEHICLES: VehicleSpec[] = [
       { label: "Full service", weeksAgo: 28, odo: 51_600 },
       { label: "Oil & filter", weeksAgo: 6, odo: 71_400 },
       { label: "Tyre rotation + balance", weeksAgo: 1, odo: 75_500 },
+      // ~2 days ago (this calendar week) so the dashboard's "Completed this
+      // week" card and weekly chart are non-empty on a fresh seed.
+      { label: "Brake inspection", weeksAgo: 2 / 7, odo: 76_400 },
     ],
   },
   {
@@ -227,6 +230,91 @@ const VEHICLES: VehicleSpec[] = [
       { label: "Full service", weeksAgo: 18, odo: 187_600 },
     ],
     archivedWeeksAgo: 10,
+  },
+  {
+    registrationNumber: "JK12 LMN",
+    make: "Ford",
+    model: "Transit 350",
+    currentOdometer: 67_900,
+    dateIntervalDays: 180,
+    mileageInterval: 15_000,
+    history: [
+      { label: "Full service", weeksAgo: 38, odo: 33_200 },
+      { label: "Interim service", weeksAgo: 12, odo: 58_700 },
+    ],
+    open: {
+      status: "DUE",
+      description: "Interim service",
+      dueDaysAgo: 11,
+    },
+  },
+  {
+    registrationNumber: "LM34 NOP",
+    make: "Mercedes-Benz",
+    model: "Vito 119",
+    currentOdometer: 45_600,
+    dateIntervalDays: 365,
+    mileageInterval: 25_000,
+    history: [
+      { label: "Full service", weeksAgo: 40, odo: 19_400 },
+      { label: "Brake inspection", weeksAgo: 4, odo: 42_800 },
+    ],
+    open: {
+      status: "DUE",
+      description: "Annual service — brakes and suspension check",
+      dueDaysAgo: 14,
+    },
+  },
+  {
+    registrationNumber: "NO56 PQR",
+    make: "Volkswagen",
+    model: "Transporter T6",
+    currentOdometer: 112_300,
+    dateIntervalDays: 180,
+    mileageInterval: 15_000,
+    history: [
+      { label: "Full service", weeksAgo: 34, odo: 71_900 },
+      { label: "Oil & filter", weeksAgo: 10, odo: 103_500 },
+    ],
+    open: {
+      status: "DUE",
+      description: "Oil & filter change + inspection",
+      dueDaysAgo: 9,
+    },
+  },
+  {
+    registrationNumber: "ST78 UVW",
+    make: "Isuzu",
+    model: "NPR 4x2",
+    currentOdometer: 58_200,
+    dateIntervalDays: 180,
+    mileageInterval: 12_000,
+    history: [
+      { label: "Full service", weeksAgo: 26, odo: 31_600 },
+      { label: "Tyre rotation", weeksAgo: 5, odo: 54_200 },
+    ],
+    open: {
+      status: "DUE",
+      description: "AdBlue system check + service",
+      dueDaysAgo: 16,
+    },
+  },
+  {
+    registrationNumber: "WX90 YZA",
+    make: "Renault",
+    model: "Master L2H2",
+    currentOdometer: 31_750,
+    dateIntervalDays: 365,
+    mileageInterval: 25_000,
+    history: [
+      { label: "Full service", weeksAgo: 48, odo: 12_300 },
+      { label: "Full service", weeksAgo: 8, odo: 27_900 },
+    ],
+    open: {
+      status: "DUE",
+      description: "First annual service",
+      dueDaysAgo: 21,
+    },
   },
 ];
 
@@ -526,33 +614,39 @@ async function main() {
   // ----------------------------------------------------------------- alerts
   // One Alert row per overdue vehicle (DUE record past the 7-day grace) for its
   // current serviceCycle — the same rows GET /api/alerts would lazily create.
-  let alertCount = 0;
-  for (const { vehicle, spec } of vehicles) {
-    const isOverdue = spec.open?.status === "DUE" && (spec.open.dueDaysAgo ?? 0) > 7;
-    if (!isOverdue) continue;
-    await prisma.alert.create({
-      data: {
-        vehicleId: vehicle.id,
-        serviceCycle: vehicle.serviceCycle,
-        triggeredAt: daysAgo(7),
-      },
-    });
-    alertCount++;
-  }
+  // createMany+skipDuplicates mirrors the API and keeps the seed robust if a
+  // concurrently running app instance lazily creates an alert mid-seed.
+  const overdueAlerts = vehicles
+    .filter(
+      ({ spec }) =>
+        spec.open?.status === "DUE" && (spec.open.dueDaysAgo ?? 0) > 7
+    )
+    .map(({ vehicle }) => ({
+      vehicleId: vehicle.id,
+      serviceCycle: vehicle.serviceCycle,
+      triggeredAt: daysAgo(7),
+    }));
+  const { count: alertCount } = await prisma.alert.createMany({
+    data: overdueAlerts,
+    skipDuplicates: true,
+  });
   console.log(`Seeded ${alertCount} overdue alerts`);
 
   // A dismissed alert for variety (older cycle on an active vehicle).
   const dismissedVehicle = vehicleByReg.get("FG34 HIJ")!.vehicle;
-  await prisma.alert.create({
-    data: {
-      vehicleId: dismissedVehicle.id,
-      // An older cycle than the vehicle's current one — visible only in the DB,
-      // filtered out of the alerts list (matches current cycle rule).
-      serviceCycle: Math.max(1, dismissedVehicle.serviceCycle - 1),
-      triggeredAt: weeksAgo(6),
-      dismissedAt: weeksAgo(5),
-      dismissedById: manager.id,
-    },
+  await prisma.alert.createMany({
+    data: [
+      {
+        vehicleId: dismissedVehicle.id,
+        // An older cycle than the vehicle's current one — visible only in the DB,
+        // filtered out of the alerts list (matches current cycle rule).
+        serviceCycle: Math.max(1, dismissedVehicle.serviceCycle - 1),
+        triggeredAt: weeksAgo(6),
+        dismissedAt: weeksAgo(5),
+        dismissedById: manager.id,
+      },
+    ],
+    skipDuplicates: true,
   });
 
   console.log("\nSeed complete.");

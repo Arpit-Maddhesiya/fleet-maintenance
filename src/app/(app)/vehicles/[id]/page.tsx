@@ -27,6 +27,8 @@ import {
 } from "@/components/ui/table";
 import { apiFetch } from "@/lib/api-client";
 import { isManagerRole } from "@/lib/roles";
+import { Role } from "@/generated/prisma/enums";
+import { RoleRestrictedPage } from "@/lib/role-restricted-page";
 import { cn } from "@/lib/utils";
 import { getVehicleStatus } from "@/lib/vehicle-status";
 import type { ServiceRecord, VehicleWithRecords } from "@/lib/types";
@@ -52,6 +54,18 @@ function statusLabel(status: string): string {
 }
 
 export default function VehicleDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  return (
+    <RoleRestrictedPage allowedRoles={[Role.FLEET_MANAGER, Role.ADMIN]}>
+      <VehicleDetailPageContent params={params} />
+    </RoleRestrictedPage>
+  );
+}
+
+function VehicleDetailPageContent({
   params,
 }: {
   params: Promise<{ id: string }>;

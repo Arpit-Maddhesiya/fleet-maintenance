@@ -27,12 +27,7 @@ interface AlertsResponse {
   count: number;
 }
 
-/** Nav links that are always visible. */
-const PRIMARY_LINKS = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboardIcon },
-  { href: "/vehicles", label: "Vehicles", icon: TruckIcon },
-  { href: "/service-records", label: "Service Records", icon: ClipboardListIcon },
-];
+/** Nav links are role-aware — rendered explicitly in NavContent below. */
 
 export function AppNav() {
   const { data: session, status } = useSession();
@@ -42,6 +37,7 @@ export function AppNav() {
 
   const isManager = isManagerRole(session?.user?.role);
   const isAdmin = isAdminRole(session?.user?.role);
+  const isTechnician = !isManager; // Only three roles; non-manager = technician.
 
   const refreshAlertCount = useCallback(async () => {
     try {
@@ -55,18 +51,21 @@ export function AppNav() {
 
   // Fetch on mount and refetch whenever the route changes so the badge
   // doesn't go stale mid-session (e.g. after a service-record transition
-  // that clears an overdue status).
+  // that clears an overdue status). Technicians never see the alerts nav
+  // item, so skip the fetch for them.
   useEffect(() => {
+    if (isTechnician) return;
     refreshAlertCount();
-  }, [pathname, refreshAlertCount]);
+  }, [pathname, refreshAlertCount, isTechnician]);
 
   // Also refetch when a page broadcasts that the active alert set changed
   // (a dismiss on the alerts page). Route changes already cover most cases;
   // this catches the ones that happen without navigation.
   useEffect(() => {
+    if (isTechnician) return;
     window.addEventListener(ALERT_COUNT_EVENT, refreshAlertCount);
     return () => window.removeEventListener(ALERT_COUNT_EVENT, refreshAlertCount);
-  }, [refreshAlertCount]);
+  }, [refreshAlertCount, isTechnician]);
 
   // Close the mobile drawer on navigation so it doesn't linger over content.
   useEffect(() => {
@@ -130,6 +129,7 @@ export function AppNav() {
             <NavContent
               isManager={isManager}
               isAdmin={isAdmin}
+              isTechnician={isTechnician}
               alertCount={alertCount}
               pathname={pathname}
             />
@@ -149,6 +149,7 @@ export function AppNav() {
         <NavContent
           isManager={isManager}
           isAdmin={isAdmin}
+          isTechnician={isTechnician}
           alertCount={alertCount}
           pathname={pathname}
         />
@@ -161,45 +162,56 @@ export function AppNav() {
 function NavContent({
   isManager,
   isAdmin,
+  isTechnician,
   alertCount,
   pathname,
 }: {
   isManager: boolean;
   isAdmin: boolean;
+  isTechnician: boolean;
   alertCount: number | null;
   pathname: string;
 }) {
   return (
     <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto p-2">
-      {PRIMARY_LINKS.map(({ href, label, icon: Icon }) => (
-        <NavLink key={href} href={href} active={pathname.startsWith(href)}>
-          <Icon className="size-4" />
-          {label}
-        </NavLink>
-      ))}
+      {/* Everyone has a dashboard. Managers/admins see the fleet pages;
+          technicians only see their personal dashboard + records. */}
+      <NavLink href="/dashboard" active={pathname.startsWith("/dashboard")}>
+        <LayoutDashboardIcon className="size-4" />
+        Dashboard
+      </NavLink>
 
-      {/* My Records is technician-facing: a manager's records are visible in
-          the general Service Records list, so this link is cosmetic-only for
-          the technician role. The backend is the real boundary. */}
-      {isManager ? null : (
-        <NavLink
-          href="/my-records"
-          active={pathname.startsWith("/my-records")}
-        >
+      {isManager ? (
+        <>
+          <NavLink href="/vehicles" active={pathname.startsWith("/vehicles")}>
+            <TruckIcon className="size-4" />
+            Vehicles
+          </NavLink>
+          <NavLink
+            href="/service-records"
+            active={pathname.startsWith("/service-records")}
+          >
+            <ClipboardListIcon className="size-4" />
+            Service Records
+          </NavLink>
+          <NavLink href="/alerts" active={pathname.startsWith("/alerts")}>
+            <BellRingIcon className="size-4" />
+            Alerts
+            {alertCount !== null && alertCount > 0 ? (
+              <Badge className="ml-auto rounded-full border-0 bg-red-600 px-1.5 text-white">
+                {alertCount}
+              </Badge>
+            ) : null}
+          </NavLink>
+        </>
+      ) : null}
+
+      {isTechnician ? (
+        <NavLink href="/my-records" active={pathname.startsWith("/my-records")}>
           <UserIcon className="size-4" />
           My Records
         </NavLink>
-      )}
-
-      <NavLink href="/alerts" active={pathname.startsWith("/alerts")}>
-        <BellRingIcon className="size-4" />
-        Alerts
-        {alertCount !== null && alertCount > 0 ? (
-          <Badge className="ml-auto rounded-full border-0 bg-red-600 px-1.5 text-white">
-            {alertCount}
-          </Badge>
-        ) : null}
-      </NavLink>
+      ) : null}
 
       {isAdmin ? (
         <NavLink href="/users" active={pathname.startsWith("/users")}>
@@ -276,8 +288,8 @@ function BrandMark() {
       <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-amber-950 shadow-sm shadow-amber-950/30">
         <TruckIcon className="size-4" aria-hidden />
       </div>
-      <span className="truncate text-[15px] font-semibold leading-tight text-stone-100">
-        Fleet Maintenance
+      <span className="truncate text-[15px] leading-tight text-stone-100">
+        Fleet <span className="font-semibold text-amber-400">Maintenance</span>
       </span>
     </div>
   );

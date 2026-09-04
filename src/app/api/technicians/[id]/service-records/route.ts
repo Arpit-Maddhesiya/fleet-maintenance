@@ -5,10 +5,12 @@ import { handleError, NotFoundError } from "@/lib/api";
 import { Role } from "@/generated/prisma/enums";
 
 // GET /api/technicians/[id]/service-records — any authenticated user
-// Returns every ServiceRecord (with vehicle info) where this technician has an
-// active assignment (unassignedAt = null), across all vehicles. A technician
-// caller may only request their own list — a technician asking for another
-// technician's records gets 403.
+// Returns every ServiceRecord (with vehicle info) this technician has ever
+// been assigned to — both their active jobs (unassignedAt = null) and their
+// completed history (closed assignments). A technician caller may only request
+// their own list — a technician asking for another technician's records gets
+// 403. This powers the "My Records" page, which is a technician's complete
+// work history now that the fleet-wide Service Records list is manager-only.
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -51,7 +53,8 @@ export async function GET(
         assignments: {
           some: {
             technicianId: technician.id,
-            unassignedAt: null,
+            // Any assignment — active or closed. A technician's "My Records"
+            // is their full work history (current jobs + completed jobs).
           },
         },
       },

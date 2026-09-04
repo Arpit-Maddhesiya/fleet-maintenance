@@ -27,7 +27,7 @@ export function ExportButton() {
       // Pass only the filters the export endpoint honors (same shape as the
       // list query). sortBy/sortDir/page/pageSize are list-view concerns.
       const params = new URLSearchParams();
-      for (const key of ["q", "vehicleId", "status", "technicianId"]) {
+      for (const key of ["q", "vehicleId", "status", "overdue", "technicianId"]) {
         const value = searchParams.get(key);
         if (value) params.set(key, value);
       }

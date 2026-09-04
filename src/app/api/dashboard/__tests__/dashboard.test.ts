@@ -17,11 +17,13 @@ vi.mock("@/lib/db", () => ({
   prisma: {
     vehicle: { count: vi.fn() },
     serviceRecord: { count: vi.fn(), groupBy: vi.fn(), findMany: vi.fn() },
-    serviceAssignment: { groupBy: vi.fn() },
+    serviceAssignment: { groupBy: vi.fn(), findMany: vi.fn() },
+    user: { findUnique: vi.fn() },
   },
 }));
 
 const managerSession = { user: { id: "u-manager", role: "FLEET_MANAGER" } };
+const technicianSession = { user: { id: "u-tech", role: "TECHNICIAN" } };
 
 /** Monday 00:00 UTC of the ISO week containing `date` (same logic as the route). */
 function mondayOfWeek(date: Date): Date {
@@ -151,6 +153,78 @@ describe("GET /api/dashboard", () => {
       BOOKED: 0,
       IN_SERVICE: 3,
       COMPLETED: 0,
+    });
+  });
+
+  describe("as a TECHNICIAN", () => {
+    const technician = { id: "u-tech", name: "Tech One" };
+    const vehicle = { id: "v1", registrationNumber: "AB12 CDE", make: "Ford", model: "Transit" };
+
+    beforeEach(() => {
+      vi.mocked(auth).mockResolvedValue(technicianSession as never);
+      vi.mocked(prisma.user.findUnique).mockResolvedValue(technician as never);
+      vi.mocked(prisma.serviceAssignment.findMany).mockResolvedValue([] as never);
+    });
+
+    it("returns a technician-scoped payload (not fleet-wide stats)", async () => {
+      const res = await getDashboard();
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.role).toBe("TECHNICIAN");
+      expect(body.technician).toEqual(technician);
+      expect(body.stats.assignedCount).toBe(0);
+      expect(body.assigned).toEqual([]);
+      expect(body.recentCompleted).toEqual([]);
+      // Fleet-wide aggregates must not be present.
+      expect(body).not.toHaveProperty("dueCount");
+      expect(body).not.toHaveProperty("byStatus");
+    });
+
+    it("buckets only the caller's own assignments", async () => {
+      const now = new Date();
+      const thisMonday = mondayOfWeek(now);
+      const inService = {
+        id: "r-active",
+        status: "IN_SERVICE",
+        description: "Suspension check",
+        scheduledDate: null,
+        startedAt: now,
+        dueSince: now,
+        vehicle,
+      };
+      const completed = {
+        id: "r-done",
+        status: "COMPLETED",
+        description: "Full service",
+        scheduledDate: null,
+        startedAt: null,
+        dueSince: now,
+        completedAt: new Date(thisMonday.getTime() + 86400000), // this week
+        completedOdometer: 12345,
+        vehicle,
+      };
+      vi.mocked(prisma.serviceAssignment.findMany).mockImplementation(
+        (async ({ where }: { where?: { unassignedAt?: unknown } } = {}) => {
+          if (where?.unassignedAt === null) {
+            // Active assignments (the route uses { unassignedAt: null }).
+            return [{ serviceRecord: inService }] as never;
+          }
+          // Closed assignments.
+          return [{ serviceRecord: completed }] as never;
+        }) as never
+      );
+
+      const res = await getDashboard();
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.stats.assignedCount).toBe(1);
+      expect(body.stats.inServiceCount).toBe(1);
+      expect(body.stats.completedThisWeek).toBe(1);
+      expect(body.stats.completedAllTime).toBe(1);
+      expect(body.assigned[0].id).toBe("r-active");
+      expect(body.recentCompleted[0].id).toBe("r-done");
     });
   });
 });

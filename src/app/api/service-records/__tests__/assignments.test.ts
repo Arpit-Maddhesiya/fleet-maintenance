@@ -272,7 +272,7 @@ describe("DELETE /api/service-records/[id]/assignments/[assignmentId]", () => {
 });
 
 describe("GET /api/technicians/[id]/service-records", () => {
-  it("returns a technician's actively assigned records with vehicle info", async () => {
+  it("returns a technician's assigned records (active and history) with vehicle info", async () => {
     vi.mocked(auth).mockResolvedValue(technicianSession as never);
     vi.mocked(prisma.user.findUnique).mockResolvedValue(technicianUser as never);
     vi.mocked(prisma.serviceRecord.findMany).mockResolvedValue([
@@ -289,12 +289,13 @@ describe("GET /api/technicians/[id]/service-records", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body).toHaveLength(1);
+    // Any assignment (active or closed) counts — "My Records" is the
+    // technician's full work history.
     expect(prisma.serviceRecord.findMany).toHaveBeenCalledWith({
       where: {
         assignments: {
           some: {
             technicianId: "u-tech1",
-            unassignedAt: null,
           },
         },
       },

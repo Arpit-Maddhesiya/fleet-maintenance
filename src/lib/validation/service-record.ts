@@ -43,6 +43,9 @@ export const listServiceRecordsQuerySchema = z.object({
   status: z
     .enum(["DUE", "BOOKED", "IN_SERVICE", "COMPLETED"])
     .optional(),
+  // "overdue" is a derived status: DUE past the grace period. When set, the
+  // list endpoint filters to overdue DUE records only.
+  overdue: z.enum(["true", "false"]).optional(),
   technicianId: z.string().min(1).optional(),
   sortBy: z.enum(["scheduledDate", "status", "updatedAt"]).optional(),
   sortDir: z.enum(["asc", "desc"]).optional(),

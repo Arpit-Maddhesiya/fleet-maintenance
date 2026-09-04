@@ -6,7 +6,8 @@ import {
   listServiceRecordsQuerySchema,
 } from "@/lib/validation/service-record";
 import { handleError } from "@/lib/api";
-import { Role, HistoryEventType } from "@/generated/prisma/enums";
+import { isOverdue } from "@/lib/overdue";
+import { Role, ServiceStatus, HistoryEventType } from "@/generated/prisma/enums";
 import { Prisma } from "@/generated/prisma/client";
 
 // GET /api/service-records — any authenticated user. The single list endpoint
@@ -31,6 +32,7 @@ export async function GET(request: NextRequest) {
       q: searchParams.get("q") ?? undefined,
       vehicleId: searchParams.get("vehicleId") ?? undefined,
       status: searchParams.get("status") ?? undefined,
+      overdue: searchParams.get("overdue") ?? undefined,
       technicianId: searchParams.get("technicianId") ?? undefined,
       sortBy: searchParams.get("sortBy") ?? undefined,
       sortDir: searchParams.get("sortDir") ?? undefined,
@@ -48,6 +50,7 @@ export async function GET(request: NextRequest) {
       q,
       vehicleId,
       status,
+      overdue,
       technicianId,
       sortBy = "updatedAt",
       sortDir = "desc",
@@ -58,6 +61,19 @@ export async function GET(request: NextRequest) {
     const where: Prisma.ServiceRecordWhereInput = {
       ...(q ? { description: { contains: q, mode: "insensitive" } } : {}),
       ...(vehicleId ? { vehicleId } : {}),
+      // "overdue" is a derived status — the record must be DUE and past the
+      // shared grace period. Resolve it to the set of overdue record ids.
+      ...(overdue === "true"
+        ? await (async () => {
+            const due = await prisma.serviceRecord.findMany({
+              where: { status: ServiceStatus.DUE },
+              select: { id: true, status: true, dueSince: true },
+            });
+            return {
+              id: { in: due.filter(isOverdue).map((r) => r.id) },
+            };
+          })()
+        : {}),
       ...(status ? { status } : {}),
       // A technician can only ever see their own active assignments; anyone
       // else (fleet manager or admin) may filter by any technician.
