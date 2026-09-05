@@ -288,4 +288,264 @@ All five docs filled in from the real schema, routes, and decisions, including o
 
 ## Frontend module build-out (Modules F0–F8)
 
-Each module's prompt will be pasted in full here as the frontend work happens, with the same structure: full prompt text, what I got, what I corrected.
+Same process as the backend: each module's prompt was pasted in full to the coding agent, then I read the diff, ran the app and tests before moving on, and committed. The two rules from the frontend brief held throughout: hiding buttons is cosmetic (the server's `requireRole` is the real boundary — verified by curl later in I0), and every list/table is server-driven from the Module 5 endpoint, never a client-side `.filter()` over a fully-fetched array.
+
+### Module F0 — App Shell, Auth Pages, Role-Aware Nav
+
+#### Prompt
+
+> Context: Backend from Modules 0-9 is complete and working (auth, vehicles, service records, assignments, search, bulk CSV, dashboard, timeline, alerts). Next.js 15 App Router + Tailwind is set up. I want shadcn/ui for base components.
+>
+> Task:
+> 1. Install and initialize shadcn/ui (button, input, table, dialog, dropdown-menu, badge, card, select, tabs, toast/sonner components at minimum).
+> 2. Build app/login/page.tsx as a server component with a form posting to the existing Auth.js credentials sign-in action. Show a clear error message on bad credentials (don't just redirect silently).
+> 3. Build a root authenticated layout (app/(app)/layout.tsx) with:
+>    - A left sidebar or top nav with links: Dashboard, Vehicles, Service Records, My Records (technician only), Alerts (with a count badge — fetch from GET /api/alerts and show the count; poll or refetch on navigation, no need for websockets).
+>    - The nav must read the session role and conditionally show/hide manager-only links (Vehicles create, bulk import) — but comment clearly that this is cosmetic, the backend already enforces the real boundary.
+>    - A sign-out button.
+> 4. Add a lib/api-client.ts with a small typed fetch wrapper (base function that adds credentials, parses JSON, and throws a typed ApiError with the status code and server-provided message on non-2xx) so every page/component below uses one consistent way to call the backend instead of raw fetch calls copy-pasted everywhere.
+> 5. Set up a toast provider (sonner) at the layout level so any page can call `toast.error(...)` / `toast.success(...)` for API results.
+>
+> Do not build any feature pages yet (no vehicles list, no dashboard content) — just the shell, auth, nav, and the shared api-client. Stub each nav destination with a one-line placeholder page so the nav is clickable.
+
+#### What I got
+
+The shell landed with shadcn/ui components under `src/components/ui/`, a `SessionProvider`-wrapped authenticated layout in `src/app/(app)/layout.tsx` that redirects logged-out visitors to `/login`, and a role-aware `AppNav` that shows Vehicles/Service Records/Alerts to managers and My Records to technicians. `src/lib/api-client.ts` is exactly the shared typed wrapper the brief asked for: it sends `credentials: "include"`, parses JSON, and throws `ApiError` (status + the server's `{ error }` message + parsed body for field details) on non-2xx — every page uses it. The login flow got a real error state for bad credentials instead of a silent redirect.
+
+One deliberate deviation I made: `RoleRestrictedPage` in `src/lib/role-restricted-page.tsx` wraps whole pages (Vehicles, Service Records, the detail page) so a technician hitting `/vehicles` by direct URL is bounced to their dashboard rather than seeing a manager page with buttons. The wrapper and the nav are both commented as cosmetic — the 403 still comes from the server if the same page's API is called directly.
+
+#### What I corrected
+
+The initial version put `"use client"` on the whole app shell including server-only session logic, which fights the App Router's RSC model. I split it: the layout stays a server component that calls `auth()` for the redirect and mounts client providers; the nav is its own client component that reads the session via `useSession()`.
+
+### Module F1 — Vehicles: List, Create/Edit, Archive/Restore, Detail
+
+#### Prompt
+
+> Context: Module F0 shell/nav/api-client exists. Backend vehicle endpoints from backend Module 2 are live.
+>
+> Task:
+> 1. app/(app)/vehicles/page.tsx — table of vehicles (registration, make/model, current odometer, date interval, mileage interval, status badge Active/Archived) fetched via lib/api-client from GET /api/vehicles. Toggle to show archived. FLEET_MANAGER sees an "Add Vehicle" button; technicians don't (cosmetic-only per F0's note).
+> 2. A create/edit dialog (shadcn Dialog + form) with client-side validation mirroring the Zod schema (don't duplicate the schema by hand — either share the Zod schema from the backend via a shared package/import if your project structure allows it, or at minimum keep the rules identical and comment that they must stay in sync). On submit, call the api-client, show a toast on success/failure, refresh the list.
+> 3. Archive/Restore as row actions with a confirmation dialog before archiving (don't let one misclick nuke a vehicle from the default view without warning).
+> 4. app/(app)/vehicles/[id]/page.tsx — vehicle detail: its core info, current status (due/overdue/ok — compute display-side using the same interval logic the backend uses, or better, just show whatever the backend already tells you if backend Module 7/9 exposes a per-vehicle due status; don't reimplement overdue logic in the frontend if the backend already computed it), and below that its full service history list.
+>
+> Handle loading and empty states explicitly (skeleton or spinner while fetching, a real empty-state message for zero vehicles, not a blank table).
+
+#### What I got
+
+The vehicles table with an archived toggle, a manager-only Add Vehicle button, and an explicit empty state; a `VehicleDialog` used for both create and edit; an `ArchiveAction` component that puts a confirmation dialog in front of archiving; and the vehicle detail page showing core info plus the full service history from `GET /api/vehicles/[id]`. The list gained a client-side search box over registration/make/model (this stays client-side deliberately — the vehicle endpoint is a small unpaginated fleet list, unlike service records). Loading shows skeletons rather than a flash of empty table.
+
+The one judgment call I made against the letter of the prompt: rather than reimplementing due/overdue status math on the client or building a per-vehicle status endpoint, the vehicle rows and detail page show the concrete, DB-backed signal — the next service record's status (and "X days overdue" where a DUE record is past the grace period, using the same `isOverdue` semantics the backend uses). The intervals that *predict* the next due date are shown as data, not re-derived into a fake status. No duplicated rule logic.
+
+#### What I corrected
+
+Client-side validation rules were initially hand-written to "match" the Zod schema, which is exactly the drift risk the prompt flagged. I kept the field-level rules (required, positive integers) in the dialog but made the server's Zod error the authority: on a 400 the dialog renders the field errors from the API response (`fieldErrorsOf` in the api-client) inline, and the local checks are only a fast first gate. The comment in the dialog says they must stay in sync — but correctness comes from the server either way.
+
+### Module F2 — Service Records: Server-Driven List (Search/Filter/Sort/Pagination)
+
+#### Prompt
+
+> Context: Modules F0-F1 exist. Backend search endpoint from backend Module 5 is live at GET /api/service-records.
+>
+> Task: app/(app)/service-records/page.tsx.
+>
+> Requirements:
+> - Controls: text search input (debounced ~300ms before firing a request), vehicle filter (select, populated from GET /api/vehicles), status filter (select from the 4 enum values + "All"), technician filter (select, manager-only — a technician's view is implicitly scoped server-side so don't even show this control to a technician), sort dropdown (scheduledDate/status/updatedAt) with asc/desc toggle, and pagination controls (prev/next + page numbers, showing "X-Y of Z" using the `total` from the response).
+> - CRITICAL: every one of these controls must update the URL's query params (use useSearchParams/router.push with shallow routing) and refetch from the server with those params — do not fetch once and filter client-side. This also gives you shareable/bookmarkable filtered URLs for free, which is a nice thing to point out if asked why you did it this way.
+> - Table columns: vehicle registration, description (truncated with a tooltip for the full text), status (as a colored badge), scheduled date, last updated, assigned technicians (comma list or avatar stack).
+> - Row click navigates to app/(app)/service-records/[id]/page.tsx (build this as a stub for now — full detail comes in Module F3).
+> - FLEET_MANAGER sees a "New Record" button opening a create dialog (pick vehicle, enter description) posting to POST /api/service-records.
+>
+> Add a loading skeleton for the table specifically (not a full-page spinner — the filters/controls should stay usable while a new page of results loads).
+
+#### What I got
+
+The single most important page in the app, and it follows the brief exactly: the URL query string is the source of truth for every control (`q`, `vehicleId`, `status`, `technicianId`, `sortBy`, `sortDir`, `page`), and every control rewrites the URL (`router.push`) and refetches — nothing is filtered client-side. Search is debounced ~300 ms, the filters/selects stay live above a table-only skeleton while a page loads, and the pagination footer shows "X–Y of Z" from the server's `total`. The table lives in a reusable `ServiceRecordsTable` component (shared later by My Records) with truncated description + full-text tooltip, colored status badges that pair text with color, and assigned-technician names.
+
+Two extras that made it past the base spec because they were cheap and the backend already supported them: an "Overdue" status option in the filter dropdown (a DUE record past the grace period, expressed as its own `overdue=true` param rather than faking a status enum value the API doesn't know), and an "Export CSV" button wired to `GET /api/service-records/export` that carries the page's current filters into the export URL. The `ExportButton` triggers a browser download directly (the app is same-origin, so a plain GET carries the session cookie).
+
+#### What I corrected
+
+My first pass fetched the technician dropdown from the backend technicians endpoint only when the manager filter was opened, which made the filter control pop in late. It now loads the technician/vehicle lists once on mount and keeps them in state, so the selects render immediately. Also — the export button initially built a `Blob` + anchor download; since the app is same-origin there was no need, and navigating straight to the export URL with credentials is simpler and streams server-side. The button now just navigates.
+
+### Module F3 — Service Record Detail: Lifecycle Actions + Assignment Management
+
+#### Prompt
+
+> Context: Modules F0-F2 exist. Backend Modules 3 (lifecycle) and 4 (assignment) are live.
+>
+> Task: Build out app/(app)/service-records/[id]/page.tsx fully.
+>
+> Sections:
+> 1. Header: vehicle info, description (editable inline by the assigned technician or a manager — PATCH to update description only, per the brief's rule that assignment can't be changed this way), current status as a large badge.
+> 2. Lifecycle action button(s), contextual to current status and the viewer's role:
+>    - DUE + FLEET_MANAGER: "Book Service" button opens a dialog to pick a scheduled date and at least one technician (multi-select), POSTs to the transition endpoint with action=BOOK.
+>    - BOOKED + (assigned technician or manager): "Start Service" button, action=START, probably no dialog needed (confirm then call).
+>    - IN_SERVICE + (assigned technician or manager): "Complete Service" button opens a dialog asking for the final odometer reading, action=COMPLETE. Client-side check that it's >= vehicle's currentOdometer before even submitting (nicer UX), but the real validation is server-side — if the server rejects it, surface the exact server message in a toast, don't invent your own.
+>    - On any transition attempt the server rejects (409), show the server's exact reason string to the user.
+> 3. Assignments panel (FLEET_MANAGER only for add/remove; everyone sees the current list): list of currently active technician assignments with a remove (X) button per row calling DELETE on the assignment; an "Assign Technician" select + button calling POST.
+> 4. Timeline panel: fetch from GET /api/service-records/[id]/timeline (backend Module 8) and render as a vertical activity feed using the server-provided `summary` strings, oldest at top or bottom — pick one and be consistent (I'd suggest newest-first so the most relevant recent activity is visible without scrolling). No edit/delete affordances anywhere near this panel — it's read-only by design.
+>
+> Make sure every action button's disabled/hidden logic is correct for role + status combinations you haven't explicitly coded for (e.g., a technician not assigned to this record viewing it — they should see it if they got here via "My Records" but should NOT see action buttons for other technicians' records unless they're assigned).
+
+#### What I got
+
+The full detail page: a header with vehicle info, description and status badge; contextual lifecycle actions (Book dialog with scheduled date + technician multi-select for DUE records, one-click Start for BOOKED, Complete dialog with the final odometer for IN_SERVICE); an assignments panel where managers add/remove technicians and everyone sees the current list; and a newest-first vertical timeline rendered from the server's `summary` strings with no edit affordances anywhere. The button-visibility logic is role + status + *assignment* aware: a technician who somehow lands on a record they aren't assigned to sees the record read-only with no lifecycle buttons, and the 403 handling is graceful if a stale button ever slips through. Server rejection reasons — the state machine's "Cannot move from X to Y" strings — reach the screen via toast verbatim; 400s from the description PATCH render inline field errors.
+
+#### What I corrected
+
+The lifecycle buttons were originally hidden entirely based on role, which meant an assigned technician never saw Start/Complete. The correct rule is that the *record's assignment* is what grants START/COMPLETE — a manager is always allowed, but a technician's button depends on whether *they* are an active assignee, not just on their role. I fixed the conditions to check the current user's id against the active assignments list before rendering an action button.
+
+### Module F4 — "My Records" (Technician View)
+
+#### Prompt
+
+> Context: Modules F0-F3 exist. Backend endpoint from backend Module 4 (GET /api/technicians/[id]/service-records) is live.
+>
+> Task: app/(app)/my-records/page.tsx, technician-facing (still viewable by a manager for their own curiosity if you want, but the meaningful use case is technicians). Reuse the service-record row/table component from Module F2 if you built it as a reusable component (you should have — if you didn't, refactor it out now rather than duplicating the table markup).
+>
+> This page calls the technician-scoped endpoint directly rather than the general list endpoint with a technicianId filter, matching how the backend is actually structured. No filters needed beyond maybe a status filter — this list is already scoped to "assigned to me," it doesn't need vehicle/technician filters.
+
+#### What I got
+
+`/my-records` fetches the caller's own active assignments from `GET /api/technicians/[id]/service-records` (the technician's own id — the backend 403s anyone else), reusing the same `ServiceRecordsTable` from F2 rather than duplicating the markup. It has just a status filter plus the table's own states, and row clicks go to the shared record detail. A manager opening the page sees their own (empty) assignment list, which matches the backend's self-only scoping.
+
+#### What I corrected
+
+Nothing agent-side worth recording — the module went in cleanly because the reusable table and the self-scoped endpoint already existed. The one post-hoc change (from the polish pass) was making the empty state for a technician with no active assignments read as "nothing assigned right now" rather than looking like an error.
+
+### Module F5 — Bulk CSV Odometer Upload + Service History Export
+
+#### Prompt
+
+> Context: Modules F0-F4 exist. Backend Module 6 endpoints are live.
+>
+> Task:
+> 1. A "Bulk Update Odometer" page or dialog (manager-only), accessible from the Vehicles page. File input accepting .csv, a short inline example of the expected format (registrationNumber,odometerReading) so a user isn't guessing. On submit, POST the file as multipart/form-data to /api/vehicles/bulk-odometer.
+> 2. Render the per-row result report the backend returns as a table: row number, registration, status (success/rejected badge), reason if rejected. Show a summary line ("12 succeeded, 3 rejected") above the table. This report should stay on screen after submission — don't auto-dismiss it, the whole point is the user needs to see which rows failed and why.
+> 3. An "Export Service History" button (visible on the Service Records list page) that calls GET /api/service-records/export with whatever filters are currently active in the URL, and triggers a browser download of the returned CSV.
+
+#### What I got
+
+A manager-only "Bulk Update Odometer" dialog on the Vehicles page with a file input, an inline example of the expected two-column format, and a `FormData` POST through the api-client's `formData` path. After submission the dialog stays open and renders the per-row report (row number, registration, success/rejected badge, rejection reason) above a "X succeeded, Y rejected" summary — deliberately not auto-dismissed. The export button on the Service Records page downloads the CSV for whatever filters are currently in the URL.
+
+#### What I corrected
+
+The first version parsed and validated the CSV client-side before uploading, which duplicated backend logic and would have let a "valid-looking" file through that the server still rejects row-by-row. The client now does no parsing at all — it sends the raw file and renders whatever the server's report says. The server is the only place the file format is defined.
+
+### Module F6 — Dashboard
+
+#### Prompt
+
+> Context: Modules F0-F5 exist. Backend Module 7 (GET /api/dashboard) is live.
+>
+> Task: app/(app)/dashboard/page.tsx, the landing page after login.
+>
+> Layout:
+> - Four headline stat cards across the top: Due for Service, In Service, Completed This Week, Overdue (make the Overdue card visually distinct — it's the one that matters most operationally, e.g. a red/amber accent). Each stat card, when clicked, could deep-link to the service-records list pre-filtered to that status (nice touch, not required — do it if it's cheap).
+> - A breakdown section: status distribution (simple bar or donut using Recharts, fed by dashboard's byStatus) and a per-technician workload list or bar chart (byTechnician).
+> - A line or bar chart of completedPerWeek across the last 8 weeks (Recharts), x-axis = week label, y-axis = count. Confirm it renders 8 points even for weeks with zero completions.
+>
+> Make this the default route for '/' after login (redirect from '/' to '/dashboard' for authenticated users).
+
+#### What I got
+
+The dashboard with the four KPI cards (Overdue visually distinct), a Recharts status-distribution chart and per-technician workload view fed by `byStatus`/`byTechnician`, and an 8-week completions bar chart that renders all eight points including zero weeks. KPI cards deep-link to the service-records list pre-filtered to that status. `/` redirects to `/dashboard` for authenticated users (and to `/login` otherwise). Charts use theme-aware colors and status colors are paired with labels in legends so color is never the only signal.
+
+#### What I corrected
+
+This is where one decision got reversed mid-build, and it's recorded properly in `docs/decisions.md`. The brief's fourth KPI was "Completed This Week," which the dashboard API *does* return (`completedThisWeek`). I started extending the records list endpoint with timezone-aware `completedThisWeek=true` and `updated=true` filters so the card could deep-link to the exact records behind the number — wrote the timezone helpers and tests for both — then changed the card to a lifetime "Completed services" total instead. The reason: the lifetime total is already computed for the status chart (`byStatus.COMPLETED`), so the card added zero queries, and its deep link goes to a plain `status=COMPLETED` filter the list genuinely supports. The half-built filters lost their reason to exist, and I later deleted the abandoned tests outright rather than leave the suite red (the "Reversed decision" entry in `decisions.md` has the full story).
+
+Also corrected from the polish pass: the dashboard's weekly chart initially bucketed completions in JS by raw UTC week. That drifted for viewers east of UTC, so the bucketing moved to the timezone-explicit helpers in `src/lib/local-week.ts` (the server computes the 8 weeks from an `X-Timezone` header) — which is what the daily-reports stretch later generalized.
+
+### Module F7 — Alerts Page + Nav Badge Wiring
+
+#### Prompt
+
+> Context: Modules F0-F6 exist. Backend Module 9 is live. F0 already added a placeholder badge in the nav — wire it for real now.
+>
+> Task:
+> 1. app/(app)/alerts/page.tsx — list of active (non-dismissed) alerts from GET /api/alerts, each showing the vehicle, how long it's been overdue (compute from triggeredAt or the record's dueSince, human-readable like "9 days overdue"), and a Dismiss button (FLEET_MANAGER only) calling POST /api/alerts/[id]/dismiss.
+> 2. After a dismiss, remove it from the list immediately (optimistic or refetch) and update the nav badge count.
+> 3. Nav badge (from F0's stub): fetch the count on layout mount and refetch after any dismiss action or any service-record transition, so it doesn't go stale mid-session. A simple approach: refetch on route change is fine for this project's scale — no need for real-time push.
+> 4. Add an empty state for "no active alerts" that's genuinely reassuring rather than looking broken.
+
+#### What I got
+
+The alerts page lists active alerts with the vehicle, a human-readable "N days overdue" from `triggeredAt`, and a manager-only Dismiss button. Dismissing removes the row (refetch) and broadcasts a custom `ALERT_COUNT_EVENT` so the nav badge updates without a page change; the badge also refetches on every route change via the layout's `AppNav`, which covers transitions that clear overdue states. The empty state is a genuinely reassuring "no overdue vehicles" panel rather than a blank page.
+
+#### What I corrected
+
+The first wiring had the alerts page and the nav badge each fetching independently, so a dismiss updated the list but the badge could lag until the next navigation. The `src/lib/alert-events.ts` broadcast event closed that gap — the page dispatches it after a dismiss, and `AppNav` listens and refetches the count. Technicians don't render the alerts item at all, so the nav skips the fetch for them.
+
+### Module F8 — Polish Pass
+
+#### Prompt
+
+> Context: All feature modules (F0-F7) exist and work.
+>
+> Task, in one pass across the whole app:
+> 1. Consistent loading states: every data-fetching page should show a skeleton or spinner, never a flash of empty/zero content while the first fetch is in flight.
+> 2. Consistent error states: every page should handle its fetch failing (network error, 500) with a visible message and, where sensible, a retry button — not a blank page or an uncaught console error.
+> 3. Form validation feedback: every form should show inline field errors from Zod validation failures returned by the API, not just a generic toast.
+> 4. Responsive check: the sidebar nav should collapse to something usable on a narrow viewport (drawer or bottom nav), and the service-records table should not overflow unreadably on mobile — a stacked card layout below a breakpoint is a reasonable fallback if you don't want to fight a wide table.
+> 5. Basic accessibility pass: every icon-only button has an aria-label, form inputs have associated labels, focus states are visible (don't strip outline: none without a visible replacement), color is never the only signal for status (pair status badges with text, not just color).
+> 6. Double check role-based UI hides match what the backend actually enforces — go through backend Modules 1-9's role rules one more time and confirm nothing manager-only is shown as clickable-but-then-403s for a technician in a confusing way.
+>
+> This is the module where you spend time actually clicking through the whole app as both a manager and a technician end to end, fixing whatever feels broken or unpolished.
+
+#### What I got
+
+A real pass over every page (commit `bdd2921`), not a refactor: pages that fetched data got skeletons and visible error states with retry affordances; the app shell became a viewport-locked frame with a collapsible mobile drawer nav; the service-records table gained a mobile card layout below the desktop breakpoint; dialogs and buttons picked up aria-labels and visible focus rings; and the F3 lifecycle-button logic was re-audited against the backend's role rules. `RecordsTable` and the list/detail pages were broken into the shared components used across F2–F4.
+
+#### What I corrected
+
+Mostly the things the pass was designed to find by clicking through as both roles: a technician could reach `/service-records/[id]` for a record they weren't assigned to and see a read-only page (fine), but some manager-only actions were briefly rendered as disabled-looking buttons instead of being hidden or cleanly 403-handled; the fix was `RoleRestrictedPage` on the manager pages plus stricter per-action conditions. Two environment fights also belong to this phase even though they weren't feature bugs: a corrupted `@next/swc` native binary killed the dev server (`f6083ba` — reinstalled clean) and a win32-only native dependency broke Vercel builds (`fbead63` — removed; the `console.log(c))` scratch file that snuck into `adbf580` was deleted in the cleanup).
+
+### Module I0 — Integration Test Pass + the UI redesign it triggered
+
+#### Prompt
+
+> Manually, not via an agent prompt — walk through the entire app once as each role, end to end, and write down anything that breaks:
+>
+> As FLEET_MANAGER: create a vehicle, edit it, archive it, restore it. Create a service record, book it with a technician and a near-future date. Bulk-upload a CSV with at least one row that should be rejected (lower odometer) — confirm the report is accurate and the DB only updated the valid rows. Export service history, open the CSV, confirm it's correct. Watch the dashboard numbers change as you move a record through the lifecycle. Force a record to overdue, confirm it shows in Alerts with a nav badge, dismiss it, complete the record, drive it overdue again, confirm the alert reappears.
+>
+> As TECHNICIAN: confirm you only see records assigned to you in "My Records." Start and complete an assigned record. Confirm you cannot see or reach vehicle-create, bulk-upload, or assignment controls anywhere in the UI. Try hitting a manager-only endpoint directly with curl using your technician session cookie — confirm you get a real 403, not just a hidden button. This is the check that actually matters.
+>
+> Fix whatever you find. THEN write/finish docs/architecture.md, docs/schema.md, docs/decisions.md, and docs/plan.md.
+
+#### What I got
+
+Every flow above worked end to end, including the curl-with-a-technician-cookie check — the 403s are real and come from `requireRole` in the handlers, not from hidden buttons. The pass also produced the single biggest non-feature commit of the project: `b920b50` is a full UI redesign. Clicking through the first version as a reviewer, the flat tables and default styling felt unfinished, so I rebuilt the visual language (warm app canvas, dark branded sidebar, status color system shared by badges and charts, mobile drawer + stacked card layouts) and then re-ran the whole integration pass against the redesign.
+
+#### What I corrected
+
+The redesign re-touched every page — the notes above for F8 mostly describe fixes found during this same reviewer-style clicking, since the two passes overlapped. The one architectural fix it forced: the original layout let tall pages scroll the whole viewport, carrying the nav off-screen; the redesigned shell is viewport-locked (`h-dvh`), with the sidebar fixed and only `<main>` scrolling, which is what made the mobile drawer and desktop rail feel deliberate instead of bolted on.
+
+### Module I1 — Deployment + the late phases (admin, search, stretch) — brief notes
+
+#### Prompt
+
+> Context: App is fully built and integration-tested locally.
+>
+> Task (following the brief's suggested free-tier path — swap providers if you already deployed differently):
+> 1. Neon: confirm your production database is the same one you've been migrating against, or create a clean prod branch/project and run `npx prisma migrate deploy` (not `migrate dev`) against it, then run the seed script once for demo data.
+> 2. Render (or wherever your Next.js server-side runs): set DATABASE_URL, DIRECT_URL, NEXTAUTH_SECRET, NEXTAUTH_URL as environment variables — never commit these. If you're deploying Next.js as a single full-stack app to Vercel alone, you don't need Render at all — say so in SUBMISSION.md.
+> 3. Confirm the deployed app can actually reach Neon (check for IP allowlist issues).
+> 4. Seed the production database with enough demo data to look like a real fleet: ~15-20 vehicles, a spread of service records across all four statuses, at least one overdue alert, and a few weeks of completed history so the dashboard chart isn't empty.
+> 5. Write SUBMISSION.md: live URL, repo URL, demo credentials for both roles, a note if the free tier sleeps, and anything you know is broken or incomplete.
+
+#### What I got
+
+Deployed as a single full-stack app to Vercel — no Render split, because a Next.js App Router app already serves its own API and a second host would have added a CORS/credential problem for zero benefit (noted in SUBMISSION.md, which the brief explicitly invites). Neon's pooled connection string worked from Vercel without allowlisting. The seed grew to ~15 vehicles with a realistic spread of statuses, several weeks of completed history, and an overdue alert set.
+
+The git history after the deployment commits then shows three phases that the original F-module plan did not predict, each worth a line here because they changed several of the pages described above:
+
+- **Admin role + user management** (`d447a5b`): the brief only required two roles, but "who administers the system" became real once the app was usable. `Role` gained `ADMIN`; a Users page (admin-only) creates technician/manager accounts and deletes users; admins see the full manager view. This also surfaced the HTTPS-only proxy session-cookie bug that took a redeploy to pin down (`949e8ec`).
+- **Technician dashboard + universal search** (`adbf580`, `921d9f0`): a Ctrl+K command palette (`CommandSearch`) searches vehicles, service records, and people from anywhere in the app; and the `/dashboard` landing page split by role — technicians now get a personal dashboard (their active jobs, recent completions, their own stats) instead of fleet-wide numbers they could not act on.
+- **Daily reports stretch feature** (`c6a487e`): one of the brief's optional ideas, taken further — role-based end-of-day reports that open at 5 PM in the viewer's local timezone, with a review screen for managers/admins and an app-wide reminder banner. This is where the timezone-explicit `local-week`/`local-day` helpers and the `X-Timezone` header convention came from, and it is documented in `docs/decisions.md` (Decisions 7–10) and the daily-report tests.
+
+#### What I corrected
+
+Deployment-specific findings, in order: the first Vercel build broke on the win32-only native dependency (removed in `fbead63`); the proxy session cookie was set without `Secure`, so production logins over HTTPS didn't stick — the fix (`d447a5b`) made the cookie secure-aware and the redeploy (`949e8ec`) confirmed it; and the demo data needed two passes to look like a real fleet rather than a seed dump (the second pass added the overdue alert set and backdated completed history so the dashboard chart and the alerts page read as live on first click). Each is visible in the commit messages, which is the honest record of what the module plans could not predict.
