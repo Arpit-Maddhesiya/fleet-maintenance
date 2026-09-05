@@ -5,8 +5,8 @@ Fill this in and commit it. This is the first file we open.
 ## Links
 
 - **GitHub repository:** https://github.com/Arpit-Maddhesiya/fleet-maintenance
-- **Live application:** (https://fleet-maintenance-ten.vercel.app/)
-
+- **Live application:** https://fleet-maintenance-ten.vercel.app/
+- **Live API docs:** https://fleet-maintenance-ten.vercel.app/api-docs
 
 ## Notes for the reviewer
 
